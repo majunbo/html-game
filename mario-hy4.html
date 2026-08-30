@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>超级马里奥 · 三关历险</title>
+<title>超级马里奥 · 六关历险</title>
 <style>
   /* ============ 全局：中文字体统一（积分、中文说明、按钮完全一致） ============ */
   :root{
@@ -164,6 +164,38 @@
     .title{ font-size:30px; }
     canvas#game{ width:100% !important; height:auto !important; }
   }
+
+  /* ============ V2 新增：左上角游戏名 / 右上角 FPS 数字时钟 / GitHub 链接 / 过关彩带 ============ */
+  .corner-title{
+    position:absolute; top:8px; left:10px; z-index:4; pointer-events:none;
+    font-size:14px; font-weight:900; letter-spacing:1px; color:#fff;
+    text-shadow:0 2px 0 rgba(20,30,60,.65), 0 0 10px rgba(0,0,0,.35);
+    white-space:nowrap;
+  }
+  .corner-title .ver{ font-size:11px; color:#ffe066; margin-left:6px; letter-spacing:.5px; }
+  .corner-fps{
+    position:absolute; top:8px; right:10px; z-index:4; pointer-events:none;
+    font-family:Consolas,"Courier New",monospace; font-size:11px; font-weight:700;
+    letter-spacing:2px; color:#8dffb9; background:#04140a;
+    border:1px solid #0f3d22; border-radius:4px; padding:2px 7px;
+    text-shadow:0 0 6px rgba(70,255,150,.85); box-shadow:inset 0 0 6px rgba(0,255,120,.14);
+    font-variant-numeric:tabular-nums;
+  }
+  .github-link{
+    margin-top:16px; text-align:center; font-size:14px; color:#98a2ba; letter-spacing:.5px;
+  }
+  .github-link a{
+    color:#3d6fd9; text-decoration:none; font-weight:700;
+    transition:color .15s ease, text-shadow .15s ease;
+  }
+  .github-link a:hover{ color:#6b93f0; text-shadow:0 0 10px rgba(80,130,240,.55); }
+  .panel{ position:relative; }
+  .confetti-box{ position:absolute; inset:0; overflow:hidden; border-radius:22px; pointer-events:none; }
+  .confetti-box i{
+    position:absolute; top:-14px; width:8px; height:13px; opacity:.92; border-radius:2px;
+    animation:confFall linear forwards;
+  }
+  @keyframes confFall{ to{ transform:translateY(560px) rotate(760deg); } }
 </style>
 </head>
 <body>
@@ -171,7 +203,7 @@
 
   <div class="topbar">
     <div>
-      <div class="title" data-i18n="title">超级马里奥 · 三关历险</div>
+      <div class="title" data-i18n="title">超级马里奥 · 六关历险</div>
       <div class="subtitle" data-i18n="subtitle">纯前端 Canvas 手绘像素版 · 顶问号、踩板栗仔、夺下终点红旗</div>
     </div>
     <div class="badges">
@@ -207,12 +239,13 @@
     <!-- ============ 舞台 ============ -->
     <div class="stage">
       <canvas id="game" width="1000" height="560"></canvas>
+      <div class="corner-fps" id="fpsBox">FPS --</div>
 
       <!-- 开始界面 -->
       <div class="overlay show" id="ovStart">
         <div class="panel">
-          <h2 data-i18n="title">超级马里奥 · 三关历险</h2>
-          <p class="lead" data-i18n="startLead">帮助马里奥穿越三关，跳过悬崖、顶碎问号、踩扁板栗仔，最后夺下终点的红旗！</p>
+          <h2 data-i18n="title">超级马里奥 · 六关历险</h2>
+          <p class="lead" data-i18n="startLead">帮助马里奥穿越六大主题关卡：跳过悬崖、顶碎问号、踩扁板栗仔，空中还有金币等你收集，最后夺下终点的红旗！</p>
           <div class="keys">
             <h3 data-i18n="opsTitle">操作说明</h3>
             <ul>
@@ -236,7 +269,7 @@
       <div class="overlay" id="ovHelp">
         <div class="panel">
           <h2 data-i18n="btnHelp">玩法提示</h2>
-          <p class="lead" data-i18n="helpLead">三关难度递进：悬崖更多、阶梯更密、板栗仔从 5 只增加到 14 只。</p>
+          <p class="lead" data-i18n="helpLead">六关难度递进：悬崖更宽、砖阵更密，每个悬崖落点都有板栗仔把守，坑上还有金币弧线等你冒险收集。</p>
           <div class="keys">
             <h3 data-i18n="scoreTitle">得分规则</h3>
             <ul>
@@ -272,11 +305,13 @@
       <div class="overlay" id="ovClear">
         <div class="panel">
           <h2 class="win" id="clearTitle">恭喜过关！</h2>
+          <div class="confetti-box" id="confettiBox"></div>
           <p class="hero" id="clearWord">太棒了！你成功夺下了红旗！</p>
           <table class="score-table">
             <tr><td data-i18n="tblLevel">本关过关得分</td><td id="clearScore">0</td></tr>
             <tr><td data-i18n="tblFlag">旗帜高度奖励</td><td id="clearFlag">0</td></tr>
             <tr><td data-i18n="tblTime">剩余时间奖励</td><td id="clearTime">0</td></tr>
+            <tr><td data-i18n="tblLucky">惊喜幸运奖励</td><td id="clearLucky">0</td></tr>
             <tr class="total"><td data-i18n="tblTotal">累计总分</td><td id="clearTotal">0</td></tr>
           </table>
           <div class="btns" id="clearBtns">
@@ -317,22 +352,8 @@
     </div>
   </div>
 
-  <!-- ============ 技术栈说明 ============ -->
-  <div class="tech">
-    <h3 data-i18n="techTitle">技术框架（本项目实际选型）</h3>
-    <div class="grid">
-      <div><span class="tag" data-i18n="techTag1">渲染</span><span data-i18n="techDesc1">HTML5 Canvas 2D（原生逐帧渲染，未使用游戏引擎）</span></div>
-      <div><span class="tag" data-i18n="techTag2">语言</span><span data-i18n="techDesc2">JavaScript ES2020，单文件、零依赖、零构建</span></div>
-      <div><span class="tag" data-i18n="techTag3">界面</span><span data-i18n="techDesc3">HTML + CSS3（Flex 布局、渐变、圆角卡片、毛玻璃浮层）</span></div>
-      <div><span class="tag" data-i18n="techTag4">美术</span><span data-i18n="techDesc4">代码内嵌像素矩阵，运行时由 Canvas 手绘精灵图</span></div>
-      <div><span class="tag" data-i18n="techTag5">音效</span><span data-i18n="techDesc5">Web Audio API 实时合成（无外部音频文件）</span></div>
-      <div><span class="tag" data-i18n="techTag6">适配</span><span data-i18n="techDesc6">固定 1000×560 逻辑分辨率 + devicePixelRatio 高清缩放</span></div>
-    </div>
-    <div class="note" data-i18n-html="techNote">
-      选型理由：游戏是 60fps 逐帧循环 + 逐像素绘制场景，React/Vue 这类 DOM 框架会引入无谓的虚拟 DOM 开销；
-      Canvas 2D 原生 API 足够胜任且加载最快。若后续需要工程化，可直接迁移到 <b>Vite + TypeScript</b>，
-      渲染层代码无需改动。
-    </div>
+  <div class="github-link">
+    超级马里奥 · 六关历险 Hy4 Preview 生成 v2 · GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a>
   </div>
 </div>
 
@@ -350,14 +371,15 @@
    * ========================================================================= */
   var I18N = {
     'zh-CN': {
-      title: '超级马里奥 · 三关历险',
+      title: '超级马里奥 · 六关历险',
+      gameVer: 'Hy4 Preview 生成 v2',
       subtitle: '纯前端 Canvas 手绘像素版 · 顶问号、踩板栗仔、夺下终点红旗',
       badgeTech: '技术栈：原生 HTML5 + Canvas 2D + ES2020',
       badgeZero: '零依赖单文件',
       badgeLang: '多语言界面',
       hudLevel: '关卡', hudScore: '积分', hudCoin: '金币', hudLife: '生命', hudTime: '时间', hudBest: '最高分',
       musicOn: '音乐：开', musicOff: '音乐：关', pause: '暂停', resume: '继续',
-      startLead: '帮助马里奥穿越三关，跳过悬崖、顶碎问号、踩扁板栗仔，最后夺下终点的红旗！',
+      startLead: '帮助马里奥穿越六大主题关卡：跳过悬崖、顶碎问号、踩扁板栗仔，空中还有金币等你收集，最后夺下终点的红旗！',
       opsTitle: '操作说明',
       ops1: '<kbd>←</kbd><kbd>→</kbd> 或 <kbd>A</kbd><kbd>D</kbd><span>左右移动</span>',
       ops2: '<kbd>空格</kbd> 或 <kbd>↑</kbd> 或 <kbd>W</kbd><span>跳跃（按住跳得更高）</span>',
@@ -366,7 +388,7 @@
       ops5: '<kbd>Enter</kbd><span>确认（所有按钮都可用回车生效）</span>',
       btnStart: '开始游戏', btnHelp: '玩法提示', btnResetBest: '重置最高分',
       hintStart: '提示：按 <b>Enter</b> 可直接开始；踩敌人 +200 分，顶问号 +100 分。',
-      helpLead: '三关难度递进：悬崖更多、阶梯更密、板栗仔从 5 只增加到 14 只。',
+      helpLead: '六关难度递进：悬崖更宽、砖阵更密，每个悬崖落点都有板栗仔把守，坑上还有金币弧线等你冒险收集。',
       scoreTitle: '得分规则',
       rule1: '顶中问号块：+100 分，金币飞出并有飘字动画',
       rule2: '踩扁板栗仔：+200 分（从侧面撞到会受伤）',
@@ -379,10 +401,10 @@
       pauseLead: '休息一下，马里奥在等你回来。',
       btnResume: '继续游戏', btnRetryLevel: '重玩本关', btnMenu: '返回主菜单',
       hintPause: '按 <b>Enter</b> 继续游戏',
-      clearTitle: '恭喜过关！', clearTitleLast: '恭喜通关全部三关！',
+      clearTitle: '恭喜过关！', clearTitleLast: '恭喜通关全部六关！',
       clearWord: function (n) { return '太棒了！你成功夺下了' + n + '的红旗！'; },
-      clearWordLast: '了不起！你就是传说中的通关大侠，三关全部拿下！',
-      tblLevel: '本关过关得分', tblFlag: '旗帜高度奖励', tblTime: '剩余时间奖励', tblTotal: '累计总分',
+      clearWordLast: '了不起！你就是传说中的通关大侠，六关全部拿下！',
+      tblLevel: '本关过关得分', tblFlag: '旗帜高度奖励', tblTime: '剩余时间奖励', tblLucky: '惊喜幸运奖励', tblTotal: '累计总分',
       btnNext: '进入下一关', btnNextLast: '从第一关再来一次',
       clearHintNext: '按 <b>Enter</b> 进入下一关',
       clearHintLast: '按 <b>Enter</b> 从第一关重新开始（积分清零）',
@@ -406,18 +428,19 @@
       techTag5: '音效', techDesc5: 'Web Audio API 实时合成（无外部音频文件）',
       techTag6: '适配', techDesc6: '固定 1000×560 逻辑分辨率 + devicePixelRatio 高清缩放',
       techNote: '选型理由：游戏是 60fps 逐帧循环 + 逐像素绘制场景，React/Vue 这类 DOM 框架会引入无谓的虚拟 DOM 开销；Canvas 2D 原生 API 足够胜任且加载最快。若后续需要工程化，可直接迁移到 <b>Vite + TypeScript</b>，渲染层代码无需改动。',
-      levelNames: ['第一关 · 草原起步', '第二关 · 黄昏砖道', '第三关 · 星夜险境'],
+      levelNames: ['第一关 · 草原起步', '第二关 · 黄昏砖道', '第三关 · 星夜险境', '第四关 · 熔岩洞窟', '第五关 · 冰雪奇缘', '第六关 · 幽暗鬼域'],
       banner: function (n, c) { return n + '　（板栗仔 ' + c + ' 只）'; }
     },
     'zh-TW': {
-      title: '超級瑪利歐 · 三關歷險',
+      title: '超級瑪利歐 · 六關歷險',
+      gameVer: 'Hy4 Preview 生成 v2',
       subtitle: '純前端 Canvas 手繪像素版 · 頂問號、踩慄寶寶、奪下終點紅旗',
       badgeTech: '技術棧：原生 HTML5 + Canvas 2D + ES2020',
       badgeZero: '零依賴單檔案',
       badgeLang: '多語言介面',
       hudLevel: '關卡', hudScore: '積分', hudCoin: '金幣', hudLife: '生命', hudTime: '時間', hudBest: '最高分',
       musicOn: '音樂：開', musicOff: '音樂：關', pause: '暫停', resume: '繼續',
-      startLead: '幫助瑪利歐穿越三關，跳過懸崖、頂碎問號、踩扁慄寶寶，最後奪下終點的紅旗！',
+      startLead: '幫助瑪利歐穿越六大主題關卡：跳過懸崖、頂碎問號、踩扁慄寶寶，空中還有金幣等你收集，最後奪下終點的紅旗！',
       opsTitle: '操作說明',
       ops1: '<kbd>←</kbd><kbd>→</kbd> 或 <kbd>A</kbd><kbd>D</kbd><span>左右移動</span>',
       ops2: '<kbd>空格</kbd> 或 <kbd>↑</kbd> 或 <kbd>W</kbd><span>跳躍（按住跳得更高）</span>',
@@ -426,7 +449,7 @@
       ops5: '<kbd>Enter</kbd><span>確認（所有按鈕都可以用 Enter 生效）</span>',
       btnStart: '開始遊戲', btnHelp: '玩法提示', btnResetBest: '重置最高分',
       hintStart: '提示：按 <b>Enter</b> 可直接開始；踩敵人 +200 分，頂問號 +100 分。',
-      helpLead: '三關難度遞進：懸崖更多、階梯更密、慄寶寶從 5 隻增加到 14 隻。',
+      helpLead: '六關難度遞進：懸崖更寬、磚陣更密，每個懸崖落點都有慄寶寶把守，坑上還有金幣弧線等你冒險收集。',
       scoreTitle: '得分規則',
       rule1: '頂中問號方塊：+100 分，金幣飛出並有飄字動畫',
       rule2: '踩扁慄寶寶：+200 分（從側面撞到會受傷）',
@@ -439,10 +462,10 @@
       pauseLead: '休息一下，瑪利歐在等你回來。',
       btnResume: '繼續遊戲', btnRetryLevel: '重玩本關', btnMenu: '返回主選單',
       hintPause: '按 <b>Enter</b> 繼續遊戲',
-      clearTitle: '恭喜過關！', clearTitleLast: '恭喜通關全部三關！',
+      clearTitle: '恭喜過關！', clearTitleLast: '恭喜通關全部六關！',
       clearWord: function (n) { return '太棒了！你成功奪下了' + n + '的紅旗！'; },
-      clearWordLast: '了不起！你就是傳說中的通關大俠，三關全部拿下！',
-      tblLevel: '本關過關得分', tblFlag: '旗幟高度獎勵', tblTime: '剩餘時間獎勵', tblTotal: '累計總分',
+      clearWordLast: '了不起！你就是傳說中的通關大俠，六關全部拿下！',
+      tblLevel: '本關過關得分', tblFlag: '旗幟高度獎勵', tblTime: '剩餘時間獎勵', tblLucky: '驚喜幸運獎勵', tblTotal: '累計總分',
       btnNext: '進入下一關', btnNextLast: '從第一關再來一次',
       clearHintNext: '按 <b>Enter</b> 進入下一關',
       clearHintLast: '按 <b>Enter</b> 從第一關重新開始（積分清零）',
@@ -466,18 +489,19 @@
       techTag5: '音效', techDesc5: 'Web Audio API 即時合成（無外部音訊檔案）',
       techTag6: '適配', techDesc6: '固定 1000×560 邏輯解析度 + devicePixelRatio 高清縮放',
       techNote: '選型理由：遊戲是 60fps 逐幀循環 + 逐像素繪製場景，React/Vue 這類 DOM 框架會引入不必要的虛擬 DOM 開銷；Canvas 2D 原生 API 足夠勝任且載入最快。若後續需要工程化，可直接遷移到 <b>Vite + TypeScript</b>，渲染層程式碼無需改動。',
-      levelNames: ['第一關 · 草原起步', '第二關 · 黃昏磚道', '第三關 · 星夜險境'],
+      levelNames: ['第一關 · 草原起步', '第二關 · 黃昏磚道', '第三關 · 星夜險境', '第四關 · 熔岩洞窟', '第五關 · 冰雪奇緣', '第六關 · 幽暗鬼域'],
       banner: function (n, c) { return n + '　（慄寶寶 ' + c + ' 隻）'; }
     },
     'en': {
-      title: 'Super Mario · Three-Level Adventure',
+      title: 'Super Mario · Six-Level Adventure',
+      gameVer: 'Hy4 Preview Build v2',
       subtitle: 'Pure-frontend hand-drawn pixel Canvas · Hit ? blocks, stomp Goombas, grab the goal flag',
       badgeTech: 'Stack: Native HTML5 + Canvas 2D + ES2020',
       badgeZero: 'Zero-dependency single file',
       badgeLang: 'Multilingual UI',
       hudLevel: 'Level', hudScore: 'Score', hudCoin: 'Coins', hudLife: 'Lives', hudTime: 'Time', hudBest: 'Best',
       musicOn: 'Music: On', musicOff: 'Music: Off', pause: 'Pause', resume: 'Resume',
-      startLead: 'Help Mario through three levels: leap the cliffs, hit the ? blocks, stomp the Goombas, and grab the red flag at the finish!',
+      startLead: 'Help Mario through six themed levels: leap the cliffs, hit the ? blocks, stomp the Goombas, grab floating coins, and take the red flag at the finish!',
       opsTitle: 'Controls',
       ops1: '<kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd><span>Move left / right</span>',
       ops2: '<kbd>Space</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Jump (hold to jump higher)</span>',
@@ -486,7 +510,7 @@
       ops5: '<kbd>Enter</kbd><span>Confirm (works on every button)</span>',
       btnStart: 'Start Game', btnHelp: 'How to Play', btnResetBest: 'Reset Best Score',
       hintStart: 'Tip: press <b>Enter</b> to start right away; stomp enemies +200, hit ? blocks +100.',
-      helpLead: 'Difficulty ramps up across three levels: more cliffs, denser staircases, and Goombas grow from 5 to 14.',
+      helpLead: 'Six levels of ramping difficulty: wider cliffs, denser brick grids — every cliff landing is guarded by a Goomba, and coin arcs float above the pits.',
       scoreTitle: 'Scoring Rules',
       rule1: 'Hit a ? block: +100 pts, a coin pops out with a floating score animation',
       rule2: 'Stomp a Goomba: +200 pts (touching from the side hurts you)',
@@ -499,10 +523,10 @@
       pauseLead: 'Take a break — Mario is waiting for you.',
       btnResume: 'Resume Game', btnRetryLevel: 'Retry Level', btnMenu: 'Main Menu',
       hintPause: 'Press <b>Enter</b> to resume',
-      clearTitle: 'Level Clear!', clearTitleLast: 'All Three Levels Clear!',
+      clearTitle: 'Level Clear!', clearTitleLast: 'All Six Levels Clear!',
       clearWord: function (n) { return 'Great job! You captured the flag of ' + n + '!'; },
-      clearWordLast: 'Incredible! You are the legendary champion — all three levels conquered!',
-      tblLevel: 'Level Score', tblFlag: 'Flag Height Bonus', tblTime: 'Time Bonus', tblTotal: 'Total Score',
+      clearWordLast: 'Incredible! You are the legendary champion — all six levels conquered!',
+      tblLevel: 'Level Score', tblFlag: 'Flag Height Bonus', tblTime: 'Time Bonus', tblLucky: 'Lucky Surprise Bonus', tblTotal: 'Total Score',
       btnNext: 'Next Level', btnNextLast: 'Play Again from Level 1',
       clearHintNext: 'Press <b>Enter</b> for the next level',
       clearHintLast: 'Press <b>Enter</b> to restart from Level 1 (score resets)',
@@ -526,18 +550,19 @@
       techTag5: 'Audio', techDesc5: 'Web Audio API real-time synthesis (no external audio files)',
       techTag6: 'Display', techDesc6: 'Fixed 1000×560 logical resolution + devicePixelRatio HD scaling',
       techNote: 'Why: the game is a 60fps frame loop with pixel-by-pixel drawing; DOM frameworks like React/Vue add needless virtual-DOM overhead. The native Canvas 2D API is fully capable and loads fastest. To scale up later, migrate straight to <b>Vite + TypeScript</b> — the rendering layer needs no changes.',
-      levelNames: ['Level 1 · Grassland Start', 'Level 2 · Dusk Brick Road', 'Level 3 · Starry-Night Peril'],
+      levelNames: ['Level 1 · Grassland Start', 'Level 2 · Dusk Brick Road', 'Level 3 · Starry-Night Peril', 'Level 4 · Lava Caverns', 'Level 5 · Frost Wonderland', 'Level 6 · Haunted Realm'],
       banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
     },
     'ja': {
-      title: 'スーパーマリオ · 3コースアドベンチャー',
+      title: 'スーパーマリオ · 6コースアドベンチャー',
+      gameVer: 'Hy4 Preview 生成 v2',
       subtitle: '純フロントエンド Canvas 手描きドット絵 · ？ブロックを叩き、クリボーを踏んで、ゴールの旗を取ろう',
       badgeTech: '技術スタック：ネイティブ HTML5 + Canvas 2D + ES2020',
       badgeZero: '依存ゼロの単一ファイル',
       badgeLang: '多言語対応',
       hudLevel: 'コース', hudScore: 'スコア', hudCoin: 'コイン', hudLife: '残機', hudTime: 'タイム', hudBest: 'ハイスコア',
       musicOn: '音楽：ON', musicOff: '音楽：OFF', pause: '一時停止', resume: '再開',
-      startLead: 'マリオと一緒に3コースを駆け抜けよう！崖を飛び越え、？ブロックを叩き、クリボーを踏みつぶし、ゴールの赤い旗を取るのだ！',
+      startLead: 'マリオと一緒に6コースを駆け抜けよう！崖を飛び越え、？ブロックを叩き、クリボーを踏みつぶし、空中のコインも集めて、ゴールの赤い旗を取るのだ！',
       opsTitle: '操作方法',
       ops1: '<kbd>←</kbd><kbd>→</kbd> または <kbd>A</kbd><kbd>D</kbd><span>左右に移動</span>',
       ops2: '<kbd>スペース</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>ジャンプ（長押しで高く跳べる）</span>',
@@ -546,7 +571,7 @@
       ops5: '<kbd>Enter</kbd><span>決定（すべてのボタンで有効）</span>',
       btnStart: 'ゲームスタート', btnHelp: '遊び方', btnResetBest: 'ハイスコアをリセット',
       hintStart: 'ヒント：<b>Enter</b> ですぐスタート！敵を踏むと +200 点、？ブロックで +100 点。',
-      helpLead: '3コースは難度上昇：崖が増え、階段が密集し、クリボーは5匹から14匹へ。',
+      helpLead: '6コースは難度上昇：崖が広がり、レンガ陣が密集。崖の着地点にはクリボーが待ち伏せ、坑の上にはコインのアーチが浮かんでいる。',
       scoreTitle: '得点ルール',
       rule1: '？ブロックを叩く：+100 点。コインが飛び出してスコアがポップ表示',
       rule2: 'クリボーを踏む：+200 点（横から触れるとダメージ）',
@@ -559,10 +584,10 @@
       pauseLead: '少し休憩しよう。マリオは君の帰りを待っている。',
       btnResume: 'ゲーム再開', btnRetryLevel: 'このコースをやり直す', btnMenu: 'メインメニューへ',
       hintPause: '<b>Enter</b> でゲーム再開',
-      clearTitle: 'コースクリア！', clearTitleLast: '全3コースクリア！',
+      clearTitle: 'コースクリア！', clearTitleLast: '全6コースクリア！',
       clearWord: function (n) { return 'すごい！' + n + 'の赤い旗を奪取した！'; },
-      clearWordLast: '見事！まさに伝説のクリアマスター、3コース制覇だ！',
-      tblLevel: 'コース得点', tblFlag: '旗の高さボーナス', tblTime: '残りタイムボーナス', tblTotal: '累計スコア',
+      clearWordLast: '見事！まさに伝説のクリアマスター、6コース制覇だ！',
+      tblLevel: 'コース得点', tblFlag: '旗の高さボーナス', tblTime: '残りタイムボーナス', tblLucky: 'ラッキーボーナス', tblTotal: '累計スコア',
       btnNext: '次のコースへ', btnNextLast: '1コース目からもう一度',
       clearHintNext: '<b>Enter</b> で次のコースへ',
       clearHintLast: '<b>Enter</b> で1コース目から再スタート（スコアはリセット）',
@@ -586,18 +611,19 @@
       techTag5: 'サウンド', techDesc5: 'Web Audio API によるリアルタイム合成（外部音声ファイルなし）',
       techTag6: '表示', techDesc6: '1000×560 の固定論理解像度 + devicePixelRatio 高精細スケーリング',
       techNote: '選定理由：本作は60fpsのフレームループでピクセル単位の描画を行うため、React/Vue などの DOM フレームワークは無駄な仮想 DOM コストを生む。ネイティブの Canvas 2D API で十分であり、ロードも最速。将来スケールするなら <b>Vite + TypeScript</b> へそのまま移行でき、描画層のコードは変更不要。',
-      levelNames: ['コース1 · 草原の出発', 'コース2 · 夕暮れのレンガ道', 'コース3 · 星夜の危険'],
+      levelNames: ['コース1 · 草原の出発', 'コース2 · 夕暮れのレンガ道', 'コース3 · 星夜の危険', 'コース4 · 溶岩の洞窟', 'コース5 · 氷雪の世界', 'コース6 · 幽霊の領域'],
       banner: function (n, c) { return n + '　（クリボー ' + c + ' 匹）'; }
     },
     'pt-BR': {
-      title: 'Super Mario · Aventura em Três Fases',
+      title: 'Super Mario · Aventura em Seis Fases',
+      gameVer: 'Hy4 Preview v2',
       subtitle: 'Versão pixel desenhada à mão em Canvas puro · Acerte blocos ?, pise nos Goombas e pegue a bandeira final',
       badgeTech: 'Stack: HTML5 nativo + Canvas 2D + ES2020',
       badgeZero: 'Arquivo único, zero dependências',
       badgeLang: 'Interface multilíngue',
       hudLevel: 'Fase', hudScore: 'Pontos', hudCoin: 'Moedas', hudLife: 'Vidas', hudTime: 'Tempo', hudBest: 'Recorde',
       musicOn: 'Música: Ligada', musicOff: 'Música: Desligada', pause: 'Pausar', resume: 'Continuar',
-      startLead: 'Ajude o Mario a atravessar três fases: salte os penhascos, acerte os blocos ?, pise nos Goombas e pegue a bandeira vermelha no final!',
+      startLead: 'Ajude o Mario a atravessar seis fases temáticas: salte os penhascos, acerte os blocos ?, colete moedas no ar e pegue a bandeira vermelha no final!',
       opsTitle: 'Controles',
       ops1: '<kbd>←</kbd><kbd>→</kbd> ou <kbd>A</kbd><kbd>D</kbd><span>Mover</span>',
       ops2: '<kbd>Espaço</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Pular (segure para pular mais alto)</span>',
@@ -606,7 +632,7 @@
       ops5: '<kbd>Enter</kbd><span>Confirmar (funciona em todos os botões)</span>',
       btnStart: 'Começar Jogo', btnHelp: 'Como Jogar', btnResetBest: 'Zerar Recorde',
       hintStart: 'Dica: aperte <b>Enter</b> para começar direto; pisar em inimigos dá +200, acertar blocos ? dá +100.',
-      helpLead: 'A dificuldade cresce nas três fases: mais penhascos, escadas mais densas e Goombas de 5 até 14.',
+      helpLead: 'A dificuldade cresce nas seis fases: penhascos mais largos, blocos mais densos — cada pouso de penhasco tem um Goomba de guarda, e arcos de moedas flutuam sobre os buracos.',
       scoreTitle: 'Regras de Pontuação',
       rule1: 'Acertar um bloco ?: +100 pontos, uma moeda salta com animação',
       rule2: 'Pisar num Goomba: +200 pontos (encostar de lado machuca)',
@@ -619,10 +645,10 @@
       pauseLead: 'Relaxe um pouco — o Mario está esperando por você.',
       btnResume: 'Continuar Jogo', btnRetryLevel: 'Repetir Fase', btnMenu: 'Menu Principal',
       hintPause: 'Aperte <b>Enter</b> para continuar',
-      clearTitle: 'Fase Concluída!', clearTitleLast: 'As Três Fases Concluídas!',
+      clearTitle: 'Fase Concluída!', clearTitleLast: 'As Seis Fases Concluídas!',
       clearWord: function (n) { return 'Muito bem! Você conquistou a bandeira de ' + n + '!'; },
-      clearWordLast: 'Impressionante! Você é o lendário campeão — as três fases foram dominadas!',
-      tblLevel: 'Pontos da Fase', tblFlag: 'Bônus da Bandeira', tblTime: 'Bônus de Tempo', tblTotal: 'Pontuação Total',
+      clearWordLast: 'Impressionante! Você é o lendário campeão — as seis fases foram dominadas!',
+      tblLevel: 'Pontos da Fase', tblFlag: 'Bônus da Bandeira', tblTime: 'Bônus de Tempo', tblLucky: 'Bônus Surpresa da Sorte', tblTotal: 'Pontuação Total',
       btnNext: 'Próxima Fase', btnNextLast: 'Jogar de Novo da Fase 1',
       clearHintNext: 'Aperte <b>Enter</b> para a próxima fase',
       clearHintLast: 'Aperte <b>Enter</b> para recomeçar da Fase 1 (pontuação zera)',
@@ -646,18 +672,19 @@
       techTag5: 'Áudio', techDesc5: 'Síntese em tempo real via Web Audio API (sem arquivos de áudio)',
       techTag6: 'Tela', techDesc6: 'Resolução lógica fixa de 1000×560 + escalonamento HD por devicePixelRatio',
       techNote: 'Motivo: o jogo roda um loop de 60fps desenhando pixel a pixel; frameworks DOM como React/Vue adicionam custo desnecessário de virtual DOM. A API nativa do Canvas 2D dá conta e carrega mais rápido. Para escalar depois, migre direto para <b>Vite + TypeScript</b> — a camada de renderização não muda.',
-      levelNames: ['Fase 1 · Saída na Grama', 'Fase 2 · Estrada de Tijolos ao Entardecer', 'Fase 3 · Perigo sob as Estrelas'],
+      levelNames: ['Fase 1 · Saída na Grama', 'Fase 2 · Estrada de Tijolos ao Entardecer', 'Fase 3 · Perigo sob as Estrelas', 'Fase 4 · Cavernas de Lava', 'Fase 5 · Terra do Gelo', 'Fase 6 · Reino Assombrado'],
       banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
     },
     'es': {
-      title: 'Súper Mario · Aventura en Tres Niveles',
+      title: 'Súper Mario · Aventura de Seis Niveles',
+      gameVer: 'Hy4 Preview v2',
       subtitle: 'Versión pixel dibujada a mano con Canvas puro · Golpea bloques ?, pisa Goombas y toma la bandera final',
       badgeTech: 'Stack: HTML5 nativo + Canvas 2D + ES2020',
       badgeZero: 'Un solo archivo, cero dependencias',
       badgeLang: 'Interfaz multilingüe',
       hudLevel: 'Nivel', hudScore: 'Puntos', hudCoin: 'Monedas', hudLife: 'Vidas', hudTime: 'Tiempo', hudBest: 'Récord',
       musicOn: 'Música: Sí', musicOff: 'Música: No', pause: 'Pausar', resume: 'Reanudar',
-      startLead: '¡Ayuda a Mario a cruzar tres niveles: salta los precipicios, golpea los bloques ?, pisotea Goombas y toma la bandera roja de la meta!',
+      startLead: '¡Ayuda a Mario a cruzar seis niveles temáticos: salta los precipicios, golpea los bloques ?, recoge monedas en el aire y toma la bandera roja de la meta!',
       opsTitle: 'Controles',
       ops1: '<kbd>←</kbd><kbd>→</kbd> o <kbd>A</kbd><kbd>D</kbd><span>Moverse</span>',
       ops2: '<kbd>Espacio</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Saltar (mantén para saltar más alto)</span>',
@@ -666,7 +693,7 @@
       ops5: '<kbd>Enter</kbd><span>Confirmar (vale para todos los botones)</span>',
       btnStart: 'Comenzar', btnHelp: 'Cómo jugar', btnResetBest: 'Reiniciar récord',
       hintStart: 'Consejo: pulsa <b>Enter</b> para empezar ya; pisar enemigos da +200, golpear bloques ? da +100.',
-      helpLead: 'La dificultad sube en tres niveles: más precipicios, escaleras más juntas y Goombas de 5 a 14.',
+      helpLead: 'La dificultad sube en seis niveles: precipicios más anchos y bloques más densos — cada aterrizaje tiene un Goomba de guardia, y arcos de monedas flotan sobre los hoyos.',
       scoreTitle: 'Reglas de puntuación',
       rule1: 'Golpear un bloque ?: +100 puntos, salta una moneda con animación',
       rule2: 'Pisar un Goomba: +200 puntos (tocarlo de lado te hace daño)',
@@ -679,10 +706,10 @@
       pauseLead: 'Descansa un momento, Mario te espera.',
       btnResume: 'Reanudar juego', btnRetryLevel: 'Repetir nivel', btnMenu: 'Menú principal',
       hintPause: 'Pulsa <b>Enter</b> para reanudar',
-      clearTitle: '¡Nivel superado!', clearTitleLast: '¡Tres niveles superados!',
+      clearTitle: '¡Nivel superado!', clearTitleLast: '¡Seis niveles superados!',
       clearWord: function (n) { return '¡Genial! ¡Conseguiste la bandera de ' + n + '!'; },
-      clearWordLast: '¡Extraordinario! Eres la leyenda campeona: ¡tres niveles dominados!',
-      tblLevel: 'Puntos del nivel', tblFlag: 'Bono de bandera', tblTime: 'Bono de tiempo', tblTotal: 'Puntuación total',
+      clearWordLast: '¡Extraordinario! Eres la leyenda campeona: ¡seis niveles dominados!',
+      tblLevel: 'Puntos del nivel', tblFlag: 'Bono de bandera', tblTime: 'Bono de tiempo', tblLucky: 'Bono Sorpresa de la Suerte', tblTotal: 'Puntuación total',
       btnNext: 'Siguiente nivel', btnNextLast: 'Jugar otra vez desde el nivel 1',
       clearHintNext: 'Pulsa <b>Enter</b> para el siguiente nivel',
       clearHintLast: 'Pulsa <b>Enter</b> para reiniciar desde el nivel 1 (puntos a cero)',
@@ -706,18 +733,19 @@
       techTag5: 'Audio', techDesc5: 'Síntesis en tiempo real con Web Audio API (sin archivos de audio)',
       techTag6: 'Pantalla', techDesc6: 'Resolución lógica fija 1000×560 + escalado HD con devicePixelRatio',
       techNote: 'Por qué: el juego es un bucle de 60fps que pinta píxel a píxel; frameworks DOM como React/Vue añaden sobrecoste innecesario de DOM virtual. La API nativa de Canvas 2D sobra y carga más rápido. Para crecer después, migra directo a <b>Vite + TypeScript</b>: la capa de renderizado no cambia.',
-      levelNames: ['Nivel 1 · Salida en la pradera', 'Nivel 2 · Camino de ladrillos al atardecer', 'Nivel 3 · Peligro bajo las estrellas'],
+      levelNames: ['Nivel 1 · Salida en la pradera', 'Nivel 2 · Camino de ladrillos al atardecer', 'Nivel 3 · Peligro bajo las estrellas', 'Nivel 4 · Cavernas de lava', 'Nivel 5 · Reino de hielo', 'Nivel 6 · Reino encantado'],
       banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
     },
     'fr': {
-      title: 'Super Mario · Aventure en Trois Niveaux',
+      title: 'Super Mario · Aventure en Six Niveaux',
+      gameVer: 'Hy4 Preview v2',
       subtitle: 'Version pixel dessinée à la main en Canvas pur · Frappe les blocs ?, écrase les Goombas et prends le drapeau final',
       badgeTech: 'Stack : HTML5 natif + Canvas 2D + ES2020',
       badgeZero: 'Fichier unique, zéro dépendance',
       badgeLang: 'Interface multilingue',
       hudLevel: 'Niveau', hudScore: 'Score', hudCoin: 'Pièces', hudLife: 'Vies', hudTime: 'Temps', hudBest: 'Record',
       musicOn: 'Musique : oui', musicOff: 'Musique : non', pause: 'Pause', resume: 'Reprendre',
-      startLead: 'Aide Mario à traverser trois niveaux : saute les falaises, frappe les blocs ?, écrase les Goombas et prends le drapeau rouge à l’arrivée !',
+      startLead: 'Aide Mario à traverser six niveaux thématiques : saute les falaises, frappe les blocs ?, ramasse des pièces en plein vol et prends le drapeau rouge à l’arrivée !',
       opsTitle: 'Commandes',
       ops1: '<kbd>←</kbd><kbd>→</kbd> ou <kbd>A</kbd><kbd>D</kbd><span>Se déplacer</span>',
       ops2: '<kbd>Espace</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Sauter (maintiens pour sauter plus haut)</span>',
@@ -726,7 +754,7 @@
       ops5: '<kbd>Enter</kbd><span>Valider (fonctionne sur tous les boutons)</span>',
       btnStart: 'Jouer', btnHelp: 'Comment jouer', btnResetBest: 'Réinitialiser le record',
       hintStart: 'Astuce : appuie sur <b>Entrée</b> pour commencer ; écraser un ennemi +200, frapper un bloc ? +100.',
-      helpLead: 'La difficulté monte sur trois niveaux : plus de falaises, des escaliers plus denses et des Goombas de 5 à 14.',
+      helpLead: 'La difficulté monte sur six niveaux : falaises plus larges, blocs plus denses — chaque atterrissage est gardé par un Goomba, et des arcs de pièces flottent au-dessus des trous.',
       scoreTitle: 'Règles de score',
       rule1: 'Frapper un bloc ? : +100 points, une pièce jaillit avec une animation',
       rule2: 'Écraser un Goomba : +200 points (le toucher de côté fait mal)',
@@ -739,10 +767,10 @@
       pauseLead: 'Fais une pause, Mario t’attend.',
       btnResume: 'Reprendre', btnRetryLevel: 'Refaire le niveau', btnMenu: 'Menu principal',
       hintPause: 'Appuie sur <b>Entrée</b> pour reprendre',
-      clearTitle: 'Niveau terminé !', clearTitleLast: 'Les trois niveaux terminés !',
+      clearTitle: 'Niveau terminé !', clearTitleLast: 'Les six niveaux terminés !',
       clearWord: function (n) { return 'Bravo ! Tu as pris le drapeau de ' + n + ' !'; },
-      clearWordLast: 'Extraordinaire ! Tu es le champion légendaire : les trois niveaux sont conquis !',
-      tblLevel: 'Points du niveau', tblFlag: 'Bonus du drapeau', tblTime: 'Bonus de temps', tblTotal: 'Score total',
+      clearWordLast: 'Extraordinaire ! Tu es le champion légendaire : les six niveaux sont conquis !',
+      tblLevel: 'Points du niveau', tblFlag: 'Bonus du drapeau', tblTime: 'Bonus de temps', tblLucky: 'Bonus Surprise de la Chance', tblTotal: 'Score total',
       btnNext: 'Niveau suivant', btnNextLast: 'Rejouer depuis le niveau 1',
       clearHintNext: 'Appuie sur <b>Entrée</b> pour le niveau suivant',
       clearHintLast: 'Appuie sur <b>Entrée</b> pour repartir du niveau 1 (score remis à zéro)',
@@ -766,7 +794,7 @@
       techTag5: 'Audio', techDesc5: 'Synthèse en temps réel via Web Audio API (aucun fichier audio)',
       techTag6: 'Affichage', techDesc6: 'Résolution logique fixe 1000×560 + mise à l’échelle HD devicePixelRatio',
       techNote: 'Pourquoi : le jeu tourne en boucle 60fps et dessine pixel par pixel ; des frameworks DOM comme React/Vue ajouteraient un surcoût de DOM virtuel inutile. L’API native Canvas 2D suffit et charge plus vite. Pour industrialiser ensuite, migre directement vers <b>Vite + TypeScript</b> : la couche de rendu ne change pas.',
-      levelNames: ['Niveau 1 · Départ dans la prairie', 'Niveau 2 · Chemin de briques au crépuscule', 'Niveau 3 · Péril sous les étoiles'],
+      levelNames: ['Niveau 1 · Départ dans la prairie', 'Niveau 2 · Chemin de briques au crépuscule', 'Niveau 3 · Péril sous les étoiles', 'Niveau 4 · Cavernes de lave', 'Niveau 5 · Royaume de glace', 'Niveau 6 · Royaume hanté'],
       banner: function (n, c) { return n + '　(Goombas : ' + c + ')'; }
     }
   };
@@ -803,6 +831,9 @@
       if (t[k] != null) htmls[i].innerHTML = t[k];
     }
     document.title = t.title;
+    var gn = document.getElementById('gtName'), gv = document.getElementById('gtVer');
+    if (gn) gn.textContent = t.title;
+    if (gv) gv.textContent = t.gameVer;
     document.documentElement.lang = currentLang;
     el = document.getElementById('langSelect');
     if (el) el.value = currentLang;
@@ -820,9 +851,10 @@
 
   function renderClearTable() {
     var t = T();
-    document.getElementById('clearScore').textContent = (G.levelScore - G.flagBonus - G.timeBonus) + ' ' + t.unit;
+    document.getElementById('clearScore').textContent = (G.levelScore - G.flagBonus - G.timeBonus - G.luckyBonus) + ' ' + t.unit;
     document.getElementById('clearFlag').textContent = G.flagBonus + ' ' + t.unit;
     document.getElementById('clearTime').textContent = G.timeBonus + ' ' + t.unit;
+    document.getElementById('clearLucky').textContent = G.luckyBonus + ' ' + t.unit;
     document.getElementById('clearTotal').textContent = G.score + ' ' + t.unit;
   }
 
@@ -1161,21 +1193,37 @@
     };
   }
 
+  // V2：扩展为六大主题关卡，长度 / 悬崖 / 敌人速度 / 砖阵密度逐关递增
   var LEVELS = [
     {
       name: '第一关 · 草原起步', seed: 20260101, cols: 168,
-      enemies: 5, enemySpeed: 0.85, pitW: [2, 3], blockRows: [9],
+      enemies: 6, enemySpeed: 0.85, pitW: [2, 3], blockRows: [9],
       clusterLen: [3, 5], stairs: 2, double: false, time: 300, theme: 'day'
     },
     {
-      name: '第二关 · 黄昏砖道', seed: 20260202, cols: 208,
-      enemies: 9, enemySpeed: 1.05, pitW: [2, 4], blockRows: [9, 8],
-      clusterLen: [3, 6], stairs: 3, double: false, time: 280, theme: 'dusk'
+      name: '第二关 · 黄昏砖道', seed: 20260202, cols: 198,
+      enemies: 8, enemySpeed: 1.0, pitW: [2, 3], blockRows: [9, 8],
+      clusterLen: [3, 6], stairs: 3, double: false, time: 285, theme: 'dusk'
     },
     {
-      name: '第三关 · 星夜险境', seed: 20260303, cols: 248,
-      enemies: 14, enemySpeed: 1.3, pitW: [3, 4], blockRows: [9, 8],
-      clusterLen: [4, 7], stairs: 4, double: true, time: 260, theme: 'night'
+      name: '第三关 · 星夜险境', seed: 20260303, cols: 228,
+      enemies: 10, enemySpeed: 1.15, pitW: [3, 4], blockRows: [9, 8],
+      clusterLen: [4, 7], stairs: 3, double: true, time: 270, theme: 'night'
+    },
+    {
+      name: '第四关 · 熔岩洞窟', seed: 20260404, cols: 258,
+      enemies: 12, enemySpeed: 1.25, pitW: [3, 4], blockRows: [9, 8],
+      clusterLen: [4, 7], stairs: 4, double: true, time: 255, theme: 'lava'
+    },
+    {
+      name: '第五关 · 冰雪奇缘', seed: 20260505, cols: 288,
+      enemies: 14, enemySpeed: 1.35, pitW: [3, 5], blockRows: [9, 8],
+      clusterLen: [4, 8], stairs: 4, double: true, time: 240, theme: 'ice'
+    },
+    {
+      name: '第六关 · 幽暗鬼域', seed: 20260606, cols: 318,
+      enemies: 16, enemySpeed: 1.45, pitW: [4, 5], blockRows: [9, 8],
+      clusterLen: [5, 8], stairs: 5, double: true, time: 230, theme: 'ghost'
     }
   ];
 
@@ -1199,7 +1247,9 @@
     // 起点教学块（第 9 行：底边 y=400，地面 480，净空 80px > 马里奥 40px，可直接从下面走过）
     grid[9][7] = T_QUESTION; grid[9][8] = T_BRICK; grid[9][9] = T_QUESTION;
 
-    // --- 悬崖 ---
+    // --- 悬崖（V2：同时记录坑位，坑上铺金币弧线） ---
+    var pitRanges = [];
+    var coinList = [];
     var x = 22;
     while (x < END_ZONE - 6) {
       var w = cfg.pitW[0] + Math.floor(rnd() * (cfg.pitW[1] - cfg.pitW[0] + 1));
@@ -1207,21 +1257,30 @@
       for (i = -3; i < w + 4; i++) { if (resBlock[x + i]) { ok = false; break; } }
       if (ok && x + w < END_ZONE - 4) {
         for (i = 0; i < w; i++) { grid[GROUND_ROW][x + i] = 0; grid[GROUND_ROW + 1][x + i] = 0; }
-        for (i = -3; i < w + 4; i++) {
+        for (i = -2; i < w + 3; i++) {
           if (x + i >= 0 && x + i < cols) {
             resEnemy[x + i] = true;
             noBlock[x + i] = true;   // 悬崖上空及前后留空，跳跃弧线不会被方块挡住
           }
         }
+        pitRanges.push({ s: x, w: w });
+        // 金币弧线：正好落在跳跃轨迹上（冒险收集）
+        if (w >= 3) {
+          coinList.push({ x: (x + 0.5) * TILE, y: GROUND_Y - 120 });
+          coinList.push({ x: (x + w / 2) * TILE, y: GROUND_Y - 155 });
+          coinList.push({ x: (x + w - 0.5) * TILE, y: GROUND_Y - 120 });
+        } else {
+          coinList.push({ x: (x + w / 2) * TILE, y: GROUND_Y - 130 });
+        }
         x += w;
       }
-      x += 9 + Math.floor(rnd() * 9);
+      x += 10 + Math.floor(rnd() * 10);
     }
 
-    // --- 石块阶梯（金字塔，可助人登高分） ---
+    // --- 石块阶梯（金字塔，可助人登高分；V2：小型化 + 密集重试，先放阶梯再放砖阵） ---
     var sx = 26, placed = 0;
     while (sx < END_ZONE - 12 && placed < cfg.stairs) {
-      var h = 2 + Math.floor(rnd() * 3);            // 2 ~ 4 阶
+      var h = 2 + Math.floor(rnd() * 2);            // V2：2 ~ 3 阶（小型化，给砖阵留空间）
       var totalW = h * 2;
       var okStair = true;
       for (i = -3; i < totalW + 3; i++) {
@@ -1238,12 +1297,14 @@
           var c2 = sx + h + i, hh = h - i;
           for (r = GROUND_ROW - 1; r > GROUND_ROW - 1 - hh; r--) grid[r][c2] = T_STONE;
         }
-        for (i = -3; i < totalW + 4; i++) {
+        for (i = -2; i < totalW + 3; i++) {
           if (sx + i >= 0 && sx + i < cols) { resBlock[sx + i] = true; resEnemy[sx + i] = true; }
         }
         placed++;
+        sx += totalW + 8 + Math.floor(rnd() * 10);
+      } else {
+        sx += 4;   // V2：放不下时小幅前移继续找空位
       }
-      sx += 11 + Math.floor(rnd() * 12);
     }
 
     // --- 砖块 / 问号块集群（只在第 8、9 行，保证下方净空高于马里奥） ---
@@ -1256,15 +1317,21 @@
         if (resBlock[bx + i] || noBlock[bx + i]) { okB = false; break; }
       }
       if (okB) {
-        for (i = 0; i < len; i++) grid[row][bx + i] = (rnd() < 0.42) ? T_QUESTION : T_BRICK;
-        if (cfg.double && rnd() < 0.4) {  // 第三关偶尔出现双层
-          for (i = 0; i < len; i++) {
-            if (grid[row - 1][bx + i] === 0) grid[row - 1][bx + i] = (rnd() < 0.3) ? T_QUESTION : T_BRICK;
+        for (i = 0; i < len; i++) grid[row][bx + i] = (rnd() < 0.45) ? T_QUESTION : T_BRICK;
+        grid[row][bx + Math.floor(len / 2)] = T_QUESTION;   // V2：每个砖阵保底一个问号（居中）
+        if (cfg.double && rnd() < 0.45 && len >= 4) {
+          // V2 修复“双层问号顶不到”：上层改到 row-2（与下层隔一整行），
+          // 且两端各留 1 格缺口方便跳上下层——站上下层即可正常起跳顶到上层
+          var upperRow = row - 2;
+          for (i = 1; i < len - 1; i++) {
+            if (grid[upperRow][bx + i] === 0) grid[upperRow][bx + i] = (rnd() < 0.3) ? T_QUESTION : T_BRICK;
           }
         }
         for (i = -2; i < len + 2; i++) if (bx + i >= 0 && bx + i < cols) resBlock[bx + i] = true;
+        bx += len + 4 + Math.floor(rnd() * 7);
+      } else {
+        bx += 3;   // V2：放不下时小幅前移继续找空位，而不是整段跳过
       }
-      bx += len + 5 + Math.floor(rnd() * 8);
     }
 
     // --- 终点前的登高分阶梯（5 阶，借它可以摸到旗杆顶部） ---
@@ -1274,9 +1341,14 @@
       for (r = GROUND_ROW - 1; r > GROUND_ROW - 1 - (i + 1); r--) grid[r][cs] = T_STONE;
     }
 
-    // --- 板栗仔（多轮放宽间距，确保数量达标：5 → 9 → 14 递增） ---
+    // --- 板栗仔（V2：每个悬崖的落点必配一只守卫，保证敌人数 ≥ 悬崖数，再随机补充巡逻） ---
     var enemyCols = [];
-    var need = cfg.enemies;
+    var need = Math.max(cfg.enemies, pitRanges.length + 2);
+    for (var pr = 0; pr < pitRanges.length; pr++) {
+      var land = pitRanges[pr].s + pitRanges[pr].w;   // 对岸第一格
+      if (land >= END_ZONE) continue;
+      if (grid[GROUND_ROW][land] === T_GROUND && grid[GROUND_ROW - 1][land] === 0) enemyCols.push(land);
+    }
     var gaps = [9, 7, 5, 4, 3];
     function tryPlace(gap, attempts) {
       for (var t = 0; t < attempts && enemyCols.length < need; t++) {
@@ -1295,9 +1367,27 @@
     for (var gi = 0; gi < gaps.length && enemyCols.length < need; gi++) tryPlace(gaps[gi], 3000);
     enemyCols.sort(function (a, b) { return a - b; });
 
+    // --- 地面金币小队列（随机散布，跳一跳就能吃到） ---
+    var gc = START_ZONE + 10;
+    while (gc < END_ZONE - 8) {
+      var clearGround = grid[GROUND_ROW][gc] === T_GROUND && grid[GROUND_ROW][gc + 2] === T_GROUND &&
+        grid[GROUND_ROW - 1][gc] === 0 && grid[GROUND_ROW - 1][gc + 1] === 0 && grid[GROUND_ROW - 1][gc + 2] === 0;
+      var nearPit = false;
+      for (var pk = 0; pk < pitRanges.length; pk++) {
+        if (gc + 2 >= pitRanges[pk].s - 3 && gc <= pitRanges[pk].s + pitRanges[pk].w + 3) { nearPit = true; break; }
+      }
+      if (rnd() < 0.32 && clearGround && !nearPit) {
+        coinList.push({ x: (gc + 0.5) * TILE, y: GROUND_Y - 100 });
+        coinList.push({ x: (gc + 1.5) * TILE, y: GROUND_Y - 100 });
+        coinList.push({ x: (gc + 2.5) * TILE, y: GROUND_Y - 100 });
+      }
+      gc += 26 + Math.floor(rnd() * 22);
+    }
+
     return {
       cfg: cfg, cols: cols, tpl: grid, grid: grid.map(function (r2) { return r2.slice(); }),
-      enemyCols: enemyCols, poleCol: poleCol, pixelW: cols * TILE, castleCol: cols - 9
+      enemyCols: enemyCols, poleCol: poleCol, pixelW: cols * TILE, castleCol: cols - 9,
+      coinList: coinList, pitCount: pitRanges.length
     };
   }
 
@@ -1317,12 +1407,14 @@
     timeAcc: 0,
     flagBonus: 0,
     timeBonus: 0,
+    luckyBonus: 0,
     best: 0
   };
   try { G.best = parseInt(localStorage.getItem('mario_best') || '0', 10) || 0; } catch (e) { G.best = 0; }
 
   var mario = { x: 0, y: 0, w: MARIO_W, h: MARIO_H, vx: 0, vy: 0, onGround: false, face: 1, animT: 0, frame: 0, coyote: 0, dyingT: 0, prevY: 0 };
   var level = null, enemies = [], bumps = {}, coins = [], popups = [], particles = [];
+  var worldCoins = [];   // V2：关卡里散落的可收集金币（区别于问号块弹出的金币）
   var camX = 0, frameCount = 0;
   var flag = { y: POLE_TOP + 8, sliding: false, walkT: 0, carry: false };
 
@@ -1353,7 +1445,8 @@
     G.levelScore = 0;
     G.time = level.cfg.time;
     G.timeAcc = 0;
-    G.flagBonus = 0; G.timeBonus = 0;
+    G.flagBonus = 0; G.timeBonus = 0; G.luckyBonus = 0;
+    worldCoins = level.coinList.map(function (c) { return { x: c.x, y: c.y, taken: false }; });
 
     mario.x = 3 * TILE; mario.y = GROUND_Y - mario.h;
     mario.vx = 0; mario.vy = 0; mario.onGround = true; mario.face = 1;
@@ -1502,12 +1595,19 @@
     for (var i = 0; i < enemies.length; i++) {
       var g = enemies[i];
       if (g.dead) { g.deadT++; continue; }
+      // V2 敌人 AI：巡逻到悬崖边会主动掉头，把守对岸落点，不再傻乎乎掉下坑
+      var aheadX = g.dir > 0 ? g.x + g.w + 3 : g.x - 3;
+      var belowR = Math.floor((g.y + g.h + 2) / TILE);
+      var aheadC = Math.floor(aheadX / TILE);
+      if (g.vy < 3 && tileAtRC(belowR, aheadC) === T_EMPTY && tileAtRC(belowR + 1, aheadC) === T_EMPTY) {
+        g.dir = -g.dir;
+      }
       g.vx = g.dir * speed;                 // 恒定巡逻速度
       g.vy += GRAV;
       if (g.vy > MAX_FALL) g.vy = MAX_FALL;
       var hitWall = moveX(g);
       moveY(g, null);
-      if (hitWall) {                        // 撞墙掉头（走到悬崖边则直接掉下去）
+      if (hitWall) {                        // 撞墙掉头
         g.dir = -g.dir;
         g.x += g.dir * 1.5;
       }
@@ -1590,6 +1690,9 @@
   function levelClear() {
     G.timeBonus = Math.max(0, G.time) * 5;
     G.score += G.timeBonus; G.levelScore += G.timeBonus;
+    // V2 过关惊喜：随机幸运奖励 100~600 分（彩带庆祝）
+    G.luckyBonus = 100 * (1 + Math.floor(Math.random() * 6));
+    G.score += G.luckyBonus; G.levelScore += G.luckyBonus;
     G.state = 'clear';
     saveBest();
     var t = T();
@@ -1603,8 +1706,25 @@
     btnNext.textContent = last ? t.btnNextLast : t.btnNext;
     document.getElementById('clearHint').innerHTML = last ? t.clearHintLast : t.clearHintNext;
     show('ovClear');
+    spawnConfetti();
     Sound.fanfare();
     syncHUD();
+  }
+
+  // V2：过关面板彩带
+  function spawnConfetti() {
+    var box = document.getElementById('confettiBox');
+    if (!box) return;
+    box.innerHTML = '';
+    var colors = ['#ff5252', '#ffd700', '#40c4ff', '#69f0ae', '#ff4081', '#b388ff', '#ffab40'];
+    for (var i = 0; i < 18; i++) {
+      var el = document.createElement('i');
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.background = colors[i % colors.length];
+      el.style.animationDuration = (1.2 + Math.random() * 1.4) + 's';
+      el.style.animationDelay = (Math.random() * 0.7) + 's';
+      box.appendChild(el);
+    }
   }
 
   /* =========================================================================
@@ -1651,6 +1771,20 @@
 
     // 掉出地图
     if (mario.y > VIEW_H + 120) { marioDie(); return; }
+
+    // V2：收集空中金币（+50）
+    for (var wi = 0; wi < worldCoins.length; wi++) {
+      var wc = worldCoins[wi];
+      if (wc.taken) continue;
+      if (mario.x + mario.w > wc.x - 13 && mario.x < wc.x + 13 &&
+          mario.y + mario.h > wc.y - 13 && mario.y < wc.y + 13) {
+        wc.taken = true;
+        G.score += 50; G.levelScore += 50; G.coins += 1;
+        popups.push({ x: wc.x, y: wc.y - 16, text: '+50', t: 0, life: 55, color: '#ffe066' });
+        Sound.coin();
+        syncHUD();
+      }
+    }
 
     // 走到旗杆 → 夺旗
     var poleX = level.poleCol * TILE;
@@ -1763,11 +1897,34 @@
     ctx.closePath();
   }
 
+  // V2：六大主题关卡——每关的天空、远山、地面、砖块、石块配色全部不同
   var THEME = {
-    day: { top: '#5fb8ff', bot: '#cdeeff', hill: '#3fae4a', hill2: '#2f8f3c', bush: '#2f9e44', sun: '#fff3b0' },
-    dusk: { top: '#ff9b54', bot: '#ffe0b8', hill: '#a2542f', hill2: '#7d3d22', bush: '#8a4a2a', sun: '#fff0c0' },
-    night: { top: '#16224d', bot: '#3d5490', hill: '#26356b', hill2: '#1b2750', bush: '#1e2b58', sun: '#fdfbd3' }
+    day:   { top: '#5fb8ff', bot: '#cdeeff', hill: '#3fae4a', hill2: '#2f8f3c', bush: '#2f9e44', sun: '#fff3b0', dark: false,
+             ground: '#c8722a', groundTop: '#e08a3c', groundEdge: '#8a4a1a',
+             stone: '#9aa2b1', stoneHi: '#d7dce6', stoneLo: '#5f6875',
+             brick: '#b8491a', brickHi: '#d9691f', brickLo: '#8a3410', brickShine: 'rgba(255,255,255,.22)' },
+    dusk:  { top: '#ff9b54', bot: '#ffe0b8', hill: '#a2542f', hill2: '#7d3d22', bush: '#8a4a2a', sun: '#fff0c0', dark: false,
+             ground: '#a86a30', groundTop: '#c98a4b', groundEdge: '#7a4a20',
+             stone: '#a8927b', stoneHi: '#d7c4ae', stoneLo: '#6f5c49',
+             brick: '#c9792f', brickHi: '#e8a35a', brickLo: '#8a5220', brickShine: 'rgba(255,240,200,.25)' },
+    night: { top: '#16224d', bot: '#3d5490', hill: '#26356b', hill2: '#1b2750', bush: '#1e2b58', sun: '#fdfbd3', dark: true,
+             ground: '#4a5872', groundTop: '#6b7a99', groundEdge: '#2e3a52',
+             stone: '#7a8ba8', stoneHi: '#a5b4cc', stoneLo: '#4a5872',
+             brick: '#5a6a9a', brickHi: '#8a97c0', brickLo: '#3a4670', brickShine: 'rgba(220,230,255,.18)' },
+    lava:  { top: '#2b0a0a', bot: '#8a2f1d', hill: '#5a2418', hill2: '#3d170f', bush: '#6b2a18', sun: '#ffb347', dark: true,
+             ground: '#5a2a18', groundTop: '#8a4526', groundEdge: '#3a1a0e',
+             stone: '#6e4a3a', stoneHi: '#a0765c', stoneLo: '#452a1e',
+             brick: '#8a2f1d', brickHi: '#c25a30', brickLo: '#521a0e', brickShine: 'rgba(255,180,120,.22)' },
+    ice:   { top: '#aee6ff', bot: '#eaf9ff', hill: '#bfe3f5', hill2: '#9ecfe8', bush: '#8fd0ea', sun: '#ffffff', dark: false, snow: true,
+             ground: '#9ec9de', groundTop: '#d8f0fa', groundEdge: '#6a9cba',
+             stone: '#a8c8dc', stoneHi: '#e2f3fa', stoneLo: '#6d94ac',
+             brick: '#7fc4e0', brickHi: '#b8e6f5', brickLo: '#4a8fb0', brickShine: 'rgba(255,255,255,.4)' },
+    ghost: { top: '#1d1030', bot: '#4a2f7a', hill: '#2c1d52', hill2: '#201540', bush: '#2e2050', sun: '#e8e0ff', dark: true,
+             ground: '#4a3a6a', groundTop: '#6b5a94', groundEdge: '#2e2248',
+             stone: '#6a5a8a', stoneHi: '#9a8ab8', stoneLo: '#453763',
+             brick: '#8a5fd9', brickHi: '#b58fff', brickLo: '#5a3a9a', brickShine: 'rgba(230,210,255,.2)' }
   };
+  var curTh = THEME.day;   // 当前主题（render 时刷新），瓦片绘制函数共用
 
   function drawBackground() {
     var th = THEME[level.cfg.theme] || THEME.day;
@@ -1778,7 +1935,7 @@
     // 太阳 / 月亮
     ctx.fillStyle = th.sun;
     ctx.beginPath(); ctx.arc(880 - camX * 0.05, 88, 34, 0, Math.PI * 2); ctx.fill();
-    if (level.cfg.theme === 'night') {
+    if (th.dark) {   // V2：所有暗色主题（星夜/熔岩/鬼域）都有星空
       ctx.fillStyle = 'rgba(255,255,255,.85)';
       for (var s = 0; s < 46; s++) {
         var sx2 = (s * 137.5) % VIEW_W, sy2 = (s * 71.3) % 300;
@@ -1786,6 +1943,15 @@
         ctx.fillRect(sx2, sy2, 2, 2);
       }
       ctx.globalAlpha = 1;
+    }
+    if (th.snow) {   // V2：冰雪关全程飘雪
+      ctx.fillStyle = 'rgba(255,255,255,.9)';
+      for (var sn = 0; sn < 44; sn++) {
+        var sx3 = (sn * 173 + Math.sin((frameCount + sn * 30) * 0.02) * 36 - camX * 0.15) % VIEW_W;
+        if (sx3 < 0) sx3 += VIEW_W;
+        var sy3 = (sn * 97 + frameCount * (1 + (sn % 3) * 0.4)) % GROUND_Y;
+        ctx.fillRect(sx3, sy3, 3, 3);
+      }
     }
 
     // 云（视差 0.25）
@@ -1838,22 +2004,24 @@
   }
 
   function drawGroundTile(px, py) {
-    ctx.fillStyle = '#c8722a'; ctx.fillRect(px, py, TILE, TILE);
-    ctx.fillStyle = '#e08a3c'; ctx.fillRect(px, py, TILE, 6);
+    var th = curTh;   // V2：每关地面配色不同
+    ctx.fillStyle = th.ground; ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = th.groundTop; ctx.fillRect(px, py, TILE, 6);
     ctx.fillStyle = 'rgba(0,0,0,.22)';
     ctx.fillRect(px, py + 19, TILE, 2);
     ctx.fillRect(px + 19, py + 22, 2, TILE - 22);
     ctx.fillRect(px + 19, py, 2, 19);
     ctx.fillRect(px, py + TILE - 2, TILE, 2);
-    ctx.fillStyle = 'rgba(255,255,255,.16)';
+    ctx.fillStyle = th.groundEdge;
     ctx.fillRect(px + 4, py + 9, 7, 5);
     ctx.fillRect(px + 25, py + 27, 8, 5);
   }
 
   function drawStoneTile(px, py) {
-    ctx.fillStyle = '#9aa2b1'; ctx.fillRect(px, py, TILE, TILE);
-    ctx.fillStyle = '#d7dce6'; ctx.fillRect(px, py, TILE, 4); ctx.fillRect(px, py, 4, TILE);
-    ctx.fillStyle = '#5f6875'; ctx.fillRect(px, py + TILE - 4, TILE, 4); ctx.fillRect(px + TILE - 4, py, 4, TILE);
+    var th = curTh;   // V2：每关石块配色不同
+    ctx.fillStyle = th.stone; ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = th.stoneHi; ctx.fillRect(px, py, TILE, 4); ctx.fillRect(px, py, 4, TILE);
+    ctx.fillStyle = th.stoneLo; ctx.fillRect(px, py + TILE - 4, TILE, 4); ctx.fillRect(px + TILE - 4, py, 4, TILE);
     ctx.fillStyle = 'rgba(255,255,255,.35)';
     ctx.fillRect(px + 8, py + 9, 10, 3);
     ctx.fillStyle = 'rgba(0,0,0,.18)';
@@ -1862,18 +2030,19 @@
   }
 
   function drawBrickTile(px, py) {
-    ctx.fillStyle = '#b8491a'; ctx.fillRect(px, py, TILE, TILE);
-    ctx.fillStyle = '#d9691f';
+    var th = curTh;   // V2：每关砖块配色不同（草原橙/黄昏沙/星夜蓝/熔岩红/冰雪蓝/鬼域紫）
+    ctx.fillStyle = th.brick; ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = th.brickHi;
     ctx.fillRect(px + 1, py + 1, 18, 17);
     ctx.fillRect(px + 21, py + 1, 18, 17);
     ctx.fillRect(px + 11, py + 21, 18, 17);
     ctx.fillRect(px - 9, py + 21, 18, 17);
     ctx.fillRect(px + 31, py + 21, 18, 17);
-    ctx.fillStyle = 'rgba(255,255,255,.22)';
+    ctx.fillStyle = th.brickShine;
     ctx.fillRect(px + 1, py + 1, 18, 3);
     ctx.fillRect(px + 21, py + 1, 18, 3);
     ctx.fillRect(px + 11, py + 21, 18, 3);
-    ctx.fillStyle = 'rgba(0,0,0,.18)';
+    ctx.fillStyle = th.brickLo;
     ctx.fillRect(px, py + TILE - 2, TILE, 2);
   }
 
@@ -1941,6 +2110,27 @@
         }
         ctx.restore();
       }
+    }
+  }
+
+  // V2：关卡里散落的旋转金币
+  function drawWorldCoins() {
+    for (var i = 0; i < worldCoins.length; i++) {
+      var wc = worldCoins[i];
+      if (wc.taken) continue;
+      var px = wc.x - camX;
+      if (px < -30 || px > VIEW_W + 30) continue;
+      var wob = Math.abs(Math.cos(frameCount * 0.1 + i * 0.7));
+      var w = 8 + 12 * wob;
+      ctx.save();
+      var g = ctx.createLinearGradient(px - w / 2, 0, px + w / 2, 0);
+      g.addColorStop(0, '#ffd85e'); g.addColorStop(0.5, '#fff6c2'); g.addColorStop(1, '#f0a500');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.ellipse(px, wc.y, Math.max(2, w / 2), 13, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#b47500'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.7)';
+      if (w > 13) ctx.fillRect(px - 2, wc.y - 7, 3, 14);
+      ctx.restore();
     }
   }
 
@@ -2100,10 +2290,12 @@
       camX = 0;
       mario.x = 3 * TILE; mario.y = GROUND_Y - mario.h;
     }
+    curTh = THEME[level.cfg.theme] || THEME.day;   // V2：刷新当前主题
     drawBackground();
     drawTiles();
     drawFlagAndCastle();
     drawEnemies();
+    drawWorldCoins();
     if (G.state !== 'menu') drawMario();
     else drawMario();
     drawEffects();
@@ -2119,6 +2311,7 @@
    *  13. 主循环
    * ========================================================================= */
   var last = 0, acc = 0, STEP = 1000 / 60;
+  var fpsFrames = 0, fpsLast = 0;
   function loop(ts) {
     requestAnimationFrame(loop);
     if (!last) last = ts;
@@ -2128,6 +2321,15 @@
     var guard = 0;
     while (acc >= STEP && guard++ < 6) { tick(); acc -= STEP; }
     render();
+    // V2：右上角实时帧率（LCD 数字时钟风格，小号数字，500ms 刷新）
+    fpsFrames++;
+    if (!fpsLast) fpsLast = ts;
+    if (ts - fpsLast >= 500) {
+      var fps = Math.round(fpsFrames * 1000 / (ts - fpsLast));
+      var fb = document.getElementById('fpsBox');
+      if (fb) fb.textContent = 'FPS ' + String(Math.min(99, fps)).padStart(2, '0');
+      fpsFrames = 0; fpsLast = ts;
+    }
   }
   requestAnimationFrame(loop);
 

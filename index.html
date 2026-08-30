@@ -290,7 +290,7 @@ main {
 footer {
   position: relative;
   z-index: 1;
-  height: 58px;
+  min-height: 58px;
   background:
     repeating-linear-gradient(90deg,
       var(--ground) 0 44px,
@@ -301,9 +301,14 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  padding: 12px 16px;
   font-size: 13px;
   color: rgba(255,255,255,.85);
   letter-spacing: 1px;
+  line-height: 1.6;
+  flex-wrap: wrap;
+  gap: 4px 8px;
 }
 footer a { color: #ffd85e; text-decoration: none; }
 
@@ -333,24 +338,25 @@ footer a { color: #ffd85e; text-decoration: none; }
     <div class="banner grok">
       <div class="qbox">?</div>
       <h2>超级玛丽</h2>
-      <span class="author">Grok Fast 生成</span>
+      <span class="author">Grok Fast 生成 v5</span>
     </div>
     <div class="body">
       <div class="tags">
-        <span class="tag hot">迭代 5 轮</span>
+        <span class="tag hot">迭代 6 轮 · V5</span>
         <span class="tag ok">✅ 功能最完整</span>
         <span class="tag">1100 × 650</span>
+        <span class="tag">六大主题关卡</span>
         <span class="tag">七种语言</span>
       </div>
       <ul class="feat">
-        <li>霓虹深色画风，多关卡进阶挑战</li>
-        <li>生命系统 + 积分 + FPS 帧率显示</li>
-        <li>Shift 加速奔跑，加速时跳得更高</li>
-        <li>顶问号块得分、踩板栗仔消灭敌人</li>
-        <li>支持一键切换中文 / English 界面</li>
+        <li>六大主题关卡：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同</li>
+        <li>每个跳坑落点必有守卫板栗仔，敌人数量 ≥ 坑数，难度逐关递增</li>
+        <li>坑上金币弧线、移动平台、双层砖阵、15% 幸运方块 +500</li>
+        <li>夺旗烟花庆祝，过关彩带 + 惊喜奖励 100~500</li>
+        <li>右上角 FPS 数字时钟、左上角版本标识、页面底部 GitHub 链接</li>
       </ul>
       <div class="meta">
-        <b>迭代记录：</b>修复敌人管道区域重复渲染、问号方块撞击交互失效等核心缺陷，历经 5 轮人机协作打磨。
+        <b>V5 更新：</b>程序化生成 6 大主题关卡（固定种子）；新增金币收集 / 移动平台 / 幸运方块 / 烟花彩带；敌人 AI 坑边掉头；马里奥静止不动、走路 / 跳跃才有动画。
       </div>
     </div>
     <div class="actions">
@@ -363,25 +369,26 @@ footer a { color: #ffd85e; text-decoration: none; }
   <section class="card">
     <div class="banner hy4">
       <div class="qbox">?</div>
-      <h2>超级马里奥 · 三关历险</h2>
-      <span class="author">Hy4 Preview 生成</span>
+      <h2>超级马里奥 · 六关历险</h2>
+      <span class="author">Hy4 Preview 生成 v2</span>
     </div>
     <div class="body">
       <div class="tags">
-        <span class="tag">迭代 2 轮</span>
+        <span class="tag">迭代 3 轮 · V2</span>
         <span class="tag ok">✅ 功能完整</span>
         <span class="tag">1000 × 560</span>
-        <span class="tag">三大关卡</span>
+        <span class="tag">六大主题关卡</span>
         <span class="tag">七种语言</span>
       </div>
       <ul class="feat">
-        <li>清新浅色画风：草原起步 → 黄昏砖道 → 星夜险境</li>
-        <li>固定随机种子生成关卡，每次重玩完全一致</li>
-        <li>按住跳跃键跳得更高的手感调校</li>
-        <li>关卡进度 / 积分 / 生命完整 HUD 面板</li>
+        <li>六大主题关卡：草原 → 黄昏 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同</li>
+        <li>每个悬崖落点都有板栗仔把守，敌人会在悬崖边主动掉头巡逻</li>
+        <li>坑上金币弧线 + 地面金币队列，收集计入金币数（+50）</li>
+        <li>修复双层问号顶不到：隔行双层设计，站上下层即可顶到</li>
+        <li>过关幸运奖励 100~600 + 彩带庆祝；FPS / 版本标识 / GitHub 链接</li>
       </ul>
       <div class="meta">
-        <b>迭代记录：</b>两轮迭代完成基础玩法验证；因 Hy4 平台积分限制，后续完善工作由其他模型接力。
+        <b>V2 更新：</b>扩展为六大主题关卡；新增金币系统与幸运奖励；敌人 AI 崖边掉头；修复双层问号不可达缺陷；后续完善工作由其他模型接力完成。
       </div>
     </div>
     <div class="actions">
@@ -399,7 +406,7 @@ footer a { color: #ffd85e; text-decoration: none; }
 </div>
 
 <footer>
-  ⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用
+  ⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a>
 </footer>
 
 </body>
