@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>超级马里奥 · 三关历险</title>
+<style>
+  /* ============ 全局：中文字体统一（积分、中文说明、按钮完全一致） ============ */
+  :root{
+    --font: "PingFang SC", "HarmonyOS Sans SC", "Source Han Sans SC", "Noto Sans SC",
+            "Microsoft YaHei", "Hiragino Sans GB", "Heiti SC",
+            "PingFang TC", "Microsoft JhengHei", "Yu Gothic UI", "Meiryo", "Noto Sans JP", sans-serif;
+    --ink:#232a3d; --ink-2:#5b6580; --line:#dfe5f2;
+    --brand:#e5392b; --brand-2:#ff7a45;
+    --gold:#f5b301; --panel:#ffffff;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: var(--font);
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #ffe6cf 0%, rgba(255,230,207,0) 60%),
+      radial-gradient(1000px 600px at 90% 0%, #d9ecff 0%, rgba(217,236,255,0) 55%),
+      linear-gradient(180deg,#f4f8ff 0%, #eaf0fb 100%);
+    min-height:100vh;
+    display:flex; justify-content:center;
+    padding:22px 16px 40px;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* 1002 = 画布 1000 + 卡片左右边框各 1px，保证画布完整铺满卡片 */
+  .app{ width:1002px; max-width:100%; }
+
+  /* ============ 页头 ============ */
+  .topbar{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+  .title{
+    font-size:38px; font-weight:900; letter-spacing:2px; line-height:1.1;
+    background:linear-gradient(180deg,#ff8a3d 0%, #e5392b 55%, #b3190f 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 2px 0 rgba(255,255,255,.7);
+  }
+  .subtitle{ margin-top:6px; font-size:15px; color:var(--ink-2); letter-spacing:1px; }
+  .badges{ display:flex; gap:8px; flex-wrap:wrap; }
+  .badge{
+    font-size:13px; padding:6px 12px; border-radius:999px; background:#fff;
+    border:1px solid var(--line); color:var(--ink-2); box-shadow:0 2px 6px rgba(30,45,90,.06);
+  }
+  .lang-select{
+    font-family:var(--font); font-size:13px; padding:5px 10px; border-radius:999px;
+    background:#fff; border:1px solid var(--line); color:var(--ink-2);
+    box-shadow:0 2px 6px rgba(30,45,90,.06); cursor:pointer; outline:none;
+  }
+  .lang-select:focus-visible{ outline:3px solid #ffd54a; outline-offset:2px; }
+
+  /* ============ 游戏卡片 ============ */
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:22px;
+    box-shadow:0 18px 50px rgba(31,45,90,.14); overflow:hidden;
+  }
+  .hud{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    padding:12px 16px; background:linear-gradient(180deg,#fbfcff,#f1f5fd);
+    border-bottom:1px solid var(--line);
+  }
+  .pill{
+    display:flex; align-items:center; gap:8px;
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:7px 14px; font-size:15px; font-weight:700; color:var(--ink);
+    box-shadow:0 2px 5px rgba(30,45,90,.05); white-space:nowrap;
+  }
+  .pill .lbl{ font-size:13px; font-weight:600; color:var(--ink-2); }
+  .pill .val{ font-variant-numeric:tabular-nums; min-width:1.2em; }
+  .pill.score .val{ color:#e5392b; font-size:19px; }
+  .pill.life .val{ color:#e5392b; letter-spacing:2px; }
+  .hud .spacer{ flex:1 1 auto; }
+
+  /* ============ 按钮 ============ */
+  .btn{
+    font-family:var(--font); font-size:15px; font-weight:800; letter-spacing:1px;
+    padding:11px 22px; border:0; border-radius:999px; cursor:pointer; color:#fff;
+    background:linear-gradient(180deg,var(--brand-2),var(--brand));
+    box-shadow:0 5px 0 #a81d12, 0 10px 18px rgba(229,57,43,.28);
+    transition:transform .07s ease, box-shadow .07s ease, filter .15s ease;
+    user-select:none;
+  }
+  .btn:hover{ filter:brightness(1.06); }
+  .btn:active{ transform:translateY(4px); box-shadow:0 1px 0 #a81d12, 0 4px 10px rgba(229,57,43,.25); }
+  .btn:focus-visible{ outline:3px solid #ffd54a; outline-offset:3px; }
+  .btn.ghost{
+    color:#39425c; background:linear-gradient(180deg,#ffffff,#eaeef8);
+    box-shadow:0 5px 0 #c3cbdc, 0 8px 14px rgba(40,60,110,.12);
+  }
+  .btn.ghost:active{ box-shadow:0 1px 0 #c3cbdc; }
+  .btn.gold{
+    color:#5a3b00; background:linear-gradient(180deg,#ffd85e,#f5b301);
+    box-shadow:0 5px 0 #c98c00, 0 10px 18px rgba(245,179,1,.32);
+  }
+  .btn.gold:active{ box-shadow:0 1px 0 #c98c00; }
+  .btn.small{ font-size:13px; padding:8px 14px; box-shadow:0 4px 0 rgba(0,0,0,.12); }
+
+  /* ============ 舞台 / 画布 ============ */
+  .stage{ position:relative; background:#8fd3ff; display:flex; justify-content:center; }
+  canvas#game{ display:block; width:1000px; height:560px; max-width:100%; height:auto; image-rendering:pixelated; }
+
+  .overlay{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:rgba(14,22,44,.55); backdrop-filter:blur(5px); -webkit-backdrop-filter:blur(5px);
+    padding:20px; z-index:5;
+  }
+  .overlay.show{ display:flex; animation:fadeIn .18s ease; }
+  @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
+  .panel{
+    width:640px; max-width:100%; background:#fff; border-radius:22px; padding:26px 30px 24px;
+    box-shadow:0 24px 60px rgba(10,20,50,.35); text-align:center; border:1px solid #e8edf8;
+    animation:pop .22s cubic-bezier(.2,1.3,.4,1);
+  }
+  @keyframes pop{ from{transform:scale(.92) translateY(10px); opacity:0} to{transform:none; opacity:1} }
+  .panel h2{ margin:0 0 6px; font-size:30px; font-weight:900; letter-spacing:2px; }
+  .panel h2.win{ color:#1f9d55; }
+  .panel h2.lose{ color:#e5392b; }
+  .panel .lead{ margin:0 0 16px; font-size:16px; color:var(--ink-2); line-height:1.7; }
+  .panel .hero{ font-size:17px; font-weight:700; color:#e5392b; margin-bottom:14px; }
+
+  .keys{
+    text-align:left; background:#f6f9ff; border:1px solid var(--line); border-radius:16px;
+    padding:16px 18px; margin:0 0 18px;
+  }
+  .keys h3{ margin:0 0 10px; font-size:16px; letter-spacing:1px; }
+  .keys ul{ margin:0; padding:0; list-style:none; display:grid; gap:9px; }
+  .keys li{ display:flex; align-items:center; gap:10px; font-size:15px; color:#3a4358; }
+  kbd{
+    font-family:var(--font); font-size:13px; font-weight:800; color:#2b3350; background:#fff;
+    border:1px solid #cdd6e8; border-bottom-width:3px; border-radius:8px; padding:4px 10px; min-width:34px;
+    display:inline-block; text-align:center; box-shadow:0 1px 2px rgba(30,45,90,.08);
+  }
+
+  .score-table{ width:100%; border-collapse:collapse; margin:6px 0 18px; font-size:15px; }
+  .score-table td{ padding:8px 10px; border-bottom:1px dashed #e6ebf6; text-align:left; }
+  .score-table td:last-child{ text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+  .score-table tr:last-child td{ border-bottom:0; }
+  .score-table tr.total td{ font-size:18px; color:#e5392b; border-top:2px solid #e6ebf6; }
+  .score-table tr.total td:last-child{ font-size:22px; }
+
+  .btns{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .hint{ margin-top:14px; font-size:13px; color:#98a2ba; letter-spacing:.5px; }
+  .hint b{ color:#e5392b; }
+
+  /* ============ 底部信息 ============ */
+  .tips{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+    padding:11px 16px; background:#fbfcff; border-top:1px solid var(--line);
+    font-size:13px; color:var(--ink-2);
+  }
+  .tips .dot{ width:6px; height:6px; border-radius:50%; background:#cfd8ea; }
+  .tech{ margin-top:18px; background:#fff; border:1px solid var(--line); border-radius:18px; padding:18px 22px;
+         box-shadow:0 10px 30px rgba(31,45,90,.08); }
+  .tech h3{ margin:0 0 10px; font-size:16px; letter-spacing:1px; }
+  .tech .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px 20px; font-size:14px; color:#4a5470; }
+  .tech .grid div{ display:flex; gap:8px; align-items:flex-start; }
+  .tech .tag{ font-size:12px; font-weight:800; color:#fff; background:#3d4a6b; border-radius:6px; padding:2px 8px; white-space:nowrap; }
+  .tech .note{ margin-top:12px; font-size:13px; color:#8b95ad; line-height:1.8; }
+  /* 窄屏时整体等比缩放（JS 会写入内联宽高，这里用 !important 覆盖，靠画布自身比例保持不拉伸） */
+  @media (max-width:1002px){
+    .title{ font-size:30px; }
+    canvas#game{ width:100% !important; height:auto !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <div class="title" data-i18n="title">超级马里奥 · 三关历险</div>
+      <div class="subtitle" data-i18n="subtitle">纯前端 Canvas 手绘像素版 · 顶问号、踩板栗仔、夺下终点红旗</div>
+    </div>
+    <div class="badges">
+      <span class="badge" data-i18n="badgeTech">技术栈：原生 HTML5 + Canvas 2D + ES2020</span>
+      <span class="badge" data-i18n="badgeZero">零依赖单文件</span>
+      <span class="badge" data-i18n="badgeLang">多语言界面</span>
+      <select id="langSelect" class="lang-select" aria-label="Language / 语言">
+        <option value="zh-CN">简体中文</option>
+        <option value="zh-TW">繁體中文</option>
+        <option value="en">English</option>
+        <option value="ja">日本語</option>
+        <option value="pt-BR">Português</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <!-- ============ HUD ============ -->
+    <div class="hud">
+      <div class="pill"><span class="lbl" data-i18n="hudLevel">关卡</span><span class="val" id="hudLevel">1 / 3</span></div>
+      <div class="pill score"><span class="lbl" data-i18n="hudScore">积分</span><span class="val" id="hudScore">0</span></div>
+      <div class="pill"><span class="lbl" data-i18n="hudCoin">金币</span><span class="val" id="hudCoin">0</span></div>
+      <div class="pill life"><span class="lbl" data-i18n="hudLife">生命</span><span class="val" id="hudLife">♥♥♥</span></div>
+      <div class="pill"><span class="lbl" data-i18n="hudTime">时间</span><span class="val" id="hudTime">300</span></div>
+      <div class="pill"><span class="lbl" data-i18n="hudBest">最高分</span><span class="val" id="hudBest">0</span></div>
+      <div class="spacer"></div>
+      <button class="btn small ghost" id="btnMusic" type="button">音乐：开</button>
+      <button class="btn small ghost" id="btnPause" type="button">暂停</button>
+    </div>
+
+    <!-- ============ 舞台 ============ -->
+    <div class="stage">
+      <canvas id="game" width="1000" height="560"></canvas>
+
+      <!-- 开始界面 -->
+      <div class="overlay show" id="ovStart">
+        <div class="panel">
+          <h2 data-i18n="title">超级马里奥 · 三关历险</h2>
+          <p class="lead" data-i18n="startLead">帮助马里奥穿越三关，跳过悬崖、顶碎问号、踩扁板栗仔，最后夺下终点的红旗！</p>
+          <div class="keys">
+            <h3 data-i18n="opsTitle">操作说明</h3>
+            <ul>
+              <li data-i18n-html="ops1"><kbd>←</kbd><kbd>→</kbd> 或 <kbd>A</kbd><kbd>D</kbd><span>左右移动</span></li>
+              <li data-i18n-html="ops2"><kbd>空格</kbd> 或 <kbd>↑</kbd> 或 <kbd>W</kbd><span>跳跃（按住跳得更高）</span></li>
+              <li data-i18n-html="ops3"><kbd>Shift</kbd><span>加速奔跑（配合跳跃可越过宽悬崖）</span></li>
+              <li data-i18n-html="ops4"><kbd>P</kbd> / <kbd>Esc</kbd><span>暂停 / 继续</span>，<kbd>R</kbd><span>重玩本关</span>，<kbd>M</kbd><span>开关音乐</span></li>
+              <li data-i18n-html="ops5"><kbd>Enter</kbd><span>确认（所有按钮都可用回车生效）</span></li>
+            </ul>
+          </div>
+          <div class="btns">
+            <button class="btn primary" id="btnStart" type="button" data-i18n="btnStart">开始游戏</button>
+            <button class="btn ghost" id="btnHelp" type="button" data-i18n="btnHelp">玩法提示</button>
+            <button class="btn ghost" id="btnResetBest" type="button" data-i18n="btnResetBest">重置最高分</button>
+          </div>
+          <div class="hint" data-i18n-html="hintStart">提示：按 <b>Enter</b> 可直接开始；踩敌人 +200 分，顶问号 +100 分。</div>
+        </div>
+      </div>
+
+      <!-- 玩法提示 -->
+      <div class="overlay" id="ovHelp">
+        <div class="panel">
+          <h2 data-i18n="btnHelp">玩法提示</h2>
+          <p class="lead" data-i18n="helpLead">三关难度递进：悬崖更多、阶梯更密、板栗仔从 5 只增加到 14 只。</p>
+          <div class="keys">
+            <h3 data-i18n="scoreTitle">得分规则</h3>
+            <ul>
+              <li data-i18n="rule1"><span>顶中问号块：+100 分，金币飞出并有飘字动画</span></li>
+              <li data-i18n="rule2"><span>踩扁板栗仔：+200 分（从侧面撞到会受伤）</span></li>
+              <li data-i18n="rule3"><span>跳到旗杆一半高度：+200 分</span></li>
+              <li data-i18n="rule4"><span>跳到旗杆顶部：+400 分（马里奥会随着旗帜一起落下）</span></li>
+              <li data-i18n="rule5"><span>过关后剩余时间 ×5 作为时间奖励</span></li>
+            </ul>
+          </div>
+          <div class="btns">
+            <button class="btn primary" id="btnHelpBack" type="button" data-i18n="btnBack">返回</button>
+          </div>
+          <div class="hint" data-i18n-html="hintHelp">小技巧：终点前有一段<b>石块阶梯</b>，借它起跳更容易摸到旗杆顶部拿 400 分。</div>
+        </div>
+      </div>
+
+      <!-- 暂停 -->
+      <div class="overlay" id="ovPause">
+        <div class="panel">
+          <h2 data-i18n="pauseTitle">游戏已暂停</h2>
+          <p class="lead" data-i18n="pauseLead">休息一下，马里奥在等你回来。</p>
+          <div class="btns">
+            <button class="btn primary" id="btnResume" type="button" data-i18n="btnResume">继续游戏</button>
+            <button class="btn ghost" id="btnPauseRestart" type="button" data-i18n="btnRetryLevel">重玩本关</button>
+            <button class="btn ghost" id="btnPauseMenu" type="button" data-i18n="btnMenu">返回主菜单</button>
+          </div>
+          <div class="hint" data-i18n-html="hintPause">按 <b>Enter</b> 继续游戏</div>
+        </div>
+      </div>
+
+      <!-- 过关 -->
+      <div class="overlay" id="ovClear">
+        <div class="panel">
+          <h2 class="win" id="clearTitle">恭喜过关！</h2>
+          <p class="hero" id="clearWord">太棒了！你成功夺下了红旗！</p>
+          <table class="score-table">
+            <tr><td data-i18n="tblLevel">本关过关得分</td><td id="clearScore">0</td></tr>
+            <tr><td data-i18n="tblFlag">旗帜高度奖励</td><td id="clearFlag">0</td></tr>
+            <tr><td data-i18n="tblTime">剩余时间奖励</td><td id="clearTime">0</td></tr>
+            <tr class="total"><td data-i18n="tblTotal">累计总分</td><td id="clearTotal">0</td></tr>
+          </table>
+          <div class="btns" id="clearBtns">
+            <button class="btn gold primary" id="btnNext" type="button">进入下一关</button>
+            <button class="btn ghost" id="btnReplay" type="button" data-i18n="btnRetryLevel">重玩本关</button>
+            <button class="btn ghost" id="btnClearMenu" type="button" data-i18n="btnMenu">返回主菜单</button>
+          </div>
+          <div class="hint" id="clearHint">按 <b>Enter</b> 进入下一关</div>
+        </div>
+      </div>
+
+      <!-- 失败 -->
+      <div class="overlay" id="ovOver">
+        <div class="panel">
+          <h2 class="lose" id="overTitle" data-i18n="overTitle">哎呀，马里奥摔倒了</h2>
+          <p class="hero" id="overWord">别灰心，每一位大侠都是摔出来的！</p>
+          <p class="lead" id="overTip">再试一次，先按住 Shift 助跑，到悬崖边缘再起跳，会跳得更远哦。</p>
+          <div class="btns">
+            <button class="btn primary" id="btnRetry" type="button" data-i18n="btnRetry">重新开始本关</button>
+            <button class="btn ghost" id="btnBackFirst" type="button" data-i18n="btnBackFirst">从第一关开始</button>
+            <button class="btn ghost" id="btnOverMenu" type="button" data-i18n="btnMenu">返回主菜单</button>
+          </div>
+          <div class="hint" data-i18n-html="hintOver">按 <b>Enter</b> 重新开始本关（保留当前积分）；从第一关开始则积分清零。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tips">
+      <span><span data-i18n="tipsOps">操作：</span><kbd>←</kbd><kbd>→</kbd> <span data-i18n="tipsMove">移动</span></span>
+      <span class="dot"></span>
+      <span><kbd data-i18n="keySpace">空格</kbd> <span data-i18n="tipsJump">跳跃</span></span>
+      <span class="dot"></span>
+      <span><kbd>Shift</kbd> <span data-i18n="tipsRun">加速</span></span>
+      <span class="dot"></span>
+      <span><kbd>Enter</kbd> <span data-i18n="tipsOk">确认</span></span>
+      <span class="dot"></span>
+      <span><kbd>P</kbd> <span data-i18n="tipsPause">暂停</span></span>
+    </div>
+  </div>
+
+  <!-- ============ 技术栈说明 ============ -->
+  <div class="tech">
+    <h3 data-i18n="techTitle">技术框架（本项目实际选型）</h3>
+    <div class="grid">
+      <div><span class="tag" data-i18n="techTag1">渲染</span><span data-i18n="techDesc1">HTML5 Canvas 2D（原生逐帧渲染，未使用游戏引擎）</span></div>
+      <div><span class="tag" data-i18n="techTag2">语言</span><span data-i18n="techDesc2">JavaScript ES2020，单文件、零依赖、零构建</span></div>
+      <div><span class="tag" data-i18n="techTag3">界面</span><span data-i18n="techDesc3">HTML + CSS3（Flex 布局、渐变、圆角卡片、毛玻璃浮层）</span></div>
+      <div><span class="tag" data-i18n="techTag4">美术</span><span data-i18n="techDesc4">代码内嵌像素矩阵，运行时由 Canvas 手绘精灵图</span></div>
+      <div><span class="tag" data-i18n="techTag5">音效</span><span data-i18n="techDesc5">Web Audio API 实时合成（无外部音频文件）</span></div>
+      <div><span class="tag" data-i18n="techTag6">适配</span><span data-i18n="techDesc6">固定 1000×560 逻辑分辨率 + devicePixelRatio 高清缩放</span></div>
+    </div>
+    <div class="note" data-i18n-html="techNote">
+      选型理由：游戏是 60fps 逐帧循环 + 逐像素绘制场景，React/Vue 这类 DOM 框架会引入无谓的虚拟 DOM 开销；
+      Canvas 2D 原生 API 足够胜任且加载最快。若后续需要工程化，可直接迁移到 <b>Vite + TypeScript</b>，
+      渲染层代码无需改动。
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =========================================================================
+   *  0. 基础常量
+   * ========================================================================= */
+  var FONT = '"PingFang SC","HarmonyOS Sans SC","Source Han Sans SC","Noto Sans SC","Microsoft YaHei","Hiragino Sans GB","Heiti SC","PingFang TC","Microsoft JhengHei","Yu Gothic UI","Meiryo","Noto Sans JP",sans-serif';
+
+  /* =========================================================================
+   *  0.5 多语言（i18n）：7 种语言，浏览器语言自动检测，localStorage 记忆选择
+   * ========================================================================= */
+  var I18N = {
+    'zh-CN': {
+      title: '超级马里奥 · 三关历险',
+      subtitle: '纯前端 Canvas 手绘像素版 · 顶问号、踩板栗仔、夺下终点红旗',
+      badgeTech: '技术栈：原生 HTML5 + Canvas 2D + ES2020',
+      badgeZero: '零依赖单文件',
+      badgeLang: '多语言界面',
+      hudLevel: '关卡', hudScore: '积分', hudCoin: '金币', hudLife: '生命', hudTime: '时间', hudBest: '最高分',
+      musicOn: '音乐：开', musicOff: '音乐：关', pause: '暂停', resume: '继续',
+      startLead: '帮助马里奥穿越三关，跳过悬崖、顶碎问号、踩扁板栗仔，最后夺下终点的红旗！',
+      opsTitle: '操作说明',
+      ops1: '<kbd>←</kbd><kbd>→</kbd> 或 <kbd>A</kbd><kbd>D</kbd><span>左右移动</span>',
+      ops2: '<kbd>空格</kbd> 或 <kbd>↑</kbd> 或 <kbd>W</kbd><span>跳跃（按住跳得更高）</span>',
+      ops3: '<kbd>Shift</kbd><span>加速奔跑（配合跳跃可越过宽悬崖）</span>',
+      ops4: '<kbd>P</kbd> / <kbd>Esc</kbd><span>暂停 / 继续</span>，<kbd>R</kbd><span>重玩本关</span>，<kbd>M</kbd><span>开关音乐</span>',
+      ops5: '<kbd>Enter</kbd><span>确认（所有按钮都可用回车生效）</span>',
+      btnStart: '开始游戏', btnHelp: '玩法提示', btnResetBest: '重置最高分',
+      hintStart: '提示：按 <b>Enter</b> 可直接开始；踩敌人 +200 分，顶问号 +100 分。',
+      helpLead: '三关难度递进：悬崖更多、阶梯更密、板栗仔从 5 只增加到 14 只。',
+      scoreTitle: '得分规则',
+      rule1: '顶中问号块：+100 分，金币飞出并有飘字动画',
+      rule2: '踩扁板栗仔：+200 分（从侧面撞到会受伤）',
+      rule3: '跳到旗杆一半高度：+200 分',
+      rule4: '跳到旗杆顶部：+400 分（马里奥会随着旗帜一起落下）',
+      rule5: '过关后剩余时间 ×5 作为时间奖励',
+      btnBack: '返回',
+      hintHelp: '小技巧：终点前有一段<b>石块阶梯</b>，借它起跳更容易摸到旗杆顶部拿 400 分。',
+      pauseTitle: '游戏已暂停',
+      pauseLead: '休息一下，马里奥在等你回来。',
+      btnResume: '继续游戏', btnRetryLevel: '重玩本关', btnMenu: '返回主菜单',
+      hintPause: '按 <b>Enter</b> 继续游戏',
+      clearTitle: '恭喜过关！', clearTitleLast: '恭喜通关全部三关！',
+      clearWord: function (n) { return '太棒了！你成功夺下了' + n + '的红旗！'; },
+      clearWordLast: '了不起！你就是传说中的通关大侠，三关全部拿下！',
+      tblLevel: '本关过关得分', tblFlag: '旗帜高度奖励', tblTime: '剩余时间奖励', tblTotal: '累计总分',
+      btnNext: '进入下一关', btnNextLast: '从第一关再来一次',
+      clearHintNext: '按 <b>Enter</b> 进入下一关',
+      clearHintLast: '按 <b>Enter</b> 从第一关重新开始（积分清零）',
+      overTitle: '哎呀，马里奥摔倒了',
+      overMsgs: [
+        '别灰心，每一位大侠都是摔出来的！马里奥也摔过无数次，再来一次一定行！',
+        '差一点点就成功啦！深呼吸，踩准节奏，下一把稳稳过！',
+        '摔倒了没关系，真正的勇士会立刻爬起来。你已经很接近终点了！',
+        '失败是成功他妈妈～再试一次，这次按住 Shift 助跑起跳！'
+      ],
+      overTip: function (s) { return '本次得分 ' + s + ' 分（重新开始本关会保留积分，从第一关开始则积分清零）。'; },
+      btnRetry: '重新开始本关', btnBackFirst: '从第一关开始',
+      hintOver: '按 <b>Enter</b> 重新开始本关（保留当前积分）；从第一关开始则积分清零。',
+      tipsOps: '操作：', tipsMove: '移动', tipsJump: '跳跃', tipsRun: '加速', tipsOk: '确认', tipsPause: '暂停',
+      keySpace: '空格', unit: '分',
+      techTitle: '技术框架（本项目实际选型）',
+      techTag1: '渲染', techDesc1: 'HTML5 Canvas 2D（原生逐帧渲染，未使用游戏引擎）',
+      techTag2: '语言', techDesc2: 'JavaScript ES2020，单文件、零依赖、零构建',
+      techTag3: '界面', techDesc3: 'HTML + CSS3（Flex 布局、渐变、圆角卡片、毛玻璃浮层）',
+      techTag4: '美术', techDesc4: '代码内嵌像素矩阵，运行时由 Canvas 手绘精灵图',
+      techTag5: '音效', techDesc5: 'Web Audio API 实时合成（无外部音频文件）',
+      techTag6: '适配', techDesc6: '固定 1000×560 逻辑分辨率 + devicePixelRatio 高清缩放',
+      techNote: '选型理由：游戏是 60fps 逐帧循环 + 逐像素绘制场景，React/Vue 这类 DOM 框架会引入无谓的虚拟 DOM 开销；Canvas 2D 原生 API 足够胜任且加载最快。若后续需要工程化，可直接迁移到 <b>Vite + TypeScript</b>，渲染层代码无需改动。',
+      levelNames: ['第一关 · 草原起步', '第二关 · 黄昏砖道', '第三关 · 星夜险境'],
+      banner: function (n, c) { return n + '　（板栗仔 ' + c + ' 只）'; }
+    },
+    'zh-TW': {
+      title: '超級瑪利歐 · 三關歷險',
+      subtitle: '純前端 Canvas 手繪像素版 · 頂問號、踩慄寶寶、奪下終點紅旗',
+      badgeTech: '技術棧：原生 HTML5 + Canvas 2D + ES2020',
+      badgeZero: '零依賴單檔案',
+      badgeLang: '多語言介面',
+      hudLevel: '關卡', hudScore: '積分', hudCoin: '金幣', hudLife: '生命', hudTime: '時間', hudBest: '最高分',
+      musicOn: '音樂：開', musicOff: '音樂：關', pause: '暫停', resume: '繼續',
+      startLead: '幫助瑪利歐穿越三關，跳過懸崖、頂碎問號、踩扁慄寶寶，最後奪下終點的紅旗！',
+      opsTitle: '操作說明',
+      ops1: '<kbd>←</kbd><kbd>→</kbd> 或 <kbd>A</kbd><kbd>D</kbd><span>左右移動</span>',
+      ops2: '<kbd>空格</kbd> 或 <kbd>↑</kbd> 或 <kbd>W</kbd><span>跳躍（按住跳得更高）</span>',
+      ops3: '<kbd>Shift</kbd><span>加速奔跑（配合跳躍可越過寬懸崖）</span>',
+      ops4: '<kbd>P</kbd> / <kbd>Esc</kbd><span>暫停 / 繼續</span>，<kbd>R</kbd><span>重玩本關</span>，<kbd>M</kbd><span>開關音樂</span>',
+      ops5: '<kbd>Enter</kbd><span>確認（所有按鈕都可以用 Enter 生效）</span>',
+      btnStart: '開始遊戲', btnHelp: '玩法提示', btnResetBest: '重置最高分',
+      hintStart: '提示：按 <b>Enter</b> 可直接開始；踩敵人 +200 分，頂問號 +100 分。',
+      helpLead: '三關難度遞進：懸崖更多、階梯更密、慄寶寶從 5 隻增加到 14 隻。',
+      scoreTitle: '得分規則',
+      rule1: '頂中問號方塊：+100 分，金幣飛出並有飄字動畫',
+      rule2: '踩扁慄寶寶：+200 分（從側面撞到會受傷）',
+      rule3: '跳到旗桿一半高度：+200 分',
+      rule4: '跳到旗桿頂部：+400 分（瑪利歐會跟著旗幟一起落下）',
+      rule5: '過關後剩餘時間 ×5 作為時間獎勵',
+      btnBack: '返回',
+      hintHelp: '小技巧：終點前有一段<b>石塊階梯</b>，借它起跳更容易摸到旗桿頂部拿 400 分。',
+      pauseTitle: '遊戲已暫停',
+      pauseLead: '休息一下，瑪利歐在等你回來。',
+      btnResume: '繼續遊戲', btnRetryLevel: '重玩本關', btnMenu: '返回主選單',
+      hintPause: '按 <b>Enter</b> 繼續遊戲',
+      clearTitle: '恭喜過關！', clearTitleLast: '恭喜通關全部三關！',
+      clearWord: function (n) { return '太棒了！你成功奪下了' + n + '的紅旗！'; },
+      clearWordLast: '了不起！你就是傳說中的通關大俠，三關全部拿下！',
+      tblLevel: '本關過關得分', tblFlag: '旗幟高度獎勵', tblTime: '剩餘時間獎勵', tblTotal: '累計總分',
+      btnNext: '進入下一關', btnNextLast: '從第一關再來一次',
+      clearHintNext: '按 <b>Enter</b> 進入下一關',
+      clearHintLast: '按 <b>Enter</b> 從第一關重新開始（積分清零）',
+      overTitle: '哎呀，瑪利歐摔倒了',
+      overMsgs: [
+        '別灰心，每一位大俠都是摔出來的！瑪利歐也摔過無數次，再來一次一定行！',
+        '差一點點就成功啦！深呼吸，踩準節奏，下一把穩穩過！',
+        '摔倒了沒關係，真正的勇士會立刻爬起來。你已經很接近終點了！',
+        '失敗為成功之母～再試一次，這次按住 Shift 助跑起跳！'
+      ],
+      overTip: function (s) { return '本次得分 ' + s + ' 分（重新開始本關會保留積分，從第一關開始則積分清零）。'; },
+      btnRetry: '重新開始本關', btnBackFirst: '從第一關開始',
+      hintOver: '按 <b>Enter</b> 重新開始本關（保留目前積分）；從第一關開始則積分清零。',
+      tipsOps: '操作：', tipsMove: '移動', tipsJump: '跳躍', tipsRun: '加速', tipsOk: '確認', tipsPause: '暫停',
+      keySpace: '空格', unit: '分',
+      techTitle: '技術框架（本專案實際選型）',
+      techTag1: '渲染', techDesc1: 'HTML5 Canvas 2D（原生逐幀渲染，未使用遊戲引擎）',
+      techTag2: '語言', techDesc2: 'JavaScript ES2020，單檔案、零依賴、零構建',
+      techTag3: '介面', techDesc3: 'HTML + CSS3（Flex 佈局、漸層、圓角卡片、毛玻璃浮層）',
+      techTag4: '美術', techDesc4: '程式碼內嵌像素矩陣，執行時由 Canvas 手繪精靈圖',
+      techTag5: '音效', techDesc5: 'Web Audio API 即時合成（無外部音訊檔案）',
+      techTag6: '適配', techDesc6: '固定 1000×560 邏輯解析度 + devicePixelRatio 高清縮放',
+      techNote: '選型理由：遊戲是 60fps 逐幀循環 + 逐像素繪製場景，React/Vue 這類 DOM 框架會引入不必要的虛擬 DOM 開銷；Canvas 2D 原生 API 足夠勝任且載入最快。若後續需要工程化，可直接遷移到 <b>Vite + TypeScript</b>，渲染層程式碼無需改動。',
+      levelNames: ['第一關 · 草原起步', '第二關 · 黃昏磚道', '第三關 · 星夜險境'],
+      banner: function (n, c) { return n + '　（慄寶寶 ' + c + ' 隻）'; }
+    },
+    'en': {
+      title: 'Super Mario · Three-Level Adventure',
+      subtitle: 'Pure-frontend hand-drawn pixel Canvas · Hit ? blocks, stomp Goombas, grab the goal flag',
+      badgeTech: 'Stack: Native HTML5 + Canvas 2D + ES2020',
+      badgeZero: 'Zero-dependency single file',
+      badgeLang: 'Multilingual UI',
+      hudLevel: 'Level', hudScore: 'Score', hudCoin: 'Coins', hudLife: 'Lives', hudTime: 'Time', hudBest: 'Best',
+      musicOn: 'Music: On', musicOff: 'Music: Off', pause: 'Pause', resume: 'Resume',
+      startLead: 'Help Mario through three levels: leap the cliffs, hit the ? blocks, stomp the Goombas, and grab the red flag at the finish!',
+      opsTitle: 'Controls',
+      ops1: '<kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd><span>Move left / right</span>',
+      ops2: '<kbd>Space</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Jump (hold to jump higher)</span>',
+      ops3: '<kbd>Shift</kbd><span>Sprint (combine with jumps to cross wide cliffs)</span>',
+      ops4: '<kbd>P</kbd> / <kbd>Esc</kbd><span>Pause / Resume</span> · <kbd>R</kbd><span>Retry level</span> · <kbd>M</kbd><span>Toggle music</span>',
+      ops5: '<kbd>Enter</kbd><span>Confirm (works on every button)</span>',
+      btnStart: 'Start Game', btnHelp: 'How to Play', btnResetBest: 'Reset Best Score',
+      hintStart: 'Tip: press <b>Enter</b> to start right away; stomp enemies +200, hit ? blocks +100.',
+      helpLead: 'Difficulty ramps up across three levels: more cliffs, denser staircases, and Goombas grow from 5 to 14.',
+      scoreTitle: 'Scoring Rules',
+      rule1: 'Hit a ? block: +100 pts, a coin pops out with a floating score animation',
+      rule2: 'Stomp a Goomba: +200 pts (touching from the side hurts you)',
+      rule3: 'Jump to half the flagpole height: +200 pts',
+      rule4: 'Jump to the top of the pole: +400 pts (Mario rides the flag down)',
+      rule5: 'Remaining time ×5 becomes the time bonus after each level',
+      btnBack: 'Back',
+      hintHelp: 'Tip: there is a <b>stone staircase</b> before the finish — jump from it to reach the top of the pole for 400 pts.',
+      pauseTitle: 'Game Paused',
+      pauseLead: 'Take a break — Mario is waiting for you.',
+      btnResume: 'Resume Game', btnRetryLevel: 'Retry Level', btnMenu: 'Main Menu',
+      hintPause: 'Press <b>Enter</b> to resume',
+      clearTitle: 'Level Clear!', clearTitleLast: 'All Three Levels Clear!',
+      clearWord: function (n) { return 'Great job! You captured the flag of ' + n + '!'; },
+      clearWordLast: 'Incredible! You are the legendary champion — all three levels conquered!',
+      tblLevel: 'Level Score', tblFlag: 'Flag Height Bonus', tblTime: 'Time Bonus', tblTotal: 'Total Score',
+      btnNext: 'Next Level', btnNextLast: 'Play Again from Level 1',
+      clearHintNext: 'Press <b>Enter</b> for the next level',
+      clearHintLast: 'Press <b>Enter</b> to restart from Level 1 (score resets)',
+      overTitle: 'Oops, Mario Fell Down',
+      overMsgs: [
+        'Don’t give up — every hero is forged by falling! Mario fell countless times too; you’ll make it next time!',
+        'So close! Take a deep breath, find your rhythm, and you will sail through!',
+        'Falling is fine — true heroes get right back up. You’re almost at the goal!',
+        'Failure is the mother of success~ Try again, and hold Shift for a running jump!'
+      ],
+      overTip: function (s) { return 'Score this run: ' + s + ' pts (retrying the level keeps your score; starting from Level 1 resets it).'; },
+      btnRetry: 'Retry This Level', btnBackFirst: 'Start from Level 1',
+      hintOver: 'Press <b>Enter</b> to retry this level (score kept); starting from Level 1 resets the score.',
+      tipsOps: 'Controls:', tipsMove: 'Move', tipsJump: 'Jump', tipsRun: 'Sprint', tipsOk: 'Confirm', tipsPause: 'Pause',
+      keySpace: 'Space', unit: 'pts',
+      techTitle: 'Tech Stack (actual choices of this project)',
+      techTag1: 'Rendering', techDesc1: 'HTML5 Canvas 2D (native frame-by-frame rendering, no game engine)',
+      techTag2: 'Language', techDesc2: 'JavaScript ES2020, single file, zero dependencies, no build step',
+      techTag3: 'UI', techDesc3: 'HTML + CSS3 (Flex layout, gradients, rounded cards, frosted-glass overlays)',
+      techTag4: 'Art', techDesc4: 'Pixel matrices embedded in code; sprites drawn at runtime on Canvas',
+      techTag5: 'Audio', techDesc5: 'Web Audio API real-time synthesis (no external audio files)',
+      techTag6: 'Display', techDesc6: 'Fixed 1000×560 logical resolution + devicePixelRatio HD scaling',
+      techNote: 'Why: the game is a 60fps frame loop with pixel-by-pixel drawing; DOM frameworks like React/Vue add needless virtual-DOM overhead. The native Canvas 2D API is fully capable and loads fastest. To scale up later, migrate straight to <b>Vite + TypeScript</b> — the rendering layer needs no changes.',
+      levelNames: ['Level 1 · Grassland Start', 'Level 2 · Dusk Brick Road', 'Level 3 · Starry-Night Peril'],
+      banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
+    },
+    'ja': {
+      title: 'スーパーマリオ · 3コースアドベンチャー',
+      subtitle: '純フロントエンド Canvas 手描きドット絵 · ？ブロックを叩き、クリボーを踏んで、ゴールの旗を取ろう',
+      badgeTech: '技術スタック：ネイティブ HTML5 + Canvas 2D + ES2020',
+      badgeZero: '依存ゼロの単一ファイル',
+      badgeLang: '多言語対応',
+      hudLevel: 'コース', hudScore: 'スコア', hudCoin: 'コイン', hudLife: '残機', hudTime: 'タイム', hudBest: 'ハイスコア',
+      musicOn: '音楽：ON', musicOff: '音楽：OFF', pause: '一時停止', resume: '再開',
+      startLead: 'マリオと一緒に3コースを駆け抜けよう！崖を飛び越え、？ブロックを叩き、クリボーを踏みつぶし、ゴールの赤い旗を取るのだ！',
+      opsTitle: '操作方法',
+      ops1: '<kbd>←</kbd><kbd>→</kbd> または <kbd>A</kbd><kbd>D</kbd><span>左右に移動</span>',
+      ops2: '<kbd>スペース</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>ジャンプ（長押しで高く跳べる）</span>',
+      ops3: '<kbd>Shift</kbd><span>ダッシュ（ジャンプと組み合わせれば広い崖も越えられる）</span>',
+      ops4: '<kbd>P</kbd> / <kbd>Esc</kbd><span>一時停止 / 再開</span>・<kbd>R</kbd><span>コースやり直し</span>・<kbd>M</kbd><span>音楽の切替</span>',
+      ops5: '<kbd>Enter</kbd><span>決定（すべてのボタンで有効）</span>',
+      btnStart: 'ゲームスタート', btnHelp: '遊び方', btnResetBest: 'ハイスコアをリセット',
+      hintStart: 'ヒント：<b>Enter</b> ですぐスタート！敵を踏むと +200 点、？ブロックで +100 点。',
+      helpLead: '3コースは難度上昇：崖が増え、階段が密集し、クリボーは5匹から14匹へ。',
+      scoreTitle: '得点ルール',
+      rule1: '？ブロックを叩く：+100 点。コインが飛び出してスコアがポップ表示',
+      rule2: 'クリボーを踏む：+200 点（横から触れるとダメージ）',
+      rule3: '旗の中間まで跳ぶ：+200 点',
+      rule4: '旗のてっぺんに跳ぶ：+400 点（マリオは旗と一緒に降りる）',
+      rule5: 'クリア後の残りタイム ×5 がタイムボーナス',
+      btnBack: '戻る',
+      hintHelp: 'コツ：ゴール前の<b>石の階段</b>から跳べば、旗のてっぺんの400点が狙いやすい。',
+      pauseTitle: 'ゲーム一時停止中',
+      pauseLead: '少し休憩しよう。マリオは君の帰りを待っている。',
+      btnResume: 'ゲーム再開', btnRetryLevel: 'このコースをやり直す', btnMenu: 'メインメニューへ',
+      hintPause: '<b>Enter</b> でゲーム再開',
+      clearTitle: 'コースクリア！', clearTitleLast: '全3コースクリア！',
+      clearWord: function (n) { return 'すごい！' + n + 'の赤い旗を奪取した！'; },
+      clearWordLast: '見事！まさに伝説のクリアマスター、3コース制覇だ！',
+      tblLevel: 'コース得点', tblFlag: '旗の高さボーナス', tblTime: '残りタイムボーナス', tblTotal: '累計スコア',
+      btnNext: '次のコースへ', btnNextLast: '1コース目からもう一度',
+      clearHintNext: '<b>Enter</b> で次のコースへ',
+      clearHintLast: '<b>Enter</b> で1コース目から再スタート（スコアはリセット）',
+      overTitle: 'おっと、マリオが転んだ',
+      overMsgs: [
+        'くじけるな！ヒーローは転んでこそ育つもの。マリオも何度も転んだ — 次こそいける！',
+        'あと少しでした！深呼吸して、リズムを合わせれば次はバッチリ！',
+        '転んでも大丈夫。真の勇者はすぐ立ち上がる。ゴールはもうすぐだ！',
+        '失敗は成功のもと！もう一度、今度は Shift を押して助走ジャンプ！'
+      ],
+      overTip: function (s) { return '今回のスコア：' + s + ' 点（コースやり直しはスコア保持、1コース目からはリセット）。'; },
+      btnRetry: 'このコースを再挑戦', btnBackFirst: '1コース目からスタート',
+      hintOver: '<b>Enter</b> でこのコースをやり直す（スコア保持）。1コース目からはスコアリセット。',
+      tipsOps: '操作：', tipsMove: '移動', tipsJump: 'ジャンプ', tipsRun: 'ダッシュ', tipsOk: '決定', tipsPause: '一時停止',
+      keySpace: 'スペース', unit: '点',
+      techTitle: '技術フレームワーク（本プロジェクトの実際の選定）',
+      techTag1: '描画', techDesc1: 'HTML5 Canvas 2D（ネイティブのフレーム描画、ゲームエンジン不使用）',
+      techTag2: '言語', techDesc2: 'JavaScript ES2020、単一ファイル・依存ゼロ・ビルド不要',
+      techTag3: 'UI', techDesc3: 'HTML + CSS3（Flex レイアウト、グラデーション、角丸カード、すりガラス風オーバーレイ）',
+      techTag4: 'アート', techDesc4: 'コード埋め込みのドットマトリクスから、実行時に Canvas でスプライトを描画',
+      techTag5: 'サウンド', techDesc5: 'Web Audio API によるリアルタイム合成（外部音声ファイルなし）',
+      techTag6: '表示', techDesc6: '1000×560 の固定論理解像度 + devicePixelRatio 高精細スケーリング',
+      techNote: '選定理由：本作は60fpsのフレームループでピクセル単位の描画を行うため、React/Vue などの DOM フレームワークは無駄な仮想 DOM コストを生む。ネイティブの Canvas 2D API で十分であり、ロードも最速。将来スケールするなら <b>Vite + TypeScript</b> へそのまま移行でき、描画層のコードは変更不要。',
+      levelNames: ['コース1 · 草原の出発', 'コース2 · 夕暮れのレンガ道', 'コース3 · 星夜の危険'],
+      banner: function (n, c) { return n + '　（クリボー ' + c + ' 匹）'; }
+    },
+    'pt-BR': {
+      title: 'Super Mario · Aventura em Três Fases',
+      subtitle: 'Versão pixel desenhada à mão em Canvas puro · Acerte blocos ?, pise nos Goombas e pegue a bandeira final',
+      badgeTech: 'Stack: HTML5 nativo + Canvas 2D + ES2020',
+      badgeZero: 'Arquivo único, zero dependências',
+      badgeLang: 'Interface multilíngue',
+      hudLevel: 'Fase', hudScore: 'Pontos', hudCoin: 'Moedas', hudLife: 'Vidas', hudTime: 'Tempo', hudBest: 'Recorde',
+      musicOn: 'Música: Ligada', musicOff: 'Música: Desligada', pause: 'Pausar', resume: 'Continuar',
+      startLead: 'Ajude o Mario a atravessar três fases: salte os penhascos, acerte os blocos ?, pise nos Goombas e pegue a bandeira vermelha no final!',
+      opsTitle: 'Controles',
+      ops1: '<kbd>←</kbd><kbd>→</kbd> ou <kbd>A</kbd><kbd>D</kbd><span>Mover</span>',
+      ops2: '<kbd>Espaço</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Pular (segure para pular mais alto)</span>',
+      ops3: '<kbd>Shift</kbd><span>Correr (com salto, atravessa penhascos largos)</span>',
+      ops4: '<kbd>P</kbd> / <kbd>Esc</kbd><span>Pausar / Continuar</span> · <kbd>R</kbd><span>Repetir fase</span> · <kbd>M</kbd><span>Ligar/desligar música</span>',
+      ops5: '<kbd>Enter</kbd><span>Confirmar (funciona em todos os botões)</span>',
+      btnStart: 'Começar Jogo', btnHelp: 'Como Jogar', btnResetBest: 'Zerar Recorde',
+      hintStart: 'Dica: aperte <b>Enter</b> para começar direto; pisar em inimigos dá +200, acertar blocos ? dá +100.',
+      helpLead: 'A dificuldade cresce nas três fases: mais penhascos, escadas mais densas e Goombas de 5 até 14.',
+      scoreTitle: 'Regras de Pontuação',
+      rule1: 'Acertar um bloco ?: +100 pontos, uma moeda salta com animação',
+      rule2: 'Pisar num Goomba: +200 pontos (encostar de lado machuca)',
+      rule3: 'Pular até metade do mastro: +200 pontos',
+      rule4: 'Pular no topo do mastro: +400 pontos (o Mario desce com a bandeira)',
+      rule5: 'Tempo restante ×5 vira bônus de tempo no fim da fase',
+      btnBack: 'Voltar',
+      hintHelp: 'Dica: há uma <b>escadaria de pedra</b> antes da chegada — salte dela para alcançar o topo do mastro e ganhar 400 pontos.',
+      pauseTitle: 'Jogo Pausado',
+      pauseLead: 'Relaxe um pouco — o Mario está esperando por você.',
+      btnResume: 'Continuar Jogo', btnRetryLevel: 'Repetir Fase', btnMenu: 'Menu Principal',
+      hintPause: 'Aperte <b>Enter</b> para continuar',
+      clearTitle: 'Fase Concluída!', clearTitleLast: 'As Três Fases Concluídas!',
+      clearWord: function (n) { return 'Muito bem! Você conquistou a bandeira de ' + n + '!'; },
+      clearWordLast: 'Impressionante! Você é o lendário campeão — as três fases foram dominadas!',
+      tblLevel: 'Pontos da Fase', tblFlag: 'Bônus da Bandeira', tblTime: 'Bônus de Tempo', tblTotal: 'Pontuação Total',
+      btnNext: 'Próxima Fase', btnNextLast: 'Jogar de Novo da Fase 1',
+      clearHintNext: 'Aperte <b>Enter</b> para a próxima fase',
+      clearHintLast: 'Aperte <b>Enter</b> para recomeçar da Fase 1 (pontuação zera)',
+      overTitle: 'Ops, o Mario Caiu',
+      overMsgs: [
+        'Não desanima! Todo herói aprende caindo. O Mario também caiu incontáveis vezes — na próxima você consegue!',
+        'Quase lá! Respire fundo, marque o ritmo e a próxima passa fácil!',
+        'Cair não é problema — heróis de verdade levantam na hora. Você está pertíssimo do fim!',
+        'Errar é aprender~ Tenta de novo segurando Shift para um salto com corrida!'
+      ],
+      overTip: function (s) { return 'Pontos desta partida: ' + s + ' (repetir a fase mantém os pontos; começar da Fase 1 zera).'; },
+      btnRetry: 'Repetir Esta Fase', btnBackFirst: 'Começar da Fase 1',
+      hintOver: 'Aperte <b>Enter</b> para repetir esta fase (pontos mantidos); começar da Fase 1 zera a pontuação.',
+      tipsOps: 'Controles:', tipsMove: 'Mover', tipsJump: 'Pular', tipsRun: 'Correr', tipsOk: 'Confirmar', tipsPause: 'Pausar',
+      keySpace: 'Espaço', unit: 'pts',
+      techTitle: 'Stack Tecnológica (escolhas reais do projeto)',
+      techTag1: 'Renderização', techDesc1: 'HTML5 Canvas 2D (renderização quadro a quadro nativa, sem engine)',
+      techTag2: 'Linguagem', techDesc2: 'JavaScript ES2020, arquivo único, zero dependências, sem build',
+      techTag3: 'Interface', techDesc3: 'HTML + CSS3 (layout Flex, gradientes, cartões arredondados, overlays de vidro fosco)',
+      techTag4: 'Arte', techDesc4: 'Matrizes de pixel embutidas no código; sprites desenhados em tempo real no Canvas',
+      techTag5: 'Áudio', techDesc5: 'Síntese em tempo real via Web Audio API (sem arquivos de áudio)',
+      techTag6: 'Tela', techDesc6: 'Resolução lógica fixa de 1000×560 + escalonamento HD por devicePixelRatio',
+      techNote: 'Motivo: o jogo roda um loop de 60fps desenhando pixel a pixel; frameworks DOM como React/Vue adicionam custo desnecessário de virtual DOM. A API nativa do Canvas 2D dá conta e carrega mais rápido. Para escalar depois, migre direto para <b>Vite + TypeScript</b> — a camada de renderização não muda.',
+      levelNames: ['Fase 1 · Saída na Grama', 'Fase 2 · Estrada de Tijolos ao Entardecer', 'Fase 3 · Perigo sob as Estrelas'],
+      banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
+    },
+    'es': {
+      title: 'Súper Mario · Aventura en Tres Niveles',
+      subtitle: 'Versión pixel dibujada a mano con Canvas puro · Golpea bloques ?, pisa Goombas y toma la bandera final',
+      badgeTech: 'Stack: HTML5 nativo + Canvas 2D + ES2020',
+      badgeZero: 'Un solo archivo, cero dependencias',
+      badgeLang: 'Interfaz multilingüe',
+      hudLevel: 'Nivel', hudScore: 'Puntos', hudCoin: 'Monedas', hudLife: 'Vidas', hudTime: 'Tiempo', hudBest: 'Récord',
+      musicOn: 'Música: Sí', musicOff: 'Música: No', pause: 'Pausar', resume: 'Reanudar',
+      startLead: '¡Ayuda a Mario a cruzar tres niveles: salta los precipicios, golpea los bloques ?, pisotea Goombas y toma la bandera roja de la meta!',
+      opsTitle: 'Controles',
+      ops1: '<kbd>←</kbd><kbd>→</kbd> o <kbd>A</kbd><kbd>D</kbd><span>Moverse</span>',
+      ops2: '<kbd>Espacio</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Saltar (mantén para saltar más alto)</span>',
+      ops3: '<kbd>Shift</kbd><span>Correr (con salto cruzas precipicios anchos)</span>',
+      ops4: '<kbd>P</kbd> / <kbd>Esc</kbd><span>Pausar / Reanudar</span> · <kbd>R</kbd><span>Repetir nivel</span> · <kbd>M</kbd><span>Música sí/no</span>',
+      ops5: '<kbd>Enter</kbd><span>Confirmar (vale para todos los botones)</span>',
+      btnStart: 'Comenzar', btnHelp: 'Cómo jugar', btnResetBest: 'Reiniciar récord',
+      hintStart: 'Consejo: pulsa <b>Enter</b> para empezar ya; pisar enemigos da +200, golpear bloques ? da +100.',
+      helpLead: 'La dificultad sube en tres niveles: más precipicios, escaleras más juntas y Goombas de 5 a 14.',
+      scoreTitle: 'Reglas de puntuación',
+      rule1: 'Golpear un bloque ?: +100 puntos, salta una moneda con animación',
+      rule2: 'Pisar un Goomba: +200 puntos (tocarlo de lado te hace daño)',
+      rule3: 'Saltar a media altura del mástil: +200 puntos',
+      rule4: 'Saltar a la cima del mástil: +400 puntos (Mario baja con la bandera)',
+      rule5: 'El tiempo restante ×5 se convierte en bono al terminar',
+      btnBack: 'Volver',
+      hintHelp: 'Truco: hay una <b>escalera de piedra</b> antes de la meta — salta desde ella para tocar la cima del mástil y ganar 400 puntos.',
+      pauseTitle: 'Juego en pausa',
+      pauseLead: 'Descansa un momento, Mario te espera.',
+      btnResume: 'Reanudar juego', btnRetryLevel: 'Repetir nivel', btnMenu: 'Menú principal',
+      hintPause: 'Pulsa <b>Enter</b> para reanudar',
+      clearTitle: '¡Nivel superado!', clearTitleLast: '¡Tres niveles superados!',
+      clearWord: function (n) { return '¡Genial! ¡Conseguiste la bandera de ' + n + '!'; },
+      clearWordLast: '¡Extraordinario! Eres la leyenda campeona: ¡tres niveles dominados!',
+      tblLevel: 'Puntos del nivel', tblFlag: 'Bono de bandera', tblTime: 'Bono de tiempo', tblTotal: 'Puntuación total',
+      btnNext: 'Siguiente nivel', btnNextLast: 'Jugar otra vez desde el nivel 1',
+      clearHintNext: 'Pulsa <b>Enter</b> para el siguiente nivel',
+      clearHintLast: 'Pulsa <b>Enter</b> para reiniciar desde el nivel 1 (puntos a cero)',
+      overTitle: 'Ups, Mario se cayó',
+      overMsgs: [
+        '¡No te desanimes! Todo héroe se forja cayendo. Mario también cayó mil veces — ¡la próxima sale!',
+        '¡Casi lo logras! Respira hondo, marca el ritmo y la próxima pasa seguro.',
+        'Caerse no pasa nada: los valientes de verdad se levantan al instante. ¡Ya casi llegas!',
+        '¡La práctica hace al maestro! Inténtalo otra vez manteniendo Shift para saltar con carrera.'
+      ],
+      overTip: function (s) { return 'Puntos de esta partida: ' + s + ' (repetir el nivel conserva los puntos; empezar del nivel 1 los reinicia).'; },
+      btnRetry: 'Repetir este nivel', btnBackFirst: 'Empezar del nivel 1',
+      hintOver: 'Pulsa <b>Enter</b> para repetir el nivel (puntos conservados); empezar del nivel 1 reinicia la puntuación.',
+      tipsOps: 'Controles:', tipsMove: 'Moverse', tipsJump: 'Saltar', tipsRun: 'Correr', tipsOk: 'Confirmar', tipsPause: 'Pausar',
+      keySpace: 'Espacio', unit: 'pts',
+      techTitle: 'Stack tecnológico (elección real del proyecto)',
+      techTag1: 'Renderizado', techDesc1: 'HTML5 Canvas 2D (renderizado nativo fotograma a fotograma, sin motor)',
+      techTag2: 'Lenguaje', techDesc2: 'JavaScript ES2020, un solo archivo, cero dependencias, sin build',
+      techTag3: 'Interfaz', techDesc3: 'HTML + CSS3 (Flex, degradados, tarjetas redondeadas, capas de cristal)',
+      techTag4: 'Arte', techDesc4: 'Matrices de píxeles incrustadas; sprites dibujados en Canvas al vuelo',
+      techTag5: 'Audio', techDesc5: 'Síntesis en tiempo real con Web Audio API (sin archivos de audio)',
+      techTag6: 'Pantalla', techDesc6: 'Resolución lógica fija 1000×560 + escalado HD con devicePixelRatio',
+      techNote: 'Por qué: el juego es un bucle de 60fps que pinta píxel a píxel; frameworks DOM como React/Vue añaden sobrecoste innecesario de DOM virtual. La API nativa de Canvas 2D sobra y carga más rápido. Para crecer después, migra directo a <b>Vite + TypeScript</b>: la capa de renderizado no cambia.',
+      levelNames: ['Nivel 1 · Salida en la pradera', 'Nivel 2 · Camino de ladrillos al atardecer', 'Nivel 3 · Peligro bajo las estrellas'],
+      banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
+    },
+    'fr': {
+      title: 'Super Mario · Aventure en Trois Niveaux',
+      subtitle: 'Version pixel dessinée à la main en Canvas pur · Frappe les blocs ?, écrase les Goombas et prends le drapeau final',
+      badgeTech: 'Stack : HTML5 natif + Canvas 2D + ES2020',
+      badgeZero: 'Fichier unique, zéro dépendance',
+      badgeLang: 'Interface multilingue',
+      hudLevel: 'Niveau', hudScore: 'Score', hudCoin: 'Pièces', hudLife: 'Vies', hudTime: 'Temps', hudBest: 'Record',
+      musicOn: 'Musique : oui', musicOff: 'Musique : non', pause: 'Pause', resume: 'Reprendre',
+      startLead: 'Aide Mario à traverser trois niveaux : saute les falaises, frappe les blocs ?, écrase les Goombas et prends le drapeau rouge à l’arrivée !',
+      opsTitle: 'Commandes',
+      ops1: '<kbd>←</kbd><kbd>→</kbd> ou <kbd>A</kbd><kbd>D</kbd><span>Se déplacer</span>',
+      ops2: '<kbd>Espace</kbd> / <kbd>↑</kbd> / <kbd>W</kbd><span>Sauter (maintiens pour sauter plus haut)</span>',
+      ops3: '<kbd>Shift</kbd><span>Courir (avec un saut, franchis les larges falaises)</span>',
+      ops4: '<kbd>P</kbd> / <kbd>Esc</kbd><span>Pause / Reprendre</span> · <kbd>R</kbd><span>Refaire le niveau</span> · <kbd>M</kbd><span>Musique on/off</span>',
+      ops5: '<kbd>Enter</kbd><span>Valider (fonctionne sur tous les boutons)</span>',
+      btnStart: 'Jouer', btnHelp: 'Comment jouer', btnResetBest: 'Réinitialiser le record',
+      hintStart: 'Astuce : appuie sur <b>Entrée</b> pour commencer ; écraser un ennemi +200, frapper un bloc ? +100.',
+      helpLead: 'La difficulté monte sur trois niveaux : plus de falaises, des escaliers plus denses et des Goombas de 5 à 14.',
+      scoreTitle: 'Règles de score',
+      rule1: 'Frapper un bloc ? : +100 points, une pièce jaillit avec une animation',
+      rule2: 'Écraser un Goomba : +200 points (le toucher de côté fait mal)',
+      rule3: 'Sauter à mi-hauteur du mât : +200 points',
+      rule4: 'Sauter au sommet du mât : +400 points (Mario descend avec le drapeau)',
+      rule5: 'Le temps restant ×5 devient un bonus à la fin du niveau',
+      btnBack: 'Retour',
+      hintHelp: 'Astuce : un <b>escalier de pierre</b> précède l’arrivée — saute depuis lui pour toucher le sommet du mât et gagner 400 points.',
+      pauseTitle: 'Jeu en pause',
+      pauseLead: 'Fais une pause, Mario t’attend.',
+      btnResume: 'Reprendre', btnRetryLevel: 'Refaire le niveau', btnMenu: 'Menu principal',
+      hintPause: 'Appuie sur <b>Entrée</b> pour reprendre',
+      clearTitle: 'Niveau terminé !', clearTitleLast: 'Les trois niveaux terminés !',
+      clearWord: function (n) { return 'Bravo ! Tu as pris le drapeau de ' + n + ' !'; },
+      clearWordLast: 'Extraordinaire ! Tu es le champion légendaire : les trois niveaux sont conquis !',
+      tblLevel: 'Points du niveau', tblFlag: 'Bonus du drapeau', tblTime: 'Bonus de temps', tblTotal: 'Score total',
+      btnNext: 'Niveau suivant', btnNextLast: 'Rejouer depuis le niveau 1',
+      clearHintNext: 'Appuie sur <b>Entrée</b> pour le niveau suivant',
+      clearHintLast: 'Appuie sur <b>Entrée</b> pour repartir du niveau 1 (score remis à zéro)',
+      overTitle: 'Oups, Mario est tombé',
+      overMsgs: [
+        'Ne te décourage pas : chaque héros apprend en tombant ! Mario aussi est tombé des centaines de fois — la prochaine fois, c’est gagné !',
+        'Tu y étais presque ! Respire bien, garde le rythme et ça passera !',
+        'Tomber n’est pas grave : les vrais héros se relèvent aussitôt. Tu touches presque au but !',
+        'L’échec est la mère du succès ~ Réessaie en gardant Shift pour un saut avec élan !'
+      ],
+      overTip: function (s) { return 'Score de cette partie : ' + s + ' (refaire le niveau garde le score ; repartir du niveau 1 le remet à zéro).'; },
+      btnRetry: 'Refaire ce niveau', btnBackFirst: 'Repartir du niveau 1',
+      hintOver: 'Appuie sur <b>Entrée</b> pour refaire ce niveau (score conservé) ; repartir du niveau 1 remet le score à zéro.',
+      tipsOps: 'Commandes :', tipsMove: 'Déplacement', tipsJump: 'Saut', tipsRun: 'Course', tipsOk: 'Valider', tipsPause: 'Pause',
+      keySpace: 'Espace', unit: 'pts',
+      techTitle: 'Stack technique (choix réel du projet)',
+      techTag1: 'Rendu', techDesc1: 'HTML5 Canvas 2D (rendu natif image par image, sans moteur de jeu)',
+      techTag2: 'Langage', techDesc2: 'JavaScript ES2020, fichier unique, zéro dépendance, sans build',
+      techTag3: 'Interface', techDesc3: 'HTML + CSS3 (Flex, dégradés, cartes arrondies, superpositions verre dépoli)',
+      techTag4: 'Graphismes', techDesc4: 'Matrices de pixels intégrées au code ; sprites dessinés à la volée sur Canvas',
+      techTag5: 'Audio', techDesc5: 'Synthèse en temps réel via Web Audio API (aucun fichier audio)',
+      techTag6: 'Affichage', techDesc6: 'Résolution logique fixe 1000×560 + mise à l’échelle HD devicePixelRatio',
+      techNote: 'Pourquoi : le jeu tourne en boucle 60fps et dessine pixel par pixel ; des frameworks DOM comme React/Vue ajouteraient un surcoût de DOM virtuel inutile. L’API native Canvas 2D suffit et charge plus vite. Pour industrialiser ensuite, migre directement vers <b>Vite + TypeScript</b> : la couche de rendu ne change pas.',
+      levelNames: ['Niveau 1 · Départ dans la prairie', 'Niveau 2 · Chemin de briques au crépuscule', 'Niveau 3 · Péril sous les étoiles'],
+      banner: function (n, c) { return n + '　(Goombas : ' + c + ')'; }
+    }
+  };
+
+  function detectLang() {
+    var list = [].concat(navigator.languages || [], [navigator.language || 'en']);
+    var s = list.join(',').toLowerCase();
+    if (s.indexOf('zh') >= 0) return /tw|hk|mo|hant/.test(s) ? 'zh-TW' : 'zh-CN';
+    if (s.indexOf('ja') >= 0) return 'ja';
+    if (s.indexOf('pt') >= 0) return 'pt-BR';
+    if (s.indexOf('es') >= 0) return 'es';
+    if (s.indexOf('fr') >= 0) return 'fr';
+    return 'en';
+  }
+  var currentLang = 'zh-CN';
+  try {
+    var savedLang = localStorage.getItem('mario_lang');
+    if (savedLang && I18N[savedLang]) currentLang = savedLang; else currentLang = detectLang();
+  } catch (e) { currentLang = detectLang(); }
+
+  function T() { return I18N[currentLang]; }
+  function levelName(i) { return T().levelNames[i] || LEVELS[i].name; }
+
+  function applyI18n() {
+    var t = T(), i, el, k;
+    var els = document.querySelectorAll('[data-i18n]');
+    for (i = 0; i < els.length; i++) {
+      k = els[i].getAttribute('data-i18n');
+      if (t[k] != null) els[i].textContent = t[k];
+    }
+    var htmls = document.querySelectorAll('[data-i18n-html]');
+    for (i = 0; i < htmls.length; i++) {
+      k = htmls[i].getAttribute('data-i18n-html');
+      if (t[k] != null) htmls[i].innerHTML = t[k];
+    }
+    document.title = t.title;
+    document.documentElement.lang = currentLang;
+    el = document.getElementById('langSelect');
+    if (el) el.value = currentLang;
+    syncLangButtons();
+    refreshDynamicTexts();
+  }
+
+  function syncLangButtons() {
+    var t = T();
+    var bm = document.getElementById('btnMusic');
+    if (bm) bm.textContent = Sound.on ? t.musicOn : t.musicOff;
+    var bp = document.getElementById('btnPause');
+    if (bp) bp.textContent = (G.state === 'paused') ? t.resume : t.pause;
+  }
+
+  function renderClearTable() {
+    var t = T();
+    document.getElementById('clearScore').textContent = (G.levelScore - G.flagBonus - G.timeBonus) + ' ' + t.unit;
+    document.getElementById('clearFlag').textContent = G.flagBonus + ' ' + t.unit;
+    document.getElementById('clearTime').textContent = G.timeBonus + ' ' + t.unit;
+    document.getElementById('clearTotal').textContent = G.score + ' ' + t.unit;
+  }
+
+  // 语言切换时，若正停留在过关 / 失败浮层，同步刷新动态文案
+  function refreshDynamicTexts() {
+    var t = T();
+    if (G.state === 'clear') {
+      var last = (G.levelIndex === LEVELS.length - 1);
+      document.getElementById('clearTitle').textContent = last ? t.clearTitleLast : t.clearTitle;
+      document.getElementById('clearWord').textContent = last ? t.clearWordLast : t.clearWord(levelName(G.levelIndex));
+      document.getElementById('btnNext').textContent = last ? t.btnNextLast : t.btnNext;
+      document.getElementById('clearHint').innerHTML = last ? t.clearHintLast : t.clearHintNext;
+      renderClearTable();
+    } else if (G.state === 'over') {
+      var msgs = t.overMsgs;
+      document.getElementById('overWord').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+      document.getElementById('overTip').textContent = t.overTip(G.score);
+    }
+  }
+
+  var TILE = 40;              // 瓦片边长
+  var ROWS = 14;              // 关卡行数
+  var VIEW_W = 1000;          // 画布宽（≥1000px 要求）
+  var VIEW_H = 560;           // 画布高
+  var GROUND_ROW = 12;        // 地面所在行
+  var GROUND_Y = GROUND_ROW * TILE;            // 480：地面上表面
+  var POLE_TOP = 150;                          // 旗杆顶端
+  var POLE_BOTTOM = GROUND_Y;                  // 旗杆底端（竖到地面上）
+  var POLE_H = POLE_BOTTOM - POLE_TOP;         // 330
+
+  var GRAV = 0.62, MAX_FALL = 14, JUMP_V = -12.0;
+  var GRAV_HOLD = 0.50;                        // 按住跳跃上升时减重力
+  var WALK_MAX = 4.2, RUN_MAX = 7.0;
+  var ACC = 0.55, AIR_ACC = 0.38, FRIC = 0.30;
+  var MARIO_W = 26, MARIO_H = 40;              // 马里奥碰撞盒（高 40 < 砖块净空 80）
+  var SPR = 40;                                // 精灵绘制尺寸 16px × 2.5
+
+  var T_EMPTY = 0, T_STONE = 1, T_BRICK = 2, T_QUESTION = 3, T_USED = 4, T_GROUND = 5;
+
+  function isSolid(t) { return t !== T_EMPTY; }
+  function isBumpable(t) { return t === T_BRICK || t === T_QUESTION; }
+
+  /* =========================================================================
+   *  1. 画布
+   * ========================================================================= */
+  var canvas = document.getElementById('game');
+  var ctx = canvas.getContext('2d');
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = VIEW_W * DPR;
+  canvas.height = VIEW_H * DPR;
+  canvas.style.width = VIEW_W + 'px';
+  canvas.style.height = VIEW_H + 'px';
+
+  /* =========================================================================
+   *  2. 像素精灵（全部用 canvas 亲手绘制）
+   * ========================================================================= */
+  var PAL_MARIO = {
+    '.': null,
+    r: '#e52521', // 帽子 / 上衣
+    h: '#5a2d0c', // 头发、胡子
+    s: '#ffc090', // 皮肤
+    k: '#241408', // 眼睛
+    b: '#2f6bff', // 背带裤
+    y: '#ffd83d', // 纽扣
+    o: '#8a4b12'  // 鞋子
+  };
+  var PAL_GOOMBA = {
+    '.': null,
+    d: '#7b3a12', // 轮廓
+    b: '#b06a24', // 身体
+    w: '#ffffff', // 眼白
+    k: '#241408', // 瞳孔
+    f: '#40200a'  // 脚
+  };
+
+  // 16×16 马里奥：站立 / 走路① / 走路② / 跳跃
+  var MARIO_ART = [
+    // 站立
+    ["................",
+     ".....rrrrr......",
+     "....rrrrrrrrr...",
+     "....hhhssks.....",
+     "...hshssskssss..",
+     "...hshhsssksss..",
+     "...hhssssssss...",
+     ".....ssssss.....",
+     "...rrrbbrr......",
+     "..rrrbbrrrrr....",
+     "..rrrbbbbrrrr...",
+     "..ssbbybbbyss...",
+     "..sssbbbbbbsss..",
+     "....bbb..bbb....",
+     "...ooo....ooo...",
+     "..ooooo..ooooo.."],
+    // 走路 1
+    ["................",
+     ".....rrrrr......",
+     "....rrrrrrrrr...",
+     "....hhhssks.....",
+     "...hshssskssss..",
+     "...hshhsssksss..",
+     "...hhssssssss...",
+     ".....ssssss.....",
+     "...rrrbbrr......",
+     "..rrrbbrrrrr....",
+     "..rrrbbbbrrrr...",
+     "..ssbbybbbyss...",
+     "..sssbbbbbbsss..",
+     "...bbb....bbb...",
+     "..ooo......ooo..",
+     ".ooooo....ooooo."],
+    // 走路 2
+    ["................",
+     ".....rrrrr......",
+     "....rrrrrrrrr...",
+     "....hhhssks.....",
+     "...hshssskssss..",
+     "...hshhsssksss..",
+     "...hhssssssss...",
+     ".....ssssss.....",
+     "...rrrbbrr......",
+     "..rrrbbrrrrr....",
+     "..rrrbbbbrrrr...",
+     "..ssbbybbbyss...",
+     "..sssbbbbbbsss..",
+     "...bbb..bbb.....",
+     "...oooooooo.....",
+     "..oooo..oooo...."],
+    // 跳跃
+    ["................",
+     ".....rrrrr......",
+     "....rrrrrrrrr...",
+     "....hhhssks.....",
+     "...hshssskssss..",
+     "...hshhsssksss..",
+     "...hhssssssss...",
+     ".s...ssssss.....",
+     ".ss.rrrbbrr.....",
+     ".ssrrrbbrrrrrr..",
+     "...rrrbbbbrrrr..",
+     "...ssbbybbbyss..",
+     "....bbbbbbbb....",
+     "...bbb....bbb...",
+     "..ooo......ooo..",
+     ".ooooo....ooooo."]
+  ];
+
+  var GOOMBA_ART = [
+    "................",
+    ".....dddddd.....",
+    "...ddbbbbbbdd...",
+    "..dbbbbbbbbbbd..",
+    ".dbbbbbbbbbbbbd.",
+    ".dbbwwbbbbwwbbd.",
+    "dbbwkbbbbbbwkbbd",
+    "dbbwkbbbbbbwkbbd",
+    "dbbwwbbbbbbwwbbd",
+    ".dbbbbbbbbbbbbd.",
+    ".ddbbbbbbbbbdd..",
+    "..ddbbbbbbbbdd..",
+    "...dddddddddd...",
+    ".....ffffff.....",
+    "....ffff..ffff..",
+    "...ffff....ffff."
+  ];
+  var GOOMBA_FLAT_ART = [
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "................",
+    "...dddddddddd...",
+    ".dbbbbbbbbbbbbd.",
+    ".ddbbbbbbbbbdd..",
+    "..ffffffffffff..",
+    "..ffff....ffff.."
+  ];
+
+  function makeSprite(art, pal, flip) {
+    var h = art.length, w = 0, i, j;
+    for (i = 0; i < h; i++) w = Math.max(w, art[i].length);
+    var c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    var g = c.getContext('2d');
+    for (i = 0; i < h; i++) {
+      for (j = 0; j < art[i].length; j++) {
+        var col = pal[art[i][j]];
+        if (!col) continue;
+        g.fillStyle = col;
+        g.fillRect(j, i, 1, 1);
+      }
+    }
+    if (flip) {
+      var c2 = document.createElement('canvas');
+      c2.width = w; c2.height = h;
+      var g2 = c2.getContext('2d');
+      g2.translate(w, 0); g2.scale(-1, 1);
+      g2.drawImage(c, 0, 0);
+      return c2;
+    }
+    return c;
+  }
+
+  var SPR_MARIO = MARIO_ART.map(function (art) {
+    return [makeSprite(art, PAL_MARIO, false), makeSprite(art, PAL_MARIO, true)];
+  });
+  var SPR_GOOMBA = [makeSprite(GOOMBA_ART, PAL_GOOMBA, false), makeSprite(GOOMBA_ART, PAL_GOOMBA, true)];
+  var SPR_GOOMBA_FLAT = makeSprite(GOOMBA_FLAT_ART, PAL_GOOMBA, false);
+
+  /* =========================================================================
+   *  3. 音效（Web Audio 实时合成，无外部文件）
+   * ========================================================================= */
+  var NOTE_MAP = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 };
+  function freqOf(name) {
+    var m = /^([A-G]#?)(-?\d)$/.exec(name);
+    if (!m) return 440;
+    var n = NOTE_MAP[m[1]] + (parseInt(m[2], 10) + 1) * 12;
+    return 440 * Math.pow(2, (n - 69) / 12);
+  }
+
+  var Sound = {
+    ctx: null, master: null, musicGain: null, sfxGain: null,
+    on: true, timer: null, nextTime: 0, idx: 0, playing: false,
+    init: function () {
+      if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain(); this.master.gain.value = 0.85; this.master.connect(this.ctx.destination);
+      this.musicGain = this.ctx.createGain(); this.musicGain.gain.value = 0.085; this.musicGain.connect(this.master);
+      this.sfxGain = this.ctx.createGain(); this.sfxGain.gain.value = 0.22; this.sfxGain.connect(this.master);
+    },
+    tone: function (f, dur, type, when, vol, slideTo, dest) {
+      if (!this.ctx || !this.on) return;
+      var t = this.ctx.currentTime + (when || 0);
+      var o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type || 'square';
+      o.frequency.setValueAtTime(f, t);
+      if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(30, slideTo), t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol == null ? 0.25 : vol, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(dest || this.sfxGain);
+      o.start(t); o.stop(t + dur + 0.03);
+    },
+    noise: function (dur, vol, when) {
+      if (!this.ctx || !this.on) return;
+      var t = this.ctx.currentTime + (when || 0);
+      var len = Math.floor(this.ctx.sampleRate * dur);
+      var buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      var s = this.ctx.createBufferSource(); s.buffer = buf;
+      var g = this.ctx.createGain(); g.gain.value = vol == null ? 0.2 : vol;
+      s.connect(g); g.connect(this.sfxGain); s.start(t);
+    },
+    jump: function () { this.tone(340, 0.20, 'square', 0, 0.18, 760); },
+    stomp: function () { this.tone(240, 0.14, 'square', 0, 0.24, 90); this.noise(0.08, 0.12); },
+    bump: function () { this.tone(150, 0.09, 'square', 0, 0.2, 110); },
+    coin: function () { this.tone(988, 0.07, 'square', 0, 0.2); this.tone(1319, 0.16, 'square', 0.07, 0.2); },
+    die: function () {
+      this.tone(523, 0.12, 'square', 0, 0.22);
+      this.tone(392, 0.12, 'square', 0.13, 0.22);
+      this.tone(262, 0.34, 'sawtooth', 0.26, 0.2, 90);
+    },
+    flagJingle: function () { // 夺旗奖励音乐
+      var seq = ['G4', 'C5', 'E5', 'G5', 'C6', 'E6', 'G6', 'C7'];
+      for (var i = 0; i < seq.length; i++) {
+        this.tone(freqOf(seq[i]), 0.16, 'square', i * 0.075, 0.16);
+        this.tone(freqOf(seq[i]) * 2, 0.10, 'triangle', i * 0.075, 0.07);
+      }
+      this.tone(freqOf('E7'), 0.5, 'square', 0.66, 0.13);
+    },
+    fanfare: function () { // 过关号角
+      var seq = [['C5', 0], ['C5', 0.12], ['C5', 0.24], ['C5', 0.36], ['G#4', 0.52], ['A#4', 0.62], ['C5', 0.74],
+                 ['C5', 0.90], ['A#4', 1.02], ['C5', 1.14], ['G5', 1.26]];
+      for (var i = 0; i < seq.length; i++) {
+        this.tone(freqOf(seq[i][0]), 0.24, 'square', seq[i][1], 0.17);
+        this.tone(freqOf(seq[i][0]) / 2, 0.24, 'triangle', seq[i][1], 0.08);
+      }
+    },
+    gameOver: function () {
+      var seq = [['C5', 0], ['A4', 0.18], ['F4', 0.36], ['C4', 0.54]];
+      for (var i = 0; i < seq.length; i++) this.tone(freqOf(seq[i][0]), 0.34, 'sawtooth', seq[i][1], 0.16);
+    },
+    // ---- 背景音乐（原创芯片风循环） ----
+    MELODY: [['E5', 1], ['E5', 1], ['E5', 2], ['C5', 1], ['E5', 2], ['G5', 3], ['G4', 3],
+             ['C5', 2], ['G4', 1], ['E4', 2], ['A4', 2], ['B4', 1], ['A#4', 1], ['A4', 2],
+             ['G4', 1], ['E5', 1], ['G5', 1], ['A5', 2], ['F5', 1], ['G5', 2], ['E5', 2],
+             ['C5', 1], ['D5', 1], ['B4', 2], ['C5', 2], ['G4', 2], ['E4', 2]],
+    BASS: ['C3', 'C3', 'G2', 'G2', 'C3', 'C3', 'G2', 'G2', 'F2', 'F2', 'C3', 'C3', 'G2', 'G2', 'C3', 'C3'],
+    startMusic: function () {
+      this.init();
+      if (!this.ctx || this.playing) return;
+      this.playing = true; this.idx = 0;
+      this.nextTime = this.ctx.currentTime + 0.08;
+      var self = this;
+      this.timer = setInterval(function () { self._sched(); }, 55);
+    },
+    stopMusic: function () {
+      this.playing = false;
+      if (this.timer) { clearInterval(this.timer); this.timer = null; }
+    },
+    _sched: function () {
+      if (!this.ctx || !this.on) { this.nextTime = this.ctx ? this.ctx.currentTime : 0; return; }
+      var SPB = 0.155, guard = 0;
+      while (this.nextTime < this.ctx.currentTime + 0.35 && guard++ < 40) {
+        var note = this.MELODY[this.idx % this.MELODY.length];
+        var dur = note[1] * SPB;
+        this.tone(freqOf(note[0]), dur * 0.92, 'square', this.nextTime - this.ctx.currentTime, 0.16, null, this.musicGain);
+        if (this.idx % 2 === 0) {
+          var b = this.BASS[Math.floor(this.idx / 2) % this.BASS.length];
+          this.tone(freqOf(b), dur * 1.7, 'triangle', this.nextTime - this.ctx.currentTime, 0.3, null, this.musicGain);
+        }
+        this.nextTime += dur;
+        this.idx++;
+      }
+    }
+  };
+
+  /* =========================================================================
+   *  4. 关卡生成（固定随机种子 → 每次重玩完全一致）
+   * ========================================================================= */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  var LEVELS = [
+    {
+      name: '第一关 · 草原起步', seed: 20260101, cols: 168,
+      enemies: 5, enemySpeed: 0.85, pitW: [2, 3], blockRows: [9],
+      clusterLen: [3, 5], stairs: 2, double: false, time: 300, theme: 'day'
+    },
+    {
+      name: '第二关 · 黄昏砖道', seed: 20260202, cols: 208,
+      enemies: 9, enemySpeed: 1.05, pitW: [2, 4], blockRows: [9, 8],
+      clusterLen: [3, 6], stairs: 3, double: false, time: 280, theme: 'dusk'
+    },
+    {
+      name: '第三关 · 星夜险境', seed: 20260303, cols: 248,
+      enemies: 14, enemySpeed: 1.3, pitW: [3, 4], blockRows: [9, 8],
+      clusterLen: [4, 7], stairs: 4, double: true, time: 260, theme: 'night'
+    }
+  ];
+
+  function buildLevel(cfg) {
+    var rnd = mulberry32(cfg.seed);
+    var cols = cfg.cols;
+    var grid = [], r, c, i;
+    for (r = 0; r < ROWS; r++) { grid.push(new Array(cols).fill(0)); }
+    for (c = 0; c < cols; c++) { grid[GROUND_ROW][c] = T_GROUND; grid[GROUND_ROW + 1][c] = T_GROUND; }
+
+    var poleCol = cols - 12;
+    var END_ZONE = cols - 26;          // 终点安全区（无悬崖）
+    var START_ZONE = 16;               // 起点安全区
+
+    var resBlock = new Array(cols).fill(false);   // 禁止放置砖块/问号（阶梯、起终点）
+    var noBlock = new Array(cols).fill(false);    // 禁止放置砖块/问号（悬崖上空：避免跳跃撞头）
+    var resEnemy = new Array(cols).fill(false);   // 禁止放置敌人
+    for (c = 0; c < START_ZONE; c++) { resBlock[c] = true; resEnemy[c] = true; }
+    for (c = END_ZONE; c < cols; c++) { resBlock[c] = true; resEnemy[c] = true; }
+
+    // 起点教学块（第 9 行：底边 y=400，地面 480，净空 80px > 马里奥 40px，可直接从下面走过）
+    grid[9][7] = T_QUESTION; grid[9][8] = T_BRICK; grid[9][9] = T_QUESTION;
+
+    // --- 悬崖 ---
+    var x = 22;
+    while (x < END_ZONE - 6) {
+      var w = cfg.pitW[0] + Math.floor(rnd() * (cfg.pitW[1] - cfg.pitW[0] + 1));
+      var ok = true;
+      for (i = -3; i < w + 4; i++) { if (resBlock[x + i]) { ok = false; break; } }
+      if (ok && x + w < END_ZONE - 4) {
+        for (i = 0; i < w; i++) { grid[GROUND_ROW][x + i] = 0; grid[GROUND_ROW + 1][x + i] = 0; }
+        for (i = -3; i < w + 4; i++) {
+          if (x + i >= 0 && x + i < cols) {
+            resEnemy[x + i] = true;
+            noBlock[x + i] = true;   // 悬崖上空及前后留空，跳跃弧线不会被方块挡住
+          }
+        }
+        x += w;
+      }
+      x += 9 + Math.floor(rnd() * 9);
+    }
+
+    // --- 石块阶梯（金字塔，可助人登高分） ---
+    var sx = 26, placed = 0;
+    while (sx < END_ZONE - 12 && placed < cfg.stairs) {
+      var h = 2 + Math.floor(rnd() * 3);            // 2 ~ 4 阶
+      var totalW = h * 2;
+      var okStair = true;
+      for (i = -3; i < totalW + 3; i++) {
+        var cc = sx + i;
+        if (cc < 0 || cc >= cols || resBlock[cc]) { okStair = false; break; }
+        if (grid[GROUND_ROW][cc] === 0) { okStair = false; break; }
+      }
+      if (okStair) {
+        for (i = 0; i < h; i++) {                     // 上行
+          var c1 = sx + i;
+          for (r = GROUND_ROW - 1; r > GROUND_ROW - 1 - (i + 1); r--) grid[r][c1] = T_STONE;
+        }
+        for (i = 0; i < h; i++) {                     // 下行
+          var c2 = sx + h + i, hh = h - i;
+          for (r = GROUND_ROW - 1; r > GROUND_ROW - 1 - hh; r--) grid[r][c2] = T_STONE;
+        }
+        for (i = -3; i < totalW + 4; i++) {
+          if (sx + i >= 0 && sx + i < cols) { resBlock[sx + i] = true; resEnemy[sx + i] = true; }
+        }
+        placed++;
+      }
+      sx += 11 + Math.floor(rnd() * 12);
+    }
+
+    // --- 砖块 / 问号块集群（只在第 8、9 行，保证下方净空高于马里奥） ---
+    var bx = 18;
+    while (bx < END_ZONE - 8) {
+      var len = cfg.clusterLen[0] + Math.floor(rnd() * (cfg.clusterLen[1] - cfg.clusterLen[0] + 1));
+      var row = cfg.blockRows[Math.floor(rnd() * cfg.blockRows.length)];
+      var okB = true;
+      for (i = -1; i <= len; i++) {
+        if (resBlock[bx + i] || noBlock[bx + i]) { okB = false; break; }
+      }
+      if (okB) {
+        for (i = 0; i < len; i++) grid[row][bx + i] = (rnd() < 0.42) ? T_QUESTION : T_BRICK;
+        if (cfg.double && rnd() < 0.4) {  // 第三关偶尔出现双层
+          for (i = 0; i < len; i++) {
+            if (grid[row - 1][bx + i] === 0) grid[row - 1][bx + i] = (rnd() < 0.3) ? T_QUESTION : T_BRICK;
+          }
+        }
+        for (i = -2; i < len + 2; i++) if (bx + i >= 0 && bx + i < cols) resBlock[bx + i] = true;
+      }
+      bx += len + 5 + Math.floor(rnd() * 8);
+    }
+
+    // --- 终点前的登高分阶梯（5 阶，借它可以摸到旗杆顶部） ---
+    var stairStart = poleCol - 8;   // 顶点在 poleCol-4，距旗杆 3 格
+    for (i = 0; i < 5; i++) {
+      var cs = stairStart + i;
+      for (r = GROUND_ROW - 1; r > GROUND_ROW - 1 - (i + 1); r--) grid[r][cs] = T_STONE;
+    }
+
+    // --- 板栗仔（多轮放宽间距，确保数量达标：5 → 9 → 14 递增） ---
+    var enemyCols = [];
+    var need = cfg.enemies;
+    var gaps = [9, 7, 5, 4, 3];
+    function tryPlace(gap, attempts) {
+      for (var t = 0; t < attempts && enemyCols.length < need; t++) {
+        var ec = START_ZONE + 4 + Math.floor(rnd() * (END_ZONE - START_ZONE - 10));
+        if (resEnemy[ec] || resEnemy[ec + 1]) continue;
+        if (grid[GROUND_ROW][ec] !== T_GROUND || grid[GROUND_ROW][ec + 1] !== T_GROUND) continue;
+        if (grid[GROUND_ROW - 1][ec] !== 0 || grid[GROUND_ROW - 1][ec + 1] !== 0) continue;
+        var tooClose = false;
+        for (var k = 0; k < enemyCols.length; k++) {
+          if (Math.abs(enemyCols[k] - ec) < gap) { tooClose = true; break; }
+        }
+        if (tooClose) continue;
+        enemyCols.push(ec);
+      }
+    }
+    for (var gi = 0; gi < gaps.length && enemyCols.length < need; gi++) tryPlace(gaps[gi], 3000);
+    enemyCols.sort(function (a, b) { return a - b; });
+
+    return {
+      cfg: cfg, cols: cols, tpl: grid, grid: grid.map(function (r2) { return r2.slice(); }),
+      enemyCols: enemyCols, poleCol: poleCol, pixelW: cols * TILE, castleCol: cols - 9
+    };
+  }
+
+  var LEVEL_DATA = LEVELS.map(buildLevel);
+
+  /* =========================================================================
+   *  5. 游戏状态
+   * ========================================================================= */
+  var G = {
+    state: 'menu',        // menu | playing | paused | dying | flag | clear | over
+    levelIndex: 0,
+    score: 0,
+    levelScore: 0,
+    coins: 0,
+    lives: 3,
+    time: 300,
+    timeAcc: 0,
+    flagBonus: 0,
+    timeBonus: 0,
+    best: 0
+  };
+  try { G.best = parseInt(localStorage.getItem('mario_best') || '0', 10) || 0; } catch (e) { G.best = 0; }
+
+  var mario = { x: 0, y: 0, w: MARIO_W, h: MARIO_H, vx: 0, vy: 0, onGround: false, face: 1, animT: 0, frame: 0, coyote: 0, dyingT: 0, prevY: 0 };
+  var level = null, enemies = [], bumps = {}, coins = [], popups = [], particles = [];
+  var camX = 0, frameCount = 0;
+  var flag = { y: POLE_TOP + 8, sliding: false, walkT: 0, carry: false };
+
+  function makeGoomba(col) {
+    return {
+      x: col * TILE + 3, y: GROUND_Y - 36, w: 34, h: 36,
+      vx: -1, vy: 0, dead: false, deadT: 0, flat: false, dir: -1
+    };
+  }
+
+  /* =========================================================================
+   *  6. 关卡启动 / 流程
+   * ========================================================================= */
+  // resetScore：积分清零（从第一关开始时为 true）
+  // resetLives：生命恢复为 3（新关卡 / 手动重玩时为 true；死亡重生为 false）
+  function startLevel(index, resetScore, resetLives) {
+    G.levelIndex = index;
+    level = LEVEL_DATA[index];
+    level.grid = level.tpl.map(function (r) { return r.slice(); });
+    enemies = level.enemyCols.map(function (c) {
+      var g = makeGoomba(c);
+      g.vx = -level.cfg.enemySpeed;
+      g.dir = -1;
+      return g;
+    });
+    if (resetScore) { G.score = 0; G.coins = 0; }
+    if (resetLives !== false) G.lives = 3;
+    G.levelScore = 0;
+    G.time = level.cfg.time;
+    G.timeAcc = 0;
+    G.flagBonus = 0; G.timeBonus = 0;
+
+    mario.x = 3 * TILE; mario.y = GROUND_Y - mario.h;
+    mario.vx = 0; mario.vy = 0; mario.onGround = true; mario.face = 1;
+    mario.animT = 0; mario.frame = 0; mario.coyote = 0; mario.dyingT = 0; mario.prevY = mario.y;
+
+    flag.y = POLE_TOP + 8; flag.sliding = false; flag.walkT = 0; flag.carry = false;
+    bumps = {}; coins = []; popups = []; particles = [];
+    camX = 0;
+    G.state = 'playing';
+    hideAll();
+    Sound.startMusic();
+    syncHUD();
+  }
+
+  function retryLevel() { startLevel(G.levelIndex, false, true); }   // 手动重玩本关：保留积分
+  function restartFromFirst() { startLevel(0, true, true); }         // 回到第一关：积分清零
+  function nextLevel() {
+    if (G.levelIndex < LEVELS.length - 1) startLevel(G.levelIndex + 1, false, true);
+    else startLevel(0, true, true);
+  }
+  function backToMenu() {
+    G.state = 'menu';
+    Sound.stopMusic();
+    show('ovStart');
+  }
+
+  function saveBest() {
+    if (G.score > G.best) {
+      G.best = G.score;
+      try { localStorage.setItem('mario_best', String(G.best)); } catch (e) {}
+    }
+  }
+
+  /* =========================================================================
+   *  7. 物理与碰撞
+   * ========================================================================= */
+  function tileAtRC(r, c) {
+    if (r < 0) return 0;
+    if (r >= ROWS) return 0;
+    if (c < 0 || c >= level.cols) return 1;   // 关卡左右边界视为墙
+    return level.grid[r][c];
+  }
+  function tileAtPx(px, py) { return tileAtRC(Math.floor(py / TILE), Math.floor(px / TILE)); }
+
+  function moveX(e) {
+    e.x += e.vx;
+    var r0 = Math.floor(e.y / TILE), r1 = Math.floor((e.y + e.h - 1) / TILE);
+    var c0 = Math.floor(e.x / TILE), c1 = Math.floor((e.x + e.w - 1) / TILE);
+    for (var r = r0; r <= r1; r++) {
+      for (var c = c0; c <= c1; c++) {
+        if (isSolid(tileAtRC(r, c))) {
+          if (e.vx > 0) e.x = c * TILE - e.w;
+          else if (e.vx < 0) e.x = (c + 1) * TILE;
+          e.vx = 0;
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function moveY(e, onHitHead) {
+    e.y += e.vy;
+    var r0 = Math.floor(e.y / TILE), r1 = Math.floor((e.y + e.h - 1) / TILE);
+    var c0 = Math.floor(e.x / TILE), c1 = Math.floor((e.x + e.w - 1) / TILE);
+    for (var r = r0; r <= r1; r++) {
+      for (var c = c0; c <= c1; c++) {
+        if (isSolid(tileAtRC(r, c))) {
+          if (e.vy > 0) {
+            e.y = r * TILE - e.h;
+            e.vy = 0;
+            e.onGround = true;
+          } else if (e.vy < 0) {
+            e.y = (r + 1) * TILE;
+            e.vy = 0;
+            if (onHitHead) onHitHead(r, c);
+          }
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  /* =========================================================================
+   *  8. 顶砖块 / 问号
+   * ========================================================================= */
+  function bumpBlock(r, c) {
+    var t = level.grid[r][c];
+    if (!isBumpable(t)) return;
+    bumps[r + ',' + c] = { t: 0, row: r, col: c };
+
+    if (t === T_QUESTION) {
+      level.grid[r][c] = T_USED;
+      G.score += 100; G.levelScore += 100; G.coins += 1;
+      coins.push({ x: c * TILE + 20, y: r * TILE - 26, vy: -4.6, t: 0, life: 46 });
+      popups.push({ x: c * TILE + 20, y: r * TILE - 8, text: '+100', t: 0, life: 60, color: '#ffe066' });
+      Sound.coin();
+    } else {
+      Sound.bump();
+      // 砖块被顶 → 站在上面的板栗仔被弹飞
+      var top = r * TILE;
+      for (var i = 0; i < enemies.length; i++) {
+        var g = enemies[i];
+        if (!g.dead && Math.abs((g.y + g.h) - top) < 12 &&
+            g.x + g.w > c * TILE && g.x < (c + 1) * TILE) {
+          killEnemy(g, true);
+        }
+      }
+      for (var k = 0; k < 8; k++) {
+        particles.push({
+          x: c * TILE + 20, y: r * TILE + 6,
+          vx: (Math.random() - 0.5) * 5, vy: -3 - Math.random() * 3.5,
+          size: 5, t: 0, life: 46, color: '#c1541f'
+        });
+      }
+    }
+    syncHUD();
+  }
+
+  function headBump(r, c) {
+    if (r < 0 || c < 0) return;
+    if (isBumpable(level.grid[r][c])) bumpBlock(r, c);
+    else if (level.grid[r][c] !== T_EMPTY) {
+      bumps[r + ',' + c] = { t: 0, row: r, col: c };
+      Sound.bump();
+    }
+    // 头顶中心所在列也一并顶（马里奥横跨两格时不会漏顶）
+    var cc = Math.floor((mario.x + mario.w / 2) / TILE);
+    if (cc !== c && cc >= 0 && cc < level.cols && isBumpable(level.grid[r][cc])) bumpBlock(r, cc);
+  }
+
+  /* =========================================================================
+   *  9. 敌人
+   * ========================================================================= */
+  function killEnemy(g, flyUp) {
+    g.dead = true; g.flat = true; g.deadT = 0; g.vx = 0;
+    G.score += 200; G.levelScore += 200;
+    popups.push({ x: g.x + g.w / 2, y: g.y - 6, text: '+200', t: 0, life: 58, color: '#fff1a8' });
+    Sound.stomp();
+    syncHUD();
+  }
+
+  function updateEnemies() {
+    var speed = level.cfg.enemySpeed;
+    for (var i = 0; i < enemies.length; i++) {
+      var g = enemies[i];
+      if (g.dead) { g.deadT++; continue; }
+      g.vx = g.dir * speed;                 // 恒定巡逻速度
+      g.vy += GRAV;
+      if (g.vy > MAX_FALL) g.vy = MAX_FALL;
+      var hitWall = moveX(g);
+      moveY(g, null);
+      if (hitWall) {                        // 撞墙掉头（走到悬崖边则直接掉下去）
+        g.dir = -g.dir;
+        g.x += g.dir * 1.5;
+      }
+      if (g.y > VIEW_H + 200) { g.dead = true; g.deadT = 999; }
+    }
+  }
+
+  function marioVsEnemies() {
+    var feet = mario.y + mario.h;
+    // 扫掠检测：用上一帧的脚底位置判断是否"从上方落下"
+    // （高速下落时单帧位移大，只看当前帧会误判成侧面撞击）
+    var prevFeet = mario.prevY + mario.h;
+    for (var i = 0; i < enemies.length; i++) {
+      var g = enemies[i];
+      if (g.dead) continue;
+      if (mario.x + mario.w <= g.x || mario.x >= g.x + g.w) continue;
+      if (mario.y + mario.h <= g.y || mario.y >= g.y + g.h) continue;
+      var cameFromAbove = prevFeet <= g.y + g.h / 2;   // 上一帧脚底还在敌人上半身 → 从上方落下
+      if (mario.vy > 0 && (cameFromAbove || feet - g.y < 22)) {
+        killEnemy(g);
+        mario.vy = keys.jump ? -10.5 : -7.5;
+        mario.y = g.y - mario.h;
+      } else {
+        marioDie();
+        return;
+      }
+    }
+  }
+
+  /* =========================================================================
+   *  10. 死亡 / 夺旗 / 过关
+   * ========================================================================= */
+  function marioDie() {
+    if (G.state !== 'playing') return;
+    G.state = 'dying';
+    mario.dyingT = 0; mario.vy = -10; mario.vx = 0;
+    G.lives--;
+    Sound.stopMusic();
+    Sound.die();
+    syncHUD();
+  }
+
+  function afterDeath() {
+    if (G.lives > 0) {
+      startLevel(G.levelIndex, false, false);   // 保留积分、保留剩余生命，重玩本关
+    } else {
+      G.state = 'over';
+      saveBest();
+      var msgs = T().overMsgs;
+      document.getElementById('overWord').textContent = msgs[Math.floor(Math.random() * msgs.length)];
+      document.getElementById('overTip').textContent = T().overTip(G.score);
+      show('ovOver');
+      Sound.gameOver();
+      syncHUD();
+    }
+  }
+
+  function grabFlag() {
+    var feet = mario.y + mario.h;
+    var ratio = (POLE_BOTTOM - feet) / POLE_H;
+    var bonus;
+    if (ratio >= 0.85) bonus = 400;        // 摸到旗杆顶部
+    else if (ratio >= 0.5) bonus = 200;    // 旗杆一半高度
+    else bonus = 100;                      // 低处（保底）
+    G.flagBonus = bonus;
+    G.score += bonus; G.levelScore += bonus;
+    flag.carry = (bonus === 400);
+    flag.sliding = true;
+    flag.walkT = 0;
+    G.state = 'flag';
+    popups.push({
+      x: level.poleCol * TILE + 10, y: mario.y - 10,
+      text: '+' + bonus, t: 0, life: 80, color: '#ffe066'
+    });
+    Sound.stopMusic();
+    Sound.flagJingle();
+    syncHUD();
+  }
+
+  function levelClear() {
+    G.timeBonus = Math.max(0, G.time) * 5;
+    G.score += G.timeBonus; G.levelScore += G.timeBonus;
+    G.state = 'clear';
+    saveBest();
+    var t = T();
+    var last = (G.levelIndex === LEVELS.length - 1);
+    document.getElementById('clearTitle').textContent = last ? t.clearTitleLast : t.clearTitle;
+    document.getElementById('clearWord').textContent = last
+      ? t.clearWordLast
+      : t.clearWord(levelName(G.levelIndex));
+    renderClearTable();
+    var btnNext = document.getElementById('btnNext');
+    btnNext.textContent = last ? t.btnNextLast : t.btnNext;
+    document.getElementById('clearHint').innerHTML = last ? t.clearHintLast : t.clearHintNext;
+    show('ovClear');
+    Sound.fanfare();
+    syncHUD();
+  }
+
+  /* =========================================================================
+   *  11. 每帧更新
+   * ========================================================================= */
+  function updateMario() {
+    mario.prevY = mario.y;
+    var maxS = keys.shift ? RUN_MAX : WALK_MAX;
+    var acc = mario.onGround ? ACC : AIR_ACC;
+
+    if (keys.left && !keys.right) { mario.vx -= acc; mario.face = -1; }
+    else if (keys.right && !keys.left) { mario.vx += acc; mario.face = 1; }
+    else {
+      mario.vx *= (1 - FRIC);
+      if (Math.abs(mario.vx) < 0.12) mario.vx = 0;
+    }
+    // 松开 Shift 后超速时平滑回落，而不是硬切
+    if (Math.abs(mario.vx) > maxS) {
+      var d = Math.sign(mario.vx);
+      mario.vx = d * Math.max(maxS, Math.abs(mario.vx) - 0.22);
+    }
+    if (mario.vx > maxS) mario.vx = maxS;
+    if (mario.vx < -maxS) mario.vx = -maxS;
+
+    if (jumpEdge && (mario.onGround || mario.coyote > 0)) {
+      mario.vy = JUMP_V; mario.onGround = false; mario.coyote = 0;
+      Sound.jump();
+    }
+    if (!keys.jump && mario.vy < -9) mario.vy = -9;   // 短按小跳
+
+    mario.vy += (mario.vy < 0 && keys.jump) ? GRAV_HOLD : GRAV;
+    if (mario.vy > MAX_FALL) mario.vy = MAX_FALL;
+
+    var wasGround = mario.onGround;
+    mario.onGround = false;
+    moveX(mario);
+    moveY(mario, headBump);
+    if (mario.onGround) mario.coyote = 5;
+    else if (wasGround && mario.coyote > 0) mario.coyote--;
+
+    // 不能走出屏幕左侧
+    if (mario.x < camX) { mario.x = camX; if (mario.vx < 0) mario.vx = 0; }
+    if (mario.x < 0) mario.x = 0;
+
+    // 掉出地图
+    if (mario.y > VIEW_H + 120) { marioDie(); return; }
+
+    // 走到旗杆 → 夺旗
+    var poleX = level.poleCol * TILE;
+    if (mario.x + mario.w > poleX - 4) { grabFlag(); return; }
+
+    // 动画帧
+    if (!mario.onGround) mario.frame = 3;
+    else if (Math.abs(mario.vx) > 0.6) {
+      mario.animT += Math.abs(mario.vx) * 0.055;
+      mario.frame = (Math.floor(mario.animT) % 2) ? 1 : 2;
+    } else { mario.animT = 0; mario.frame = 0; }
+  }
+
+  function updateFlagPhase() {
+    var poleX = level.poleCol * TILE;
+    if (flag.sliding) {
+      flag.y += 3.2;
+      if (flag.carry) {                       // 顶部 400 分：马里奥与旗帜一起落下
+        mario.x = poleX + 10;
+        mario.y = flag.y + 2;
+        mario.vx = 0; mario.vy = 0;
+        mario.frame = 3;
+      } else {
+        mario.vy += GRAV; if (mario.vy > MAX_FALL) mario.vy = MAX_FALL;
+        moveY(mario, null);
+        mario.frame = 0;
+      }
+      if (flag.y >= POLE_BOTTOM - 44) {
+        flag.y = POLE_BOTTOM - 44;
+        flag.sliding = false;
+        flag.walkT = 0;
+        if (flag.carry) { mario.y = GROUND_Y - mario.h; mario.x = poleX + 10; }
+      }
+    } else {
+      flag.walkT++;
+      mario.face = 1;
+      mario.vx = 3.2;
+      mario.vy += GRAV; if (mario.vy > MAX_FALL) mario.vy = MAX_FALL;
+      moveX(mario);
+      moveY(mario, null);
+      mario.animT += 0.22;
+      mario.frame = (Math.floor(mario.animT) % 2) ? 1 : 2;
+      if (flag.walkT > 96) levelClear();
+    }
+  }
+
+  function updateParticles() {
+    var i;
+    for (i = coins.length - 1; i >= 0; i--) {
+      var c = coins[i];
+      c.t++; c.y += c.vy; c.vy += 0.24;
+      if (c.t > c.life) coins.splice(i, 1);
+    }
+    for (i = popups.length - 1; i >= 0; i--) {
+      var p = popups[i];
+      p.t++; p.y -= 0.75;
+      if (p.t > p.life) popups.splice(i, 1);
+    }
+    for (i = particles.length - 1; i >= 0; i--) {
+      var q = particles[i];
+      q.t++; q.x += q.vx; q.y += q.vy; q.vy += 0.32;
+      if (q.t > q.life) particles.splice(i, 1);
+    }
+    for (var k in bumps) { bumps[k].t++; if (bumps[k].t > 14) delete bumps[k]; }
+  }
+
+  function tick() {
+    frameCount++;
+    if (G.state === 'playing') {
+      updateMario();
+      if (G.state === 'playing') {
+        updateEnemies();
+        marioVsEnemies();
+        // 计时
+        G.timeAcc += 1000 / 60;
+        if (G.timeAcc >= 1000) { G.timeAcc -= 1000; G.time--; if (G.time <= 0) { G.time = 0; marioDie(); syncHUD(); } }
+        syncHUDTime();
+      }
+    } else if (G.state === 'dying') {
+      mario.dyingT++;
+      mario.vy += GRAV; if (mario.vy > MAX_FALL) mario.vy = MAX_FALL;
+      mario.y += mario.vy;
+      if (mario.dyingT > 100) afterDeath();
+    } else if (G.state === 'flag') {
+      updateFlagPhase();
+      updateEnemies();
+    }
+    if (G.state !== 'menu') updateParticles();
+
+    // 相机
+    if (level) {
+      var target = mario.x + mario.w / 2 - VIEW_W * 0.42;
+      camX += (target - camX) * 0.12;
+      if (camX < 0) camX = 0;
+      if (camX > level.pixelW - VIEW_W) camX = level.pixelW - VIEW_W;
+    }
+    jumpEdge = false;
+  }
+
+  /* =========================================================================
+   *  12. 绘制
+   * ========================================================================= */
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  var THEME = {
+    day: { top: '#5fb8ff', bot: '#cdeeff', hill: '#3fae4a', hill2: '#2f8f3c', bush: '#2f9e44', sun: '#fff3b0' },
+    dusk: { top: '#ff9b54', bot: '#ffe0b8', hill: '#a2542f', hill2: '#7d3d22', bush: '#8a4a2a', sun: '#fff0c0' },
+    night: { top: '#16224d', bot: '#3d5490', hill: '#26356b', hill2: '#1b2750', bush: '#1e2b58', sun: '#fdfbd3' }
+  };
+
+  function drawBackground() {
+    var th = THEME[level.cfg.theme] || THEME.day;
+    var g = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+    g.addColorStop(0, th.top); g.addColorStop(1, th.bot);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    // 太阳 / 月亮
+    ctx.fillStyle = th.sun;
+    ctx.beginPath(); ctx.arc(880 - camX * 0.05, 88, 34, 0, Math.PI * 2); ctx.fill();
+    if (level.cfg.theme === 'night') {
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      for (var s = 0; s < 46; s++) {
+        var sx2 = (s * 137.5) % VIEW_W, sy2 = (s * 71.3) % 300;
+        ctx.globalAlpha = 0.35 + ((s * 37) % 60) / 100;
+        ctx.fillRect(sx2, sy2, 2, 2);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // 云（视差 0.25）
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    var cloudBase = -(camX * 0.25) % 420;
+    for (var i = -1; i < 5; i++) {
+      var cx = cloudBase + i * 420 + 60;
+      drawCloud(cx, 70 + ((i * 53) % 70));
+    }
+    // 远山（视差 0.45）
+    ctx.fillStyle = th.hill;
+    var hx = -(camX * 0.45) % 520;
+    for (var j = -1; j < 5; j++) {
+      var x0 = hx + j * 520;
+      ctx.beginPath();
+      ctx.moveTo(x0 - 90, GROUND_Y);
+      ctx.quadraticCurveTo(x0 + 60, GROUND_Y - 210, x0 + 210, GROUND_Y);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = th.hill2;
+    var hx2 = -(camX * 0.6) % 340;
+    for (var k = -1; k < 6; k++) {
+      var x1 = hx2 + k * 340;
+      ctx.beginPath();
+      ctx.moveTo(x1 - 70, GROUND_Y);
+      ctx.quadraticCurveTo(x1 + 40, GROUND_Y - 120, x1 + 150, GROUND_Y);
+      ctx.closePath(); ctx.fill();
+    }
+    // 草丛（视差 0.85）
+    ctx.fillStyle = th.bush;
+    var bx2 = -(camX * 0.85) % 300;
+    for (var b = -1; b < 6; b++) {
+      var xb = bx2 + b * 300 + 40;
+      var by = GROUND_Y;
+      ctx.beginPath();
+      ctx.arc(xb, by - 8, 18, Math.PI, 0);
+      ctx.arc(xb + 26, by - 14, 24, Math.PI, 0);
+      ctx.arc(xb + 56, by - 8, 18, Math.PI, 0);
+      ctx.rect(xb - 18, by - 10, 92, 12);
+      ctx.fill();
+    }
+  }
+
+  function drawCloud(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, 22, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.arc(x + 24, y - 12, 28, Math.PI, Math.PI * 2);
+    ctx.arc(x + 56, y, 22, Math.PI * 1.5, Math.PI * 0.5);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function drawGroundTile(px, py) {
+    ctx.fillStyle = '#c8722a'; ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = '#e08a3c'; ctx.fillRect(px, py, TILE, 6);
+    ctx.fillStyle = 'rgba(0,0,0,.22)';
+    ctx.fillRect(px, py + 19, TILE, 2);
+    ctx.fillRect(px + 19, py + 22, 2, TILE - 22);
+    ctx.fillRect(px + 19, py, 2, 19);
+    ctx.fillRect(px, py + TILE - 2, TILE, 2);
+    ctx.fillStyle = 'rgba(255,255,255,.16)';
+    ctx.fillRect(px + 4, py + 9, 7, 5);
+    ctx.fillRect(px + 25, py + 27, 8, 5);
+  }
+
+  function drawStoneTile(px, py) {
+    ctx.fillStyle = '#9aa2b1'; ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = '#d7dce6'; ctx.fillRect(px, py, TILE, 4); ctx.fillRect(px, py, 4, TILE);
+    ctx.fillStyle = '#5f6875'; ctx.fillRect(px, py + TILE - 4, TILE, 4); ctx.fillRect(px + TILE - 4, py, 4, TILE);
+    ctx.fillStyle = 'rgba(255,255,255,.35)';
+    ctx.fillRect(px + 8, py + 9, 10, 3);
+    ctx.fillStyle = 'rgba(0,0,0,.18)';
+    ctx.fillRect(px + 9, py + 22, 14, 3);
+    ctx.fillRect(px + 24, py + 13, 3, 10);
+  }
+
+  function drawBrickTile(px, py) {
+    ctx.fillStyle = '#b8491a'; ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = '#d9691f';
+    ctx.fillRect(px + 1, py + 1, 18, 17);
+    ctx.fillRect(px + 21, py + 1, 18, 17);
+    ctx.fillRect(px + 11, py + 21, 18, 17);
+    ctx.fillRect(px - 9, py + 21, 18, 17);
+    ctx.fillRect(px + 31, py + 21, 18, 17);
+    ctx.fillStyle = 'rgba(255,255,255,.22)';
+    ctx.fillRect(px + 1, py + 1, 18, 3);
+    ctx.fillRect(px + 21, py + 1, 18, 3);
+    ctx.fillRect(px + 11, py + 21, 18, 3);
+    ctx.fillStyle = 'rgba(0,0,0,.18)';
+    ctx.fillRect(px, py + TILE - 2, TILE, 2);
+  }
+
+  function drawQuestionTile(px, py, bob) {
+    var t = frameCount * 0.08;
+    var glow = 0.5 + 0.5 * Math.sin(t);
+    ctx.save();
+    ctx.translate(px + TILE / 2, py + TILE / 2 + bob);
+    ctx.scale(1, 1);
+    var grad = ctx.createLinearGradient(0, -TILE / 2, 0, TILE / 2);
+    grad.addColorStop(0, '#ffdc5e'); grad.addColorStop(0.5, '#f7b324'); grad.addColorStop(1, '#d98a06');
+    ctx.fillStyle = grad;
+    rr(-19, -19, 38, 38, 6); ctx.fill();
+    ctx.strokeStyle = '#8a4b00'; ctx.lineWidth = 3; rr(-19, -19, 38, 38, 6); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,' + (0.25 + glow * 0.45).toFixed(3) + ')';
+    rr(-15, -15, 30, 12, 5); ctx.fill();
+    // 铆钉
+    ctx.fillStyle = '#8a4b00';
+    [[-13, -13], [13, -13], [-13, 13], [13, 13]].forEach(function (p) {
+      ctx.beginPath(); ctx.arc(p[0], p[1], 2.4, 0, Math.PI * 2); ctx.fill();
+    });
+    // 问号
+    ctx.font = '900 26px ' + FONT;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 5; ctx.strokeStyle = '#7a4100';
+    ctx.strokeText('?', 0, 1);
+    ctx.fillStyle = '#fffdf2';
+    ctx.fillText('?', 0, 1);
+    ctx.restore();
+  }
+
+  function drawUsedTile(px, py) {
+    ctx.fillStyle = '#a35a2b'; ctx.fillRect(px, py, TILE, TILE);
+    ctx.fillStyle = '#c98354'; ctx.fillRect(px + 2, py + 2, TILE - 4, 5);
+    ctx.fillStyle = '#6d3a1a'; ctx.fillRect(px + 2, py + TILE - 7, TILE - 4, 5);
+    ctx.fillStyle = 'rgba(0,0,0,.15)';
+    ctx.fillRect(px, py, TILE, 2); ctx.fillRect(px, py, 2, TILE);
+    ctx.fillRect(px + TILE - 2, py, 2, TILE); ctx.fillRect(px, py + TILE - 2, TILE, 2);
+  }
+
+  function drawTiles() {
+    var c0 = Math.max(0, Math.floor(camX / TILE) - 1);
+    var c1 = Math.min(level.cols - 1, Math.floor((camX + VIEW_W) / TILE) + 1);
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = c0; c <= c1; c++) {
+        var t = level.grid[r][c];
+        if (t === T_EMPTY) continue;
+        var px = c * TILE - camX;
+        var py = r * TILE;
+        var key = r + ',' + c;
+        var bump = bumps[key];
+        var off = 0;
+        if (bump) {
+          var p = bump.t / 14;
+          off = -Math.sin(p * Math.PI) * 10;
+        }
+        ctx.save();
+        if (off) ctx.translate(0, off);
+        switch (t) {
+          case T_GROUND: drawGroundTile(px, py); break;
+          case T_STONE: drawStoneTile(px, py); break;
+          case T_BRICK: drawBrickTile(px, py); break;
+          case T_QUESTION: drawQuestionTile(px, py, 0); break;
+          case T_USED: drawUsedTile(px, py); break;
+        }
+        ctx.restore();
+      }
+    }
+  }
+
+  function drawCoin(c) {
+    var px = c.x - camX;
+    var wobble = Math.abs(Math.cos(c.t * 0.16));
+    var w = 8 + 14 * wobble;
+    ctx.save();
+    ctx.translate(px, c.y);
+    var g = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+    g.addColorStop(0, '#ffd85e'); g.addColorStop(0.5, '#fff6c2'); g.addColorStop(1, '#f0a500');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.ellipse(0, 0, Math.max(2, w / 2), 17, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#b47500'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.7)';
+    ctx.fillRect(-2, -9, 3, 18);
+    ctx.restore();
+  }
+
+  function drawFlagAndCastle() {
+    var px = level.poleCol * TILE - camX;
+    // 城堡
+    var cx0 = level.castleCol * TILE - camX;
+    if (cx0 > -260 && cx0 < VIEW_W + 60) {
+      ctx.fillStyle = '#b8491a';
+      ctx.fillRect(cx0, GROUND_Y - 160, 200, 160);
+      ctx.fillStyle = '#8a3410';
+      for (var i = 0; i < 5; i++) {
+        ctx.fillRect(cx0 + (i % 2 ? 40 : 0), GROUND_Y - 160 + i * 32, 200, 4);
+        for (var j = 0; j < 5; j++) ctx.fillRect(cx0 + j * 40 + (i % 2 ? 20 : 0), GROUND_Y - 160 + i * 32, 3, 32);
+      }
+      // 城垛
+      ctx.fillStyle = '#b8491a';
+      for (var k = 0; k < 5; k++) ctx.fillRect(cx0 - 10 + k * 44, GROUND_Y - 186, 30, 26);
+      // 门
+      ctx.fillStyle = '#3a2415';
+      ctx.beginPath();
+      ctx.moveTo(cx0 + 72, GROUND_Y);
+      ctx.lineTo(cx0 + 72, GROUND_Y - 62);
+      ctx.quadraticCurveTo(cx0 + 100, GROUND_Y - 100, cx0 + 128, GROUND_Y - 62);
+      ctx.lineTo(cx0 + 128, GROUND_Y);
+      ctx.closePath(); ctx.fill();
+      // 小旗
+      ctx.fillStyle = '#cfd6e0'; ctx.fillRect(cx0 + 96, GROUND_Y - 232, 4, 50);
+      ctx.fillStyle = '#e5392b';
+      ctx.beginPath(); ctx.moveTo(cx0 + 100, GROUND_Y - 232);
+      ctx.lineTo(cx0 + 136, GROUND_Y - 220); ctx.lineTo(cx0 + 100, GROUND_Y - 208);
+      ctx.closePath(); ctx.fill();
+    }
+    // 底座
+    if (px > -120 && px < VIEW_W + 120) {
+      ctx.fillStyle = '#7f8a9c';
+      rr(px - 16, POLE_BOTTOM - 16, 32, 16, 4); ctx.fill();
+      ctx.fillStyle = '#5f6875';
+      rr(px - 20, POLE_BOTTOM - 6, 40, 6, 3); ctx.fill();
+      // 旗杆（竖到地面）
+      ctx.fillStyle = '#dfe6f0'; ctx.fillRect(px - 4, POLE_TOP, 8, POLE_BOTTOM - POLE_TOP);
+      ctx.fillStyle = '#9aa4b5'; ctx.fillRect(px + 2, POLE_TOP, 2, POLE_BOTTOM - POLE_TOP);
+      ctx.fillStyle = '#7f8a9c'; ctx.fillRect(px - 1, POLE_TOP, 1, POLE_BOTTOM - POLE_TOP);
+      // 杆顶圆球
+      ctx.fillStyle = '#ffd54a';
+      ctx.beginPath(); ctx.arc(px, POLE_TOP - 6, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff3b8';
+      ctx.beginPath(); ctx.arc(px - 3, POLE_TOP - 9, 3, 0, Math.PI * 2); ctx.fill();
+      // 旗帜（初始在旗杆最上方）
+      var fy = flag.y;
+      var wave = Math.sin(frameCount * 0.12) * 4;
+      ctx.fillStyle = '#e5392b';
+      ctx.beginPath();
+      ctx.moveTo(px + 4, fy);
+      ctx.quadraticCurveTo(px + 34, fy + 8 + wave, px + 62, fy + 6);
+      ctx.lineTo(px + 62, fy + 42);
+      ctx.quadraticCurveTo(px + 34, fy + 44 + wave, px + 4, fy + 36);
+      ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = '#a51d12'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.beginPath();
+      ctx.moveTo(px + 10, fy + 8);
+      ctx.lineTo(px + 26, fy + 12); ctx.lineTo(px + 26, fy + 22); ctx.lineTo(px + 10, fy + 18);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+
+  function drawEnemies() {
+    for (var i = 0; i < enemies.length; i++) {
+      var g = enemies[i];
+      var px = g.x - camX;
+      if (px < -60 || px > VIEW_W + 60) continue;
+      if (g.dead) {
+        if (g.deadT < 40) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, 1 - g.deadT / 40);
+          ctx.drawImage(SPR_GOOMBA_FLAT, px - 3, g.y + g.h - SPR, SPR, SPR);
+          ctx.restore();
+        }
+        continue;
+      }
+      var spr = SPR_GOOMBA[g.dir > 0 ? 1 : 0];
+      // 走路一颠一颠
+      var bob = Math.round(Math.sin(frameCount * 0.25) * 1.2);
+      ctx.drawImage(spr, px - 3, g.y + g.h - SPR + bob, SPR, SPR);
+    }
+  }
+
+  function drawMario() {
+    var px = mario.x + mario.w / 2 - SPR / 2 - camX;
+    var py = mario.y + mario.h - SPR;
+    var spr = SPR_MARIO[mario.frame][mario.face > 0 ? 0 : 1];
+    ctx.drawImage(spr, Math.round(px), Math.round(py), SPR, SPR);
+  }
+
+  function drawEffects() {
+    var i;
+    for (i = 0; i < particles.length; i++) {
+      var q = particles[i];
+      ctx.globalAlpha = Math.max(0, 1 - q.t / q.life);
+      ctx.fillStyle = q.color;
+      ctx.fillRect(q.x - camX, q.y, q.size, q.size);
+    }
+    ctx.globalAlpha = 1;
+    for (i = 0; i < coins.length; i++) drawCoin(coins[i]);
+    for (i = 0; i < popups.length; i++) {
+      var p = popups[i];
+      var a = p.t < 40 ? 1 : Math.max(0, 1 - (p.t - 40) / 20);
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.font = '900 22px ' + FONT;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(60,30,0,.85)';
+      ctx.strokeText(p.text, p.x - camX, p.y);
+      ctx.fillStyle = p.color;
+      ctx.fillText(p.text, p.x - camX, p.y);
+      ctx.restore();
+    }
+  }
+
+  function drawLevelBanner() {
+    if (frameCount < 1) return;
+    ctx.save();
+    ctx.font = '900 20px ' + FONT;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.globalAlpha = 0.85;
+    ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(30,40,70,.55)';
+    var txt = T().banner(levelName(G.levelIndex), level.enemyCols.length);
+    ctx.strokeText(txt, 18, 16);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(txt, 18, 16);
+    ctx.restore();
+  }
+
+  function render() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.imageSmoothingEnabled = false;
+    if (!level) {
+      // 主菜单背景：静态展示第一关
+      level = LEVEL_DATA[0];
+      camX = 0;
+      mario.x = 3 * TILE; mario.y = GROUND_Y - mario.h;
+    }
+    drawBackground();
+    drawTiles();
+    drawFlagAndCastle();
+    drawEnemies();
+    if (G.state !== 'menu') drawMario();
+    else drawMario();
+    drawEffects();
+    drawLevelBanner();
+
+    if (G.state === 'paused') {
+      ctx.fillStyle = 'rgba(10,18,40,.35)';
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+    }
+  }
+
+  /* =========================================================================
+   *  13. 主循环
+   * ========================================================================= */
+  var last = 0, acc = 0, STEP = 1000 / 60;
+  function loop(ts) {
+    requestAnimationFrame(loop);
+    if (!last) last = ts;
+    var dt = ts - last; last = ts;
+    if (dt > 200) dt = 200;
+    acc += dt;
+    var guard = 0;
+    while (acc >= STEP && guard++ < 6) { tick(); acc -= STEP; }
+    render();
+  }
+  requestAnimationFrame(loop);
+
+  /* =========================================================================
+   *  14. 输入
+   * ========================================================================= */
+  var keys = { left: false, right: false, jump: false, shift: false };
+  var jumpEdge = false;
+
+  function ensureAudio() { Sound.init(); }
+
+  window.addEventListener('keydown', function (e) {
+    ensureAudio();
+    var code = e.code;
+    if (code === 'ArrowLeft' || code === 'KeyA') { keys.left = true; e.preventDefault(); }
+    else if (code === 'ArrowRight' || code === 'KeyD') { keys.right = true; e.preventDefault(); }
+    else if (code === 'Space' || code === 'ArrowUp' || code === 'KeyW') {
+      if (!keys.jump) jumpEdge = true;
+      keys.jump = true; e.preventDefault();
+    }
+    else if (code === 'ShiftLeft' || code === 'ShiftRight') { keys.shift = true; }
+    else if (code === 'Enter') { handleEnter(e); }
+    else if (code === 'KeyP' || code === 'Escape') {
+      if (G.state === 'playing') pauseGame();
+      else if (G.state === 'paused') resumeGame();
+    }
+    else if (code === 'KeyM') { toggleMusic(); }
+    else if (code === 'KeyR') {
+      if (G.state === 'playing' || G.state === 'paused') retryLevel();
+    }
+  });
+  window.addEventListener('keyup', function (e) {
+    var code = e.code;
+    if (code === 'ArrowLeft' || code === 'KeyA') keys.left = false;
+    else if (code === 'ArrowRight' || code === 'KeyD') keys.right = false;
+    else if (code === 'Space' || code === 'ArrowUp' || code === 'KeyW') keys.jump = false;
+    else if (code === 'ShiftLeft' || code === 'ShiftRight') keys.shift = false;
+  });
+  window.addEventListener('blur', function () {
+    keys.left = keys.right = keys.jump = keys.shift = false;
+    if (G.state === 'playing') pauseGame();
+  });
+
+  // 回车生效：原生按钮聚焦时回车即触发；未聚焦时由这里接管浮层主按钮
+  function handleEnter(e) {
+    var ov = document.querySelector('.overlay.show');
+    if (!ov) return;
+    var active = document.activeElement;
+    if (active && active.tagName === 'BUTTON' && ov.contains(active)) return; // 交给浏览器默认行为
+    var btn = ov.querySelector('.btn.primary');
+    if (btn) { e.preventDefault(); btn.click(); }
+  }
+
+  /* =========================================================================
+   *  15. 界面控制
+   * ========================================================================= */
+  var OVERLAYS = ['ovStart', 'ovHelp', 'ovPause', 'ovClear', 'ovOver'];
+  function hideAll() {
+    OVERLAYS.forEach(function (id) { document.getElementById(id).classList.remove('show'); });
+  }
+  function show(id) {
+    hideAll();
+    var el = document.getElementById(id);
+    el.classList.add('show');
+    var btn = el.querySelector('.btn.primary');
+    if (btn) setTimeout(function () { try { btn.focus(); } catch (err) {} }, 30);
+  }
+  function to(id) { return document.getElementById(id); }
+
+  function syncHUD() {
+    to('hudLevel').textContent = (G.levelIndex + 1) + ' / ' + LEVELS.length;
+    to('hudScore').textContent = G.score;
+    to('hudCoin').textContent = G.coins;
+    to('hudLife').textContent = G.lives > 0 ? new Array(G.lives + 1).join('♥') : '♡';
+    to('hudBest').textContent = Math.max(G.best, G.score);
+  }
+  var lastTimeShown = -1;
+  function syncHUDTime() {
+    if (G.time !== lastTimeShown) { lastTimeShown = G.time; to('hudTime').textContent = G.time; }
+  }
+
+  function pauseGame() {
+    if (G.state !== 'playing') return;
+    G.state = 'paused';
+    Sound.stopMusic();
+    show('ovPause');
+    syncLangButtons();
+  }
+  function resumeGame() {
+    if (G.state !== 'paused') return;
+    G.state = 'playing';
+    hideAll();
+    Sound.startMusic();
+    syncLangButtons();
+  }
+  function toggleMusic() {
+    Sound.on = !Sound.on;
+    to('btnMusic').textContent = Sound.on ? T().musicOn : T().musicOff;
+    if (Sound.on) { if (G.state === 'playing') Sound.startMusic(); }
+    else Sound.stopMusic();
+  }
+
+  // ---- 按钮事件（全部真实按钮，天然可点击；并支持回车） ----
+  to('btnStart').addEventListener('click', function () { ensureAudio(); startLevel(0, true, true); });
+  to('btnHelp').addEventListener('click', function () { show('ovHelp'); });
+  to('btnHelpBack').addEventListener('click', function () { show('ovStart'); });
+  to('btnResetBest').addEventListener('click', function () {
+    try { localStorage.removeItem('mario_best'); } catch (e) {}
+    G.best = 0; syncHUD();
+  });
+
+  to('btnMusic').addEventListener('click', function () { ensureAudio(); toggleMusic(); });
+  to('btnPause').addEventListener('click', function () {
+    if (G.state === 'playing') pauseGame();
+    else if (G.state === 'paused') resumeGame();
+  });
+
+  to('btnResume').addEventListener('click', resumeGame);
+  to('btnPauseRestart').addEventListener('click', function () { retryLevel(); });
+  to('btnPauseMenu').addEventListener('click', backToMenu);
+
+  to('btnNext').addEventListener('click', function () {
+    if (G.levelIndex < LEVELS.length - 1) startLevel(G.levelIndex + 1, false, true);
+    else startLevel(0, true, true);
+  });
+  to('btnReplay').addEventListener('click', function () { startLevel(G.levelIndex, false, true); });
+  to('btnClearMenu').addEventListener('click', backToMenu);
+
+  to('btnRetry').addEventListener('click', function () { startLevel(G.levelIndex, false, true); });
+  to('btnBackFirst').addEventListener('click', function () { startLevel(0, true, true); });
+  to('btnOverMenu').addEventListener('click', backToMenu);
+
+  syncHUD();
+  to('hudTime').textContent = LEVELS[0].time;
+
+  // ---- 多语言初始化 ----
+  applyI18n();
+  to('langSelect').addEventListener('change', function () {
+    currentLang = this.value;
+    try { localStorage.setItem('mario_lang', currentLang); } catch (e) {}
+    applyI18n();
+    this.blur();   // 防止方向键在选框上误改语言、影响游戏操作
+  });
+})();
+</script>
+</body>
+</html>

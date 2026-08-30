@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超级玛丽</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: "Microsoft YaHei", "微软雅黑", "SimHei", "黑体", sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+#game-container {
+  position: relative;
+  width: 1100px;
+  height: 650px;
+  background: #87CEEB;
+  border: 4px solid #333;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  z-index: 10;
+  text-align: center;
+}
+.screen h1 {
+  font-size: 56px;
+  margin-bottom: 20px;
+  text-shadow: 4px 4px 0 #e94560, 0 0 20px rgba(233,69,96,0.5);
+  letter-spacing: 4px;
+}
+.screen h2 {
+  font-size: 36px;
+  margin-bottom: 16px;
+  color: #ffd700;
+}
+.screen p {
+  font-size: 18px;
+  line-height: 1.8;
+  margin: 6px 0;
+  color: #eee;
+}
+.btn {
+  margin-top: 28px;
+  padding: 14px 48px;
+  font-size: 22px;
+  font-family: inherit;
+  font-weight: 700;
+  background: linear-gradient(180deg, #e94560, #c23152);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #8b1e3a, 0 8px 20px rgba(0,0,0,0.3);
+  transition: all 0.1s;
+}
+.btn:hover, .btn:focus {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 #8b1e3a, 0 6px 15px rgba(0,0,0,0.3);
+  outline: none;
+}
+.btn:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 #8b1e3a;
+}
+.ops {
+  background: rgba(255,255,255,0.08);
+  padding: 20px 40px;
+  border-radius: 12px;
+  margin: 16px 0;
+  text-align: left;
+}
+.ops p { font-size: 16px; }
+#fpsCounter { position:absolute; top:52px; right:14px; z-index:6; font-family:"Courier New",monospace; font-size:12px; letter-spacing:1px; color:rgba(255,255,255,.9); text-shadow:1px 1px 0 #000; background:rgba(0,0,0,.25); padding:4px 6px; border-radius:3px; pointer-events:none; }
+/* 右上角控制栏：暂停 / 重新开始 / 语言切换 */
+#topBar { position:absolute; top:14px; right:14px; z-index:30; display:flex; gap:8px; align-items:center; }
+.ctrl-btn {
+  font-family:"Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  font-size:13px; font-weight:700; letter-spacing:1px; color:#fff;
+  background:rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.55);
+  border-radius:6px; padding:6px 12px; cursor:pointer;
+  text-shadow:1px 1px 0 #000;
+  transition:background .15s ease, transform .15s ease, opacity .15s ease;
+}
+.ctrl-btn:hover:not(:disabled) { background:rgba(0,0,0,.62); transform:translateY(-1px); }
+.ctrl-btn:disabled { opacity:.4; cursor:default; }
+.lang-select {
+  font-family:"Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  font-size:13px; color:#fff; background:rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.55); border-radius:6px;
+  padding:5px 6px; cursor:pointer; outline:none; text-shadow:1px 1px 0 #000;
+}
+.lang-select option { color:#1a1a2e; background:#fff; text-shadow:none; }
+.lang-select:focus-visible { outline:2px solid #ffd700; }
+#pauseScreen { background:rgba(10,16,38,.78); }
+#hud {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  padding-right: 300px;
+  display: flex;
+  justify-content: space-around;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 #000;
+  z-index: 5;
+  pointer-events: none;
+}
+.hidden { display: none !important; }
+
+/* 语言切换已合并到右上角 #topBar 的下拉框 */
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="gameCanvas" width="1100" height="650"></canvas>
+  <div id="hud" class="hidden">
+    <span data-i18n="score">积分：<span id="scoreText">0</span></span>
+    <span data-i18n="level">关卡：<span id="levelText">1</span></span>
+    <span data-i18n="lives">生命：<span id="livesText">3</span></span>
+  </div>
+  <div id="fpsCounter" class="fps-counter">FPS --</div>
+
+  <div id="topBar">
+    <button id="btnTopPause" class="ctrl-btn" type="button">⏸ 暂停</button>
+    <button id="btnTopRestart" class="ctrl-btn" type="button">↻ 重新开始</button>
+    <select id="langSelect" class="lang-select" aria-label="Language">
+      <option value="zh-CN">简体中文</option>
+      <option value="zh-TW">繁體中文</option>
+      <option value="en">English</option>
+      <option value="ja">日本語</option>
+      <option value="pt-BR">Português</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+    </select>
+  </div>
+
+  <div id="startScreen" class="screen">
+    <h1>超级玛丽</h1>
+    <div class="ops">
+      <p>← → 或 A D ：左右移动</p>
+      <p>空格 / W / ↑ ：跳跃</p>
+      <p>Shift ：加速奔跑（加速时跳得更高）</p>
+      <p>顶问号块获得积分，踩板栗仔消灭敌人</p>
+      <p>到达终点红旗即可过关</p>
+    </div>
+    <button class="btn" id="startBtn">开始游戏</button>
+  </div>
+
+  <div id="pauseScreen" class="screen hidden">
+    <h2 id="pauseTitle">游戏暂停</h2>
+    <p id="pauseText">休息一下，马里奥在等你回来。</p>
+    <button class="btn" id="btnResume">继续游戏</button>
+    <button class="btn" id="btnPauseRestart" style="margin-top:12px;background:linear-gradient(180deg,#4a90d9,#2a6cb0);box-shadow:0 6px 0 #1a4a80;">重新开始</button>
+    <p id="pauseHint" style="font-size:14px;color:#aab4d4;margin-top:22px;">按 P 或 Esc 继续游戏</p>
+  </div>
+
+  <div id="levelClearScreen" class="screen hidden">
+    <h2>恭喜通关！</h2>
+    <p id="clearMsg">本关积分 +0</p>
+    <p>当前总分：<span id="clearScore">0</span></p>
+    <button class="btn" id="nextBtn">进入下一关</button>
+  </div>
+
+  <div id="failScreen" class="screen hidden">
+    <h2>再接再厉！</h2>
+    <p>别灰心，失败是成功之母！</p>
+    <p>当前积分：<span id="failScore">0</span></p>
+    <button class="btn" id="retryBtn">重新挑战本关</button>
+    <button class="btn" id="restartBtn" style="margin-top:12px;background:linear-gradient(180deg,#4a90d9,#2a6cb0);box-shadow:0 6px 0 #1a4a80;">回到第一关</button>
+  </div>
+
+  <div id="winScreen" class="screen hidden">
+    <h1>全部通关！</h1>
+    <h2>太厉害了！</h2>
+    <p>最终积分：<span id="winScore">0</span></p>
+    <button class="btn" id="winRestartBtn">再玩一次</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const W = 1100, H = 650;
+const GROUND_Y = 560;
+const GRAVITY = 0.55;
+const JUMP_FORCE = -14.2;
+const JUMP_FORCE_RUN = -17.0;
+const MOVE_SPEED = 4.2;
+const RUN_SPEED = 7.5;
+// 跳坑手感宽容度（平台游戏标准做法）
+const COYOTE_FRAMES = 6;      // 土狼时间：走出坑沿后仍可起跳的帧数
+const JUMP_BUFFER_FRAMES = 6; // 跳跃预输入：落地前提前按键，落地瞬间自动起跳
+const LEDGE_SNAP = 18;        // 低于地面此高度内且脚未悬空时，自动“扒住坑沿”站回地面
+
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function playTone(freq, dur, type='square', vol=0.15) {
+  ensureAudio();
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur);
+}
+function playCoin() { playTone(880,0.1); setTimeout(()=>playTone(1200,0.15),80); }
+function playJump() { playTone(400,0.12,'triangle',0.1); }
+function playStomp() { playTone(200,0.15,'sawtooth',0.12); }
+function playFlag() {
+  [523,659,784,1046].forEach((f,i)=>setTimeout(()=>playTone(f,0.25,'triangle',0.18),i*180));
+}
+function playHurt() { playTone(150,0.3,'sawtooth',0.2); }
+
+const I18N={
+'zh-CN':{title:'超级玛丽',score:'积分：',level:'关卡：',lives:'生命：',start:'开始游戏',clear:'恭喜通关！',next:'进入下一关',retry:'重新挑战本关',restart:'回到第一关',win:'全部通关！',amazing:'太厉害了！',winRestart:'再玩一次',ops:['← → 或 A D ：左右移动','空格 / W / ↑ ：跳跃','Shift ：加速奔跑（加速时跳得更高）','顶问号块获得积分，踩板栗仔消灭敌人','到达终点红旗即可过关'],clearMsg:lv=>`第 ${lv} 关完成！`,finalScore:'最终积分：',currentScore:'当前总分：',failTitle:'再接再厉！',failText:'别灰心，失败是成功之母！',currentPoints:'当前积分：',fps:'FPS',pause:'暂停',resume:'继续',restartGame:'重新开始',pausedTitle:'游戏暂停',pausedText:'休息一下，马里奥在等你回来。',resumeBtn:'继续游戏',pauseHint:'按 P 或 Esc 继续游戏'},
+'zh-TW':{title:'超級瑪利歐',score:'積分：',level:'關卡：',lives:'生命：',start:'開始遊戲',clear:'恭喜過關！',next:'進入下一關',retry:'重新挑戰本關',restart:'回到第一關',win:'全部過關！',amazing:'太厲害了！',winRestart:'再玩一次',ops:['← → 或 A D ：左右移動','空格 / W / ↑ ：跳躍','Shift ：加速奔跑（加速時跳得更高）','頂問號方塊獲得積分，踩慄寶寶消滅敵人','到達終點紅旗即可過關'],clearMsg:lv=>`第 ${lv} 關完成！`,finalScore:'最終積分：',currentScore:'目前總分：',failTitle:'再接再厲！',failText:'別灰心，失敗為成功之母！',currentPoints:'目前積分：',fps:'FPS',pause:'暫停',resume:'繼續',restartGame:'重新開始',pausedTitle:'遊戲暫停',pausedText:'休息一下，瑪利歐在等你回來。',resumeBtn:'繼續遊戲',pauseHint:'按 P 或 Esc 繼續遊戲'},
+'en':{title:'Super Adventure',score:'Score: ',level:'Level: ',lives:'Lives: ',start:'Start Game',clear:'Level Clear!',next:'Next Level',retry:'Retry Level',restart:'Back to Level 1',win:'All Levels Clear!',amazing:'Amazing!',winRestart:'Play Again',ops:['← → or A D: Move','Space / W / ↑: Jump','Shift: Run faster and jump higher','Hit ? blocks for points; stomp enemies','Reach the red flag to clear the level'],clearMsg:lv=>`Level ${lv} complete!`,finalScore:'Final Score: ',currentScore:'Current Score: ',failTitle:'Try Again!',failText:'Keep going. Practice makes progress!',currentPoints:'Current Score: ',fps:'FPS',pause:'Pause',resume:'Resume',restartGame:'Restart',pausedTitle:'Game Paused',pausedText:'Take a break — Mario is waiting for you.',resumeBtn:'Resume Game',pauseHint:'Press P or Esc to resume'},
+'ja':{title:'スーパーマリオ',score:'スコア：',level:'コース：',lives:'残機：',start:'ゲームスタート',clear:'コースクリア！',next:'次のコースへ',retry:'このコースを再挑戦',restart:'1コース目に戻る',win:'全コースクリア！',amazing:'すごい！',winRestart:'もう一度遊ぶ',ops:['← → または A D ：左右移動','スペース / W / ↑ ：ジャンプ','Shift ：ダッシュ（加速中は高く跳べる）','？ブロックを叩いて得点、クリボーを踏んで倒そう','ゴールの赤い旗に触れればクリア'],clearMsg:lv=>`第${lv}コース クリア！`,finalScore:'最終スコア：',currentScore:'現在の合計：',failTitle:'あと少し！',failText:'くじけないで、失敗は成功のもと！',currentPoints:'現在のスコア：',fps:'FPS',pause:'一時停止',resume:'再開',restartGame:'最初から',pausedTitle:'一時停止中',pausedText:'少し休憩しよう。マリオが待っている。',resumeBtn:'ゲーム再開',pauseHint:'P または Esc で再開'},
+'pt-BR':{title:'Super Aventura',score:'Pontos: ',level:'Fase: ',lives:'Vidas: ',start:'Começar',clear:'Fase Concluída!',next:'Próxima Fase',retry:'Tentar de Novo',restart:'Voltar à Fase 1',win:'Todas as Fases Concluídas!',amazing:'Incrível!',winRestart:'Jogar de Novo',ops:['← → ou A D: mover','Espaço / W / ↑: pular','Shift: correr (pule mais alto com velocidade)','Acerte blocos ? para ganhar pontos; pise nos inimigos','Alcance a bandeira vermelha para concluir'],clearMsg:lv=>`Fase ${lv} concluída!`,finalScore:'Pontuação Final: ',currentScore:'Pontuação Atual: ',failTitle:'Tente de Novo!',failText:'Não desanima — a prática leva à perfeição!',currentPoints:'Pontos Atuais: ',fps:'FPS',pause:'Pausar',resume:'Continuar',restartGame:'Reiniciar',pausedTitle:'Jogo Pausado',pausedText:'Relaxe um pouco — o Mario está esperando.',resumeBtn:'Continuar Jogo',pauseHint:'Pressione P ou Esc para continuar'},
+'es':{title:'Súper Aventura',score:'Puntos: ',level:'Nivel: ',lives:'Vidas: ',start:'Comenzar',clear:'¡Nivel Superado!',next:'Siguiente Nivel',retry:'Reintentar',restart:'Volver al Nivel 1',win:'¡Todos los Niveles Superados!',amazing:'¡Increíble!',winRestart:'Jugar de Nuevo',ops:['← → o A D: moverse','Espacio / W / ↑: saltar','Shift: correr (saltas más alto con impulso)','Golpea bloques ? para ganar puntos; salta sobre los enemigos','Llega a la bandera roja para superar el nivel'],clearMsg:lv=>`¡Nivel ${lv} completado!`,finalScore:'Puntuación Final: ',currentScore:'Puntuación Actual: ',failTitle:'¡Inténtalo otra vez!',failText:'¡No te rindas, la práctica hace al maestro!',currentPoints:'Puntos Actuales: ',fps:'FPS',pause:'Pausar',resume:'Reanudar',restartGame:'Reiniciar',pausedTitle:'Juego en Pausa',pausedText:'Descansa un momento, Mario te espera.',resumeBtn:'Reanudar juego',pauseHint:'Pulsa P o Esc para reanudar'},
+'fr':{title:'Super Aventure',score:'Score : ',level:'Niveau : ',lives:'Vies : ',start:'Jouer',clear:'Niveau Terminé !',next:'Niveau suivant',retry:'Réessayer',restart:'Retour au Niveau 1',win:'Tous les Niveaux Terminés !',amazing:'Incroyable !',winRestart:'Rejouer',ops:['← → ou A D : se déplacer','Espace / W / ↑ : sauter','Shift : courir (tu sautes plus haut avec de l’élan)','Frappe les blocs ? pour des points ; écrase les ennemis','Atteins le drapeau rouge pour finir le niveau'],clearMsg:lv=>`Niveau ${lv} terminé !`,finalScore:'Score Final : ',currentScore:'Score Actuel : ',failTitle:'Encore un essai !',failText:'N’abandonne pas, c’est en forgeant qu’on devient forgeron !',currentPoints:'Score Actuel : ',fps:'FPS',pause:'Pause',resume:'Reprendre',restartGame:'Recommencer',pausedTitle:'Jeu en Pause',pausedText:'Fais une pause, Mario t’attend.',resumeBtn:'Reprendre le jeu',pauseHint:'Appuie sur P ou Échap pour reprendre'}
+};
+function detectLang(){
+  const list=[].concat(navigator.languages||[],[navigator.language||'en']);
+  const s=list.join(',').toLowerCase();
+  if(s.indexOf('zh')>=0)return /tw|hk|mo|hant/.test(s)?'zh-TW':'zh-CN';
+  if(s.indexOf('ja')>=0)return 'ja';
+  if(s.indexOf('pt')>=0)return 'pt-BR';
+  if(s.indexOf('es')>=0)return 'es';
+  if(s.indexOf('fr')>=0)return 'fr';
+  return 'en';
+}
+let currentLang='zh-CN';
+try{const saved=localStorage.getItem('mario_lang');if(saved&&I18N[saved])currentLang=saved;else currentLang=detectLang();}catch(err){currentLang=detectLang();}
+function applyLanguage(){
+  const t=I18N[currentLang];
+  document.title=t.title;
+  document.querySelector('#startScreen h1').textContent=t.title;
+  document.querySelector('#startBtn').textContent=t.start;
+  document.querySelector('#levelClearScreen h2').textContent=t.clear;
+  document.getElementById('nextBtn').textContent=t.next;
+  document.querySelector('#failScreen h2').textContent=t.failTitle;
+  document.querySelector('#failScreen p:nth-of-type(1)').textContent=t.failText;
+  document.getElementById('retryBtn').textContent=t.retry;
+  document.getElementById('restartBtn').textContent=t.restart;
+  document.querySelector('#winScreen h1').textContent=t.win;
+  document.querySelector('#winScreen h2').textContent=t.amazing;
+  document.getElementById('winRestartBtn').textContent=t.winRestart;
+  document.querySelectorAll('#startScreen .ops p').forEach((p,i)=>p.textContent=t.ops[i]||'');
+  document.querySelector('#hud [data-i18n="score"]').firstChild.textContent=t.score;
+  document.querySelector('#hud [data-i18n="level"]').firstChild.textContent=t.level;
+  document.querySelector('#hud [data-i18n="lives"]').firstChild.textContent=t.lives;
+  document.getElementById('clearScore').previousSibling.textContent=t.currentScore;
+  document.getElementById('winScore').previousSibling.textContent=t.finalScore;
+  document.getElementById('failScore').previousSibling.textContent=t.currentPoints;
+  document.getElementById('pauseTitle').textContent=t.pausedTitle;
+  document.getElementById('pauseText').textContent=t.pausedText;
+  document.getElementById('btnResume').textContent=t.resumeBtn;
+  document.getElementById('btnPauseRestart').textContent=t.restartGame;
+  document.getElementById('pauseHint').textContent=t.pauseHint;
+  document.getElementById('langSelect').value=currentLang;
+  document.getElementById('fpsCounter').textContent=`${t.fps} --`;
+  updateCtrlButtons();
+  document.documentElement.lang=currentLang;
+}
+
+// ========== 顶部控制栏：暂停 / 继续 / 重新开始 ==========
+let lastUiState='';
+function updateCtrlButtons(){
+  const t=I18N[currentLang];
+  const bP=document.getElementById('btnTopPause');
+  bP.innerHTML=gameState==='paused'?'▶ '+t.resume:'⏸ '+t.pause;
+  bP.disabled=(gameState!=='playing'&&gameState!=='paused');
+  const bR=document.getElementById('btnTopRestart');
+  bR.textContent='↻ '+t.restartGame;
+  bR.disabled=(gameState==='start');
+}
+function syncCtrlButtons(){if(gameState!==lastUiState){lastUiState=gameState;updateCtrlButtons();}}
+function pauseGame(){
+  if(gameState!=='playing')return;
+  gameState='paused';
+  keys={};
+  document.getElementById('pauseScreen').classList.remove('hidden');
+  updateCtrlButtons();
+}
+function resumeGame(){
+  if(gameState!=='paused')return;
+  gameState='playing';
+  document.getElementById('pauseScreen').classList.add('hidden');
+  updateCtrlButtons();
+}
+function togglePause(){
+  if(gameState==='playing')pauseGame();
+  else if(gameState==='paused')resumeGame();
+}
+function restartGame(){
+  if(gameState==='start'){document.getElementById('startBtn').click();return;}
+  ['pauseScreen','levelClearScreen','failScreen','winScreen','startScreen'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  keys={};
+  score=0;lives=3;
+  initLevel(1);
+  gameState='playing';
+  document.getElementById('hud').classList.remove('hidden');
+  updateCtrlButtons();
+}
+document.getElementById('langSelect').addEventListener('change',function(){
+  currentLang=this.value;
+  try{localStorage.setItem('mario_lang',currentLang);}catch(err){}
+  applyLanguage();
+  this.blur();
+});
+document.getElementById('btnTopPause').onclick=togglePause;
+document.getElementById('btnTopRestart').onclick=restartGame;
+document.getElementById('btnResume').onclick=resumeGame;
+document.getElementById('btnPauseRestart').onclick=restartGame;
+
+let gameState = 'start';
+let score = 0, lives = 3, currentLevel = 1;
+let cameraX = 0;
+let keys = {};
+let coyoteTimer = 0;      // 土狼时间剩余帧数
+let jumpBufferTimer = 0;  // 跳跃预输入剩余帧数
+let particles = [];
+let floatingTexts = [];
+let fpsFrames=0,fpsLastTime=performance.now(),fpsValue=60;
+
+const mario = {
+  x: 80, y: GROUND_Y - 48, w: 32, h: 48,
+  vx: 0, vy: 0, onGround: true,
+  facing: 1, invincible: 0,
+  frame: 0, animTimer: 0
+};
+
+const levels = [
+  {width:3400,bricks:[{x:260,y:400},{x:300,y:400},{x:340,y:400},{x:380,y:400},{x:620,y:330},{x:660,y:330},{x:900,y:410},{x:940,y:410},{x:980,y:410},{x:1250,y:300},{x:1290,y:300},{x:1330,y:300},{x:1600,y:390},{x:1640,y:390},{x:1950,y:320},{x:1990,y:320},{x:2030,y:320},{x:2070,y:320},{x:2350,y:400},{x:2390,y:400},{x:2700,y:300},{x:2740,y:300},{x:2780,y:300}],questions:[{x:300,y:400},{x:660,y:330},{x:940,y:410},{x:1290,y:300},{x:1640,y:390},{x:1990,y:320},{x:2740,y:300}],enemies:[470,720,1080,1450,1770,2180,2500,3000].map((x,i)=>({x,y:GROUND_Y-32,dir:i%2?-1:1})),pits:[{x:760,w:90},{x:1120,w:110},{x:1510,w:90},{x:2200,w:120},{x:2850,w:100}],pipes:[{x:560,h:80},{x:1160,h:90},{x:1840,h:110},{x:2550,h:100}],flagX:3150},
+  {width:3900,bricks:[{x:220,y:430},{x:260,y:430},{x:300,y:430},{x:500,y:340},{x:540,y:340},{x:580,y:340},{x:620,y:340},{x:820,y:390},{x:1050,y:280},{x:1090,y:280},{x:1130,y:280},{x:1170,y:280},{x:1400,y:360},{x:1440,y:360},{x:1480,y:360},{x:1700,y:300},{x:1740,y:300},{x:2000,y:420},{x:2040,y:420},{x:2080,y:420},{x:2120,y:420},{x:2400,y:310},{x:2440,y:310},{x:2480,y:310},{x:2750,y:390},{x:2790,y:390},{x:2830,y:390},{x:2870,y:390},{x:3100,y:280},{x:3140,y:280},{x:3180,y:280}],questions:[{x:260,y:430},{x:540,y:340},{x:1090,y:280},{x:1440,y:360},{x:1740,y:300},{x:2040,y:420},{x:2440,y:310},{x:2790,y:390},{x:3140,y:280}],enemies:[380,680,920,1260,1550,1850,2200,2600,3000,3450].map((x,i)=>({x,y:GROUND_Y-32,dir:i%2?1:-1})),pits:[{x:700,w:100},{x:930,w:90},{x:1280,w:120},{x:1580,w:100},{x:2160,w:120},{x:2600,w:100},{x:2950,w:110},{x:3350,w:120}],pipes:[{x:760,h:90},{x:1000,h:120},{x:1600,h:80},{x:2300,h:130},{x:2900,h:100}],flagX:3650},
+  {width:4500,bricks:[{x:180,y:390},{x:220,y:390},{x:260,y:390},{x:300,y:390},{x:480,y:300},{x:520,y:300},{x:560,y:300},{x:760,y:430},{x:800,y:430},{x:980,y:340},{x:1020,y:340},{x:1060,y:340},{x:1100,y:340},{x:1320,y:270},{x:1360,y:270},{x:1400,y:270},{x:1600,y:380},{x:1640,y:380},{x:1680,y:380},{x:1720,y:380},{x:1950,y:310},{x:1990,y:310},{x:2200,y:410},{x:2240,y:410},{x:2280,y:410},{x:2500,y:290},{x:2540,y:290},{x:2580,y:290},{x:2620,y:290},{x:2850,y:370},{x:2890,y:370},{x:2930,y:370},{x:3150,y:250},{x:3190,y:250},{x:3230,y:250},{x:3270,y:250},{x:3500,y:390},{x:3540,y:390},{x:3580,y:390}],questions:[{x:220,y:390},{x:520,y:300},{x:800,y:430},{x:1020,y:340},{x:1360,y:270},{x:1640,y:380},{x:1990,y:310},{x:2240,y:410},{x:2540,y:290},{x:2890,y:370},{x:3190,y:250},{x:3540,y:390}],enemies:[360,650,900,1180,1500,1820,2100,2400,2750,3050,3400,3800].map((x,i)=>({x,y:GROUND_Y-32,dir:i%2?-1:1})),pits:[{x:680,w:110},{x:920,w:120},{x:1160,w:100},{x:1450,w:120},{x:1800,w:110},{x:2050,w:130},{x:2350,w:120},{x:2700,w:110},{x:3000,w:130},{x:3350,w:120},{x:3750,w:100}],pipes:[{x:400,h:70},{x:720,h:110},{x:900,h:80},{x:1240,h:120},{x:1880,h:100},{x:2350,h:130},{x:2800,h:90},{x:3300,h:120}],flagX:4250},
+  {width:5000,bricks:[{x:240,y:450},{x:280,y:450},{x:320,y:450},{x:360,y:450},{x:560,y:350},{x:600,y:350},{x:820,y:290},{x:860,y:290},{x:900,y:290},{x:1080,y:400},{x:1120,y:400},{x:1160,y:400},{x:1200,y:400},{x:1400,y:250},{x:1440,y:250},{x:1480,y:250},{x:1520,y:250},{x:1750,y:360},{x:1790,y:360},{x:2000,y:300},{x:2040,y:300},{x:2080,y:300},{x:2300,y:430},{x:2340,y:430},{x:2380,y:430},{x:2420,y:430},{x:2650,y:280},{x:2690,y:280},{x:2730,y:280},{x:2950,y:350},{x:2990,y:350},{x:3030,y:350},{x:3070,y:350},{x:3300,y:230},{x:3340,y:230},{x:3380,y:230},{x:3600,y:400},{x:3640,y:400},{x:3680,y:400},{x:3950,y:300},{x:3990,y:300},{x:4030,y:300},{x:4070,y:300},{x:4350,y:370},{x:4390,y:370},{x:4430,y:370}],questions:[{x:280,y:450},{x:600,y:350},{x:860,y:290},{x:1120,y:400},{x:1440,y:250},{x:1790,y:360},{x:2040,y:300},{x:2340,y:430},{x:2690,y:280},{x:2990,y:350},{x:3340,y:230},{x:3640,y:400},{x:3990,y:300},{x:4390,y:370}],enemies:[420,700,980,1280,1600,1900,2200,2550,2850,3200,3500,3850,4200,4600].map((x,i)=>({x,y:GROUND_Y-32,dir:i%2?1:-1})),pits:[{x:740,w:120},{x:960,w:130},{x:1260,w:110},{x:1580,w:120},{x:1880,w:130},{x:2180,w:120},{x:2500,w:130},{x:2800,w:120},{x:3150,w:130},{x:3450,w:120},{x:3800,w:130},{x:4150,w:120},{x:4500,w:130}],pipes:[{x:500,h:100},{x:900,h:130},{x:1320,h:90},{x:1680,h:120},{x:2250,h:100},{x:2600,h:140},{x:3100,h:100},{x:3550,h:130},{x:4100,h:110}],flagX:4750},
+  {width:5600,bricks:[{x:200,y:420},{x:240,y:420},{x:280,y:420},{x:450,y:330},{x:490,y:330},{x:530,y:330},{x:570,y:330},{x:760,y:260},{x:800,y:260},{x:840,y:260},{x:1050,y:390},{x:1090,y:390},{x:1130,y:390},{x:1320,y:300},{x:1360,y:300},{x:1400,y:300},{x:1440,y:300},{x:1650,y:230},{x:1690,y:230},{x:1730,y:230},{x:1950,y:370},{x:1990,y:370},{x:2030,y:370},{x:2070,y:370},{x:2300,y:280},{x:2340,y:280},{x:2380,y:280},{x:2600,y:400},{x:2640,y:400},{x:2680,y:400},{x:2900,y:250},{x:2940,y:250},{x:2980,y:250},{x:3020,y:250},{x:3250,y:340},{x:3290,y:340},{x:3330,y:340},{x:3500,y:210},{x:3540,y:210},{x:3580,y:210},{x:3620,y:210},{x:3850,y:380},{x:3890,y:380},{x:3930,y:380},{x:4150,y:290},{x:4190,y:290},{x:4230,y:290},{x:4270,y:290},{x:4500,y:350},{x:4540,y:350},{x:4580,y:350},{x:4800,y:240},{x:4840,y:240},{x:4880,y:240},{x:4920,y:240}],questions:[{x:240,y:420},{x:490,y:330},{x:800,y:260},{x:1090,y:390},{x:1360,y:300},{x:1690,y:230},{x:1990,y:370},{x:2340,y:280},{x:2640,y:400},{x:2940,y:250},{x:3290,y:340},{x:3540,y:210},{x:3890,y:380},{x:4190,y:290},{x:4540,y:350},{x:4840,y:240}],enemies:[350,650,950,1230,1530,1850,2180,2500,2820,3150,3430,3750,4050,4400,4700,5150].map((x,i)=>({x,y:GROUND_Y-32,dir:i%2? -1:1})),pits:[{x:620,w:130},{x:900,w:140},{x:1180,w:120},{x:1480,w:130},{x:1800,w:140},{x:2120,w:130},{x:2450,w:140},{x:2750,w:130},{x:3070,w:140},{x:3380,w:130},{x:3700,w:140},{x:4000,w:130},{x:4300,w:140},{x:4600,w:130},{x:5000,w:140}],pipes:[{x:390,h:90},{x:680,h:120},{x:1010,h:100},{x:1280,h:140},{x:1600,h:100},{x:2200,h:130},{x:2550,h:110},{x:3000,h:140},{x:3450,h:100},{x:3950,h:130},{x:4450,h:110},{x:4950,h:140}],flagX:5350},
+  {width:6200,bricks:[{x:180,y:440},{x:220,y:440},{x:260,y:440},{x:300,y:440},{x:430,y:300},{x:470,y:300},{x:510,y:300},{x:700,y:370},{x:740,y:370},{x:780,y:370},{x:820,y:370},{x:1000,y:240},{x:1040,y:240},{x:1080,y:240},{x:1120,y:240},{x:1300,y:400},{x:1340,y:400},{x:1520,y:280},{x:1560,y:280},{x:1600,y:280},{x:1800,y:350},{x:1840,y:350},{x:1880,y:350},{x:1920,y:350},{x:2150,y:220},{x:2190,y:220},{x:2230,y:220},{x:2400,y:390},{x:2440,y:390},{x:2480,y:390},{x:2700,y:260},{x:2740,y:260},{x:2780,y:260},{x:2820,y:260},{x:3000,y:340},{x:3040,y:340},{x:3080,y:340},{x:3300,y:200},{x:3340,y:200},{x:3380,y:200},{x:3420,y:200},{x:3650,y:370},{x:3690,y:370},{x:3730,y:370},{x:3950,y:250},{x:3990,y:250},{x:4030,y:250},{x:4070,y:250},{x:4300,y:410},{x:4340,y:410},{x:4380,y:410},{x:4600,y:300},{x:4640,y:300},{x:4680,y:300},{x:4720,y:300},{x:4950,y:230},{x:4990,y:230},{x:5030,y:230},{x:5250,y:360},{x:5290,y:360},{x:5330,y:360},{x:5550,y:270},{x:5590,y:270},{x:5630,y:270},{x:5670,y:270}],questions:[{x:220,y:440},{x:470,y:300},{x:740,y:370},{x:1040,y:240},{x:1340,y:400},{x:1560,y:280},{x:1840,y:350},{x:2190,y:220},{x:2440,y:390},{x:2740,y:260},{x:3040,y:340},{x:3340,y:200},{x:3690,y:370},{x:3990,y:250},{x:4340,y:410},{x:4640,y:300},{x:4990,y:230},{x:5290,y:360},{x:5590,y:270}],enemies:[340,620,900,1200,1450,1730,2050,2350,2650,2950,3250,3550,3850,4200,4500,4850,5150,5450,5900].map((x,i)=>({x,y:GROUND_Y-32,dir:i%2? -1:1})),pits:[{x:580,w:140},{x:860,w:150},{x:1160,w:130},{x:1410,w:150},{x:1690,w:140},{x:2010,w:150},{x:2320,w:140},{x:2600,w:150},{x:2900,w:140},{x:3200,w:150},{x:3500,w:140},{x:3800,w:150},{x:4150,w:140},{x:4450,w:150},{x:4780,w:140},{x:5080,w:150},{x:5380,w:140},{x:5780,w:150}],pipes:[{x:350,h:100},{x:650,h:130},{x:930,h:110},{x:1250,h:150},{x:1460,h:100},{x:1950,h:130},{x:2250,h:100},{x:2750,h:140},{x:3100,h:110},{x:3600,h:140},{x:4100,h:110},{x:4550,h:130},{x:5050,h:120},{x:5500,h:150}],flagX:6000}
+];
+
+let levelData = null;
+let bricks = [], questions = [], enemies = [], pipes = [], pits = [];
+let flag = { x: 0, poleH: 220, flagY: 0, falling: false };
+let flagScoreGiven = false;
+let marioOnFlag = false;
+
+function initLevel(lv) {
+  currentLevel = lv;
+  levelData = levels[lv-1];
+  bricks = levelData.bricks.map(b => ({x:b.x, y:b.y, w:40, h:40}));
+  questions = levelData.questions.map(q => ({x:q.x, y:q.y, w:40, h:40, hit:false, bump:0, flash:0}));
+  enemies = levelData.enemies.map(e => ({
+    x:e.x, y:e.y, w:32, h:32, vx: e.dir * 1.4, alive:true, squished:false, squishTimer:0, frame:0
+  }));
+  pipes = levelData.pipes.map(p => ({x:p.x, y:GROUND_Y-p.h, w:56, h:p.h}));
+  pits = levelData.pits.map(p => ({x:p.x, y:GROUND_Y, w:p.w, h:H-GROUND_Y}));
+
+  // 防止敌人出生点落在管道内部。
+  // 第二关的敌人 x=1000，而管道 x=980~1036，原来会直接生成在管道里，
+  // 每一帧检测到重叠后又反转方向，于是敌人看起来像“卡死”。
+  for (const e of enemies) {
+    for (const p of pipes) {
+      if (!rectsCollide(e, p)) continue;
+      if (e.vx < 0) {
+        e.x = p.x - e.w - 1;
+      } else {
+        e.x = p.x + p.w + 1;
+      }
+    }
+  }
+  flag = { x: levelData.flagX, poleH: 220, flagY: 0, falling: false };
+  flagScoreGiven = false;
+  marioOnFlag = false;
+  mario.x = 80; mario.y = GROUND_Y - 48;
+  mario.vx = 0; mario.vy = 0; mario.onGround = true;
+  mario.facing = 1; mario.invincible = 0;
+  cameraX = 0;
+  particles = []; floatingTexts = [];
+  document.getElementById('levelText').textContent = lv;
+  document.getElementById('scoreText').textContent = score;
+  document.getElementById('livesText').textContent = lives;
+}
+
+function drawMario(x, y, facing, frame) {
+  ctx.save();
+  if (facing < 0) { ctx.translate(x + 16, y); ctx.scale(-1,1); x = -16; y = 0; }
+  else { ctx.translate(x, y); x=0; y=0; }
+  ctx.fillStyle = '#e52521';
+  ctx.fillRect(4, 2, 24, 10);
+  ctx.fillRect(2, 8, 28, 6);
+  ctx.fillStyle = '#fce4b8';
+  ctx.fillRect(6, 12, 20, 14);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(18, 14, 5, 5);
+  ctx.fillStyle = '#6b3a1f';
+  ctx.fillRect(14, 22, 12, 4);
+  ctx.fillStyle = '#e52521';
+  ctx.fillRect(6, 26, 20, 12);
+  ctx.fillStyle = '#1e6b1e';
+  ctx.fillRect(8, 26, 6, 14);
+  ctx.fillRect(18, 26, 6, 14);
+  const legOff = Math.floor(frame) % 2 === 0 ? 0 : 3;
+  ctx.fillStyle = '#1e3a8a';
+  ctx.fillRect(6, 38, 9, 10 + legOff);
+  ctx.fillRect(17, 38, 9, 10 - legOff);
+  ctx.fillStyle = '#6b3a1f';
+  ctx.fillRect(4, 46, 12, 4);
+  ctx.fillRect(16, 46, 12, 4);
+  ctx.restore();
+}
+
+function drawBrick(x, y) {
+  ctx.fillStyle = '#c84c0c';
+  ctx.fillRect(x, y, 40, 40);
+  ctx.strokeStyle = '#8b3a0a';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, 40, 40);
+  ctx.beginPath();
+  ctx.moveTo(x, y+20); ctx.lineTo(x+40, y+20);
+  ctx.moveTo(x+20, y); ctx.lineTo(x+20, y+20);
+  ctx.moveTo(x+10, y+20); ctx.lineTo(x+10, y+40);
+  ctx.moveTo(x+30, y+20); ctx.lineTo(x+30, y+40);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(255,200,100,0.3)';
+  ctx.fillRect(x+2, y+2, 36, 4);
+}
+
+function drawQuestion(x, y, hit, bump = 0, flash = 0) {
+  // bump: 0 → -8 → 0，形成“被顶起再回弹”的效果
+  const offsetY = bump;
+  const dy = y + offsetY;
+
+  ctx.save();
+
+  if (hit) {
+    ctx.fillStyle = '#8b5a2b';
+    ctx.fillRect(x, dy, 40, 40);
+    ctx.strokeStyle = '#5a3a1a';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, dy, 40, 40);
+  } else {
+    const g = ctx.createLinearGradient(x, dy, x, dy+40);
+    g.addColorStop(0, '#ffd700');
+    g.addColorStop(1, '#e6a800');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, dy, 40, 40);
+    ctx.strokeStyle = '#b8860b';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(x, dy, 40, 40);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 26px "Microsoft YaHei", "微软雅黑", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', x+20, dy+22);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.fillRect(x+3, dy+3, 34, 6);
+  }
+
+  // 短暂受击闪光：从白色高亮逐帧淡出
+  if (flash > 0) {
+    ctx.globalAlpha = Math.min(0.75, flash / 8);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(x, dy, 40, 40);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+}
+
+function drawGoomba(x, y, frame, squished) {
+  if (squished) {
+    ctx.fillStyle = '#8b5a2b';
+    ctx.beginPath();
+    ctx.ellipse(x+16, y+28, 16, 6, 0, 0, Math.PI*2);
+    ctx.fill();
+    return;
+  }
+  ctx.fillStyle = '#8b4513';
+  ctx.beginPath();
+  ctx.ellipse(x+16, y+18, 16, 14, 0, 0, Math.PI*2);
+  ctx.fill();
+  const foot = Math.floor(frame)%2===0 ? 0 : 4;
+  ctx.fillStyle = '#5a2d0c';
+  ctx.fillRect(x+2, y+26, 12, 6+foot);
+  ctx.fillRect(x+18, y+26, 12, 6-foot);
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(x+10, y+14, 5, 0, Math.PI*2);
+  ctx.arc(x+22, y+14, 5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(x+11, y+15, 2.5, 0, Math.PI*2);
+  ctx.arc(x+23, y+15, 2.5, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(x+6, y+9); ctx.lineTo(x+14, y+12);
+  ctx.moveTo(x+26, y+9); ctx.lineTo(x+18, y+12);
+  ctx.stroke();
+}
+
+function drawPipe(x, y, w, h) {
+  ctx.fillStyle = '#2e8b2e';
+  ctx.fillRect(x+4, y+16, w-8, h-16);
+  ctx.fillStyle = '#3cb371';
+  ctx.fillRect(x, y, w, 20);
+  ctx.strokeStyle = '#1a5c1a';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(x, y, w, 20);
+  ctx.strokeRect(x+4, y+16, w-8, h-16);
+  ctx.fillStyle = 'rgba(150,255,150,0.3)';
+  ctx.fillRect(x+8, y+4, 8, 12);
+}
+
+function drawFlag() {
+  const px = flag.x - cameraX;
+  ctx.fillStyle = '#ccc';
+  ctx.fillRect(px + 14, GROUND_Y - flag.poleH, 6, flag.poleH);
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath();
+  ctx.arc(px + 17, GROUND_Y - flag.poleH - 6, 8, 0, Math.PI*2);
+  ctx.fill();
+  const fy = GROUND_Y - flag.poleH + flag.flagY;
+  ctx.fillStyle = '#e52521';
+  ctx.beginPath();
+  ctx.moveTo(px + 20, fy);
+  ctx.lineTo(px + 20 + 40, fy + 15);
+  ctx.lineTo(px + 20, fy + 30);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(px + 32, fy + 15, 6, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawPits(){ for(const p of pits){ const x=p.x-cameraX; ctx.fillStyle='#111'; ctx.fillRect(x,GROUND_Y,p.w,H-GROUND_Y); for(let i=0;i<p.w;i+=16){ctx.fillStyle='#222';ctx.fillRect(x+i,GROUND_Y+10+(i%20),8,3);} } }
+
+function drawBackground() {
+  const grd = ctx.createLinearGradient(0, 0, 0, H);
+  grd.addColorStop(0, '#5c94fc');
+  grd.addColorStop(1, '#87CEEB');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  for (let i = 0; i < 6; i++) {
+    // 正确取模：旧写法在 cameraX 增大后取到负数，云会凭空消失/闪现，造成画面跳动
+    const CLOUD_SPAN = W + 200;
+    const cx = (((i * 400 - cameraX * 0.3) % CLOUD_SPAN) + CLOUD_SPAN) % CLOUD_SPAN - 100;
+    const cy = 60 + (i % 3) * 40;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 28, 0, Math.PI*2);
+    ctx.arc(cx+30, cy-10, 24, 0, Math.PI*2);
+    ctx.arc(cx+55, cy, 26, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#6b8e23';
+  ctx.beginPath();
+  ctx.moveTo(0, GROUND_Y);
+  for (let i = 0; i < 12; i++) {
+    // 山高以 3 座为周期（600px），取模周期必须一致，否则每滑 200px 全部山峰会瞬间“变高”一次
+    const mx = i * 200 - (cameraX * 0.15 % 600);
+    ctx.lineTo(mx + 100, GROUND_Y - 80 - (i%3)*20);
+    ctx.lineTo(mx + 200, GROUND_Y);
+  }
+  ctx.lineTo(W, GROUND_Y);
+  ctx.fill();
+  ctx.fillStyle = '#c84c0c';
+  ctx.fillRect(0, GROUND_Y, W, H - GROUND_Y);
+  ctx.fillStyle = '#8b3a0a';
+  ctx.fillRect(0, GROUND_Y, W, 8);
+  ctx.fillStyle = '#228b22';
+  ctx.fillRect(0, GROUND_Y - 6, W, 6);
+}
+
+function rectsCollide(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function addFloatText(x, y, text) {
+  floatingTexts.push({ x, y, text, life: 70, vy: -1.8 });
+}
+
+function addParticles(x, y, color) {
+  for (let i = 0; i < 10; i++) {
+    particles.push({
+      x, y, vx: (Math.random()-0.5)*7, vy: (Math.random()-0.5)*7 - 3,
+      life: 35, color
+    });
+  }
+}
+
+function triggerQuestionHit(q) {
+  q.hit = true;
+  q.bump = 8;
+  q.flash = 8;
+}
+
+// ========== 强化后的轴分离碰撞 + 可靠顶问号 ==========
+function resolveSolidCollisions() {
+  const solids = [...bricks, ...questions, ...pipes];
+
+  // 保存移动前的位置，用“穿越底边”判断是否真的从下方顶到方块。
+  const prevX = mario.x;
+  const prevY = mario.y;
+  const prevBottom = prevY + mario.h;
+
+  // 1. 水平移动 + 水平碰撞
+  mario.x += mario.vx;
+  for (const s of solids) {
+    if (!rectsCollide(mario, s)) continue;
+
+    if (mario.vx > 0) {
+      mario.x = s.x - mario.w;
+      mario.vx = 0;
+    } else if (mario.vx < 0) {
+      mario.x = s.x + s.w;
+      mario.vx = 0;
+    }
+  }
+
+  // 2. 垂直移动
+  mario.y += mario.vy;
+  mario.onGround = false;
+
+  // 关键修复：
+  // 问号块可能和砖块在水平方向重叠（例如 x=360 的问号与 x=340 的砖块），
+  // 如果先处理砖块，砖块会把马里奥挡住，导致问号永远收不到“顶到”事件。
+  // 所以先独立检测“向上穿过问号块底边”的事件。
+  if (mario.vy < 0) {
+    for (const q of questions) {
+      const horizontallyOverlapping =
+        mario.x < q.x + q.w && mario.x + mario.w > q.x;
+
+      // 前一帧马里奥底部在问号块底边以下/附近，
+      // 当前帧已经进入问号块范围 => 明确是从下方顶到。
+      const crossedBottom =
+        prevBottom <= q.y + q.h + 2 &&
+        prevBottom >= q.y + q.h - 12 &&
+        mario.y < q.y + q.h;
+
+      // 再加一个更宽松的“当前帧穿越底边”判断，避免高速/边缘情况下漏判。
+      const crossedThrough =
+        prevBottom >= q.y + q.h - 2 &&
+        mario.y <= q.y + q.h &&
+        prevY > q.y + q.h - mario.h;
+
+      if (horizontallyOverlapping && (crossedBottom || crossedThrough)) {
+        mario.y = q.y + q.h;
+        mario.vy = 0;
+
+        if (!q.hit) {
+          triggerQuestionHit(q);
+          score += 100;
+          document.getElementById('scoreText').textContent = score;
+
+          // 金色飞字、粒子、音效：三者同时触发
+          addFloatText(q.x + q.w / 2 - cameraX, q.y - 25, '+100');
+          addParticles(q.x + q.w / 2, q.y + 10, '#ffd700');
+          playCoin();
+        }
+
+        // 已经处理了本次向上碰撞，不再让其它实体重复改变垂直位置。
+        return;
+      }
+    }
+  }
+
+  // 3. 普通实体垂直碰撞（砖块、管道，以及已经变成棕色的问号块）
+  for (const s of solids) {
+    if (!rectsCollide(mario, s)) continue;
+
+    if (mario.vy >= 0) {
+      // 从上方落下
+      if (prevBottom <= s.y + 4) {
+        mario.y = s.y - mario.h;
+        mario.vy = 0;
+        mario.onGround = true;
+      }
+    } else {
+      // 向上撞到普通实体的底部
+      if (prevBottom >= s.y + s.h - 8) {
+        mario.y = s.y + s.h;
+        mario.vy = 0;
+      }
+    }
+  }
+
+  // 地面 / 坑洞支撑判定。
+  // 旧逻辑只看“身体中心点”是否悬空：跳坑时落点偏差 1px 就直接坠亡，且坠亡线
+  // 只低于地面 8px（而下落速度高达 18px/帧），几乎没有任何容错。
+  // 现改为“双脚支撑”：任一只脚（身体左右各内缩 5px）踩到实地即可站稳；
+  // 下落中若只低于地面 LEDGE_SNAP 像素，会自动“扒住坑沿”弹回地面。
+  const footL = mario.x + 5;
+  const footR = mario.x + mario.w - 5;
+  const overPit = pits.some(p => footL >= p.x && footR <= p.x + p.w);
+  if (!overPit && mario.y + mario.h >= GROUND_Y) {
+    if (mario.vy <= 0 || mario.y + mario.h <= GROUND_Y + LEDGE_SNAP) {
+      mario.y = GROUND_Y - mario.h; mario.vy=0; mario.onGround=true;
+    }
+  }
+}
+
+function updateFPS(){fpsFrames++;const now=performance.now();if(now-fpsLastTime>=500){fpsValue=Math.round(fpsFrames*1000/(now-fpsLastTime));fpsFrames=0;fpsLastTime=now;document.getElementById('fpsCounter').textContent=`${I18N[currentLang].fps} ${String(fpsValue).padStart(2,'0')}`;}}
+
+function update() {
+  if (gameState !== 'playing' && gameState !== 'flagAnim') return;
+
+  // 输入
+  let speed = keys['Shift'] ? RUN_SPEED : MOVE_SPEED;
+  if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+    mario.vx = -speed;
+    mario.facing = -1;
+  } else if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+    mario.vx = speed;
+    mario.facing = 1;
+  } else {
+    mario.vx *= 0.78;
+    if (Math.abs(mario.vx) < 0.25) mario.vx = 0;
+  }
+
+  // 跳跃（加速时更高）。
+  // 支持土狼时间（刚走出坑沿仍可补跳）与跳跃预输入（提前按键，落地即跳），
+  // 解决“起跳时机过严、跳坑必死”的手感问题。
+  const wantJump = keys[' '] || keys['ArrowUp'] || keys['w'] || keys['W'] || jumpBufferTimer > 0;
+  if (wantJump && (mario.onGround || coyoteTimer > 0) && gameState === 'playing') {
+    const isRunning = keys['Shift'] || Math.abs(mario.vx) > MOVE_SPEED + 0.5;
+    mario.vy = isRunning ? JUMP_FORCE_RUN : JUMP_FORCE;
+    mario.onGround = false;
+    coyoteTimer = 0;
+    jumpBufferTimer = 0;
+    playJump();
+  }
+
+  // 重力
+  mario.vy += GRAVITY;
+  if (mario.vy > 18) mario.vy = 18;
+
+  // 边界
+  if (mario.x < 0) { mario.x = 0; mario.vx = 0; }
+  if (mario.x > levelData.width - mario.w) { mario.x = levelData.width - mario.w; mario.vx = 0; }
+
+  // 碰撞（含顶问号）
+  resolveSolidCollisions();
+
+  // 土狼时间 / 跳跃预输入计时
+  if (mario.onGround) coyoteTimer = COYOTE_FRAMES;
+  else if (coyoteTimer > 0) coyoteTimer--;
+  if (jumpBufferTimer > 0) jumpBufferTimer--;
+
+  // V5 敌人 AI：遇到实体障碍物转向，并在坑边提前掉头。
+  const enemySolids = [...bricks, ...questions, ...pipes];
+  for (const e of enemies) {
+    if (!e.alive) continue;
+    e.turnCooldown=Math.max(0,e.turnCooldown-1);
+    const aheadX=e.x+e.w/2+Math.sign(e.vx)*12;
+    if (pits.some(p=>aheadX>p.x && aheadX<p.x+p.w) && e.turnCooldown===0){e.vx=-Math.sign(e.vx)*1.4;e.turnCooldown=12;}
+    const nx=e.x+e.vx, nr={x:nx,y:e.y,w:e.w,h:e.h}; let blocked=false;
+    if(nx<40){e.x=40;e.vx=Math.abs(e.vx);blocked=true;} else if(nx>levelData.width-e.w-40){e.x=levelData.width-e.w-40;e.vx=-Math.abs(e.vx);blocked=true;}
+    if(!blocked) for(const s of enemySolids){if(rectsCollide(nr,s)){if(e.vx>0){e.x=s.x-e.w-1;e.vx=-Math.abs(e.vx);}else{e.x=s.x+s.w+1;e.vx=Math.abs(e.vx);}e.turnCooldown=10;blocked=true;break;}}
+    if(!blocked)e.x=nx; e.frame+=.15;
+    if(!e.squished && rectsCollide(mario,e)){
+      const fromAbove=mario.vy>0 && mario.y+mario.h-e.y<20;
+      if(fromAbove){e.squished=true;e.alive=false;mario.y=e.y-mario.h;mario.vy=-10;score+=200;document.getElementById('scoreText').textContent=score;addFloatText(e.x-cameraX,e.y-20,'+200');addParticles(e.x+16,e.y+12,'#f5d76e');playStomp();}
+      else if(mario.invincible<=0){lives--;document.getElementById('livesText').textContent=lives;playHurt();addParticles(mario.x+16,mario.y+24,'#e52521');mario.invincible=90;mario.vy=-11;mario.vx=-mario.facing*4;if(lives<=0){gameState='fail';document.getElementById('failScore').textContent=score;document.getElementById('failScreen').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');}}
+    }
+  }
+  // 掉坑判死：低于地面超过 24px（旧为 8px，过于苛刻），先给“扒边”一次机会
+  if(gameState==='playing' && mario.y+mario.h>GROUND_Y+24){
+    lives--;document.getElementById('livesText').textContent=lives;playHurt();
+    if(lives<=0){gameState='fail';document.getElementById('failScore').textContent=score;document.getElementById('failScreen').classList.remove('hidden');document.getElementById('hud').classList.add('hidden');}
+    else{
+      // 重生点回退并避开坑沿（至少留 26px 助跑距离），防止“落地即再掉坑”；
+      // 镜头改为平滑跟随，重生时画面不再瞬间回跳 120px 造成“晃荡”感
+      let rx=Math.max(40,mario.x-120);
+      const nearPitEdge=(px)=>pits.some(p=>px+mario.w+26>p.x&&px<p.x+p.w+26);
+      while(rx>40&&nearPitEdge(rx))rx-=16;
+      mario.x=rx;mario.y=GROUND_Y-mario.h;mario.vx=0;mario.vy=0;
+      coyoteTimer=0;jumpBufferTimer=0;
+      mario.invincible=60;  // 重生短暂闪烁无敌，避免被坑边巡逻的板栗仔秒撞
+    }
+  }
+
+  // 旗杆
+  if (gameState === 'playing' && mario.x + mario.w > flag.x && mario.x < flag.x + 30) {
+    gameState = 'flagAnim';
+    mario.vx = 0;
+    const touchHeight = GROUND_Y - (mario.y + mario.h);
+    if (!flagScoreGiven) {
+      flagScoreGiven = true;
+      if (touchHeight >= flag.poleH - 25) {
+        score += 400;
+        addFloatText(flag.x - cameraX, mario.y - 30, '+400');
+        marioOnFlag = true;
+      } else if (touchHeight >= flag.poleH / 2) {
+        score += 200;
+        addFloatText(flag.x - cameraX, mario.y - 30, '+200');
+      }
+      document.getElementById('scoreText').textContent = score;
+      playFlag();
+    }
+    flag.falling = true;
+  }
+
+  if (flag.falling) {
+    flag.flagY += 3.8;
+    if (flag.flagY >= flag.poleH - 30) {
+      flag.flagY = flag.poleH - 30;
+      flag.falling = false;
+      if (marioOnFlag) mario.y = GROUND_Y - mario.h;
+      setTimeout(() => {
+        if (gameState !== 'flagAnim') return;  // 被暂停/重开打断则不再结算
+        if (currentLevel >= levels.length) {
+          gameState = 'win';
+          document.getElementById('winScore').textContent = score;
+          document.getElementById('winScreen').classList.remove('hidden');
+          document.getElementById('hud').classList.add('hidden');
+        } else {
+          gameState = 'levelClear';
+          document.getElementById('clearScore').textContent = score;
+          document.getElementById('clearMsg').textContent = I18N[currentLang].clearMsg(currentLevel);
+          document.getElementById('levelClearScreen').classList.remove('hidden');
+          document.getElementById('hud').classList.add('hidden');
+        }
+      }, 700);
+    }
+    if (marioOnFlag && flag.falling) {
+      const targetY = GROUND_Y - flag.poleH + flag.flagY + 18;
+      if (mario.y < targetY) mario.y += 3.8;
+    }
+  }
+
+  // 平滑跟随镜头：掉坑重生、突然变速时画面不再来回猛跳（配合远山/云视差修复，消除“晃荡”感）
+  const camTarget = Math.max(0, Math.min(mario.x - W * 0.35, levelData.width - W));
+  cameraX += (camTarget - cameraX) * 0.2;
+  if (Math.abs(camTarget - cameraX) < 0.3) cameraX = camTarget;
+
+  mario.animTimer += Math.abs(mario.vx) > 0.4 ? 0.28 : 0;
+  mario.frame = mario.animTimer;
+  if (mario.invincible > 0) mario.invincible--;
+
+  particles = particles.filter(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += 0.2; p.life--;
+    return p.life > 0;
+  });
+  floatingTexts = floatingTexts.filter(t => {
+    t.y += t.vy; t.life--;
+    return t.life > 0;
+  });
+
+  // 问号块“被顶起 8px → 回弹”，并同步淡出受击闪光
+  for (const q of questions) {
+    if (q.bump > 0) {
+      q.bump -= 1.6;
+      if (q.bump < 0) q.bump = 0;
+    }
+    if (q.flash > 0) q.flash -= 1;
+  }
+}
+
+function draw() {
+  drawBackground();
+  drawPits();
+  for (const b of bricks) drawBrick(b.x - cameraX, b.y);
+  for (const q of questions) drawQuestion(q.x - cameraX, q.y, q.hit, q.bump, q.flash);
+  for (const p of pipes) drawPipe(p.x - cameraX, p.y, p.w, p.h);
+  for (const e of enemies) {
+    if (e.alive || (e.squished && e.squishTimer > 0)) drawGoomba(e.x - cameraX, e.y, e.frame, e.squished);
+  }
+  drawFlag();
+
+  if (mario.invincible <= 0 || Math.floor(mario.invincible / 4) % 2 === 0) {
+    drawMario(mario.x - cameraX, mario.y, mario.facing, mario.frame);
+  }
+
+  for (const p of particles) {
+    ctx.globalAlpha = p.life / 35;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - cameraX, p.y, 6, 6);
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.font = 'bold 24px "Microsoft YaHei", "微软雅黑", sans-serif';
+  ctx.textAlign = 'center';
+  for (const t of floatingTexts) {
+    ctx.globalAlpha = Math.min(1, t.life / 40);
+    ctx.fillStyle = '#ffd700';
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 4;
+    ctx.strokeText(t.text, t.x, t.y);
+    ctx.fillText(t.text, t.x, t.y);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function loop() {
+  syncCtrlButtons();
+  updateFPS();
+  update();
+  if (gameState === 'playing' || gameState === 'flagAnim') draw();
+  requestAnimationFrame(loop);
+}
+
+document.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  // 跳跃预输入：按下瞬间缓存（长按不重复计数），落地帧自动起跳
+  if (!e.repeat && [' ', 'ArrowUp', 'w', 'W'].includes(e.key)) jumpBufferTimer = JUMP_BUFFER_FRAMES;
+  if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') togglePause();
+  if (e.key === 'Enter') {
+    if (gameState === 'start') document.getElementById('startBtn').click();
+    else if (gameState === 'paused') document.getElementById('btnResume').click();
+    else if (gameState === 'levelClear') document.getElementById('nextBtn').click();
+    else if (gameState === 'fail') document.getElementById('retryBtn').click();
+    else if (gameState === 'win') document.getElementById('winRestartBtn').click();
+  }
+  if ([' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+});
+document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+document.getElementById('startBtn').onclick = () => {
+  score = 0; lives = 3;
+  initLevel(1);
+  gameState = 'playing';
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('hud').classList.remove('hidden');
+  ensureAudio();
+};
+document.getElementById('nextBtn').onclick = () => {
+  document.getElementById('levelClearScreen').classList.add('hidden');
+  keys = {};
+  initLevel(currentLevel + 1);
+  gameState = 'playing';
+  document.getElementById('hud').classList.remove('hidden');
+};
+document.getElementById('retryBtn').onclick = () => {
+  document.getElementById('failScreen').classList.add('hidden');
+  keys = {};
+  lives = 3;
+  initLevel(currentLevel);
+  gameState = 'playing';
+  document.getElementById('hud').classList.remove('hidden');
+};
+document.getElementById('restartBtn').onclick = () => {
+  document.getElementById('failScreen').classList.add('hidden');
+  keys = {};
+  score = 0; lives = 3;
+  initLevel(1);
+  gameState = 'playing';
+  document.getElementById('hud').classList.remove('hidden');
+};
+document.getElementById('winRestartBtn').onclick = () => {
+  document.getElementById('winScreen').classList.add('hidden');
+  keys = {};
+  score = 0; lives = 3;
+  initLevel(1);
+  gameState = 'playing';
+  document.getElementById('hud').classList.remove('hidden');
+};
+applyLanguage();
+loop();
+</script>
+</body>
+</html>
