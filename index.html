@@ -269,6 +269,7 @@ main {
   font-size: 14px;
   color: #39425c;
   backdrop-filter: blur(6px);
+  align-items: center;
 }
 .tips kbd {
   display: inline-block;
@@ -285,7 +286,6 @@ main {
   font-size: 12.5px;
   color: #2c3e5d;
 }
-
 /* ============ 地面 ============ */
 footer {
   position: relative;
@@ -304,13 +304,46 @@ footer {
   text-align: center;
   padding: 12px 16px;
   font-size: 13px;
-  color: rgba(255,255,255,.85);
-  letter-spacing: 1px;
+  color: rgba(255,255,255,.88);
+  letter-spacing: .5px;
   line-height: 1.6;
   flex-wrap: wrap;
-  gap: 4px 8px;
+  gap: 8px 12px;
 }
-footer a { color: #ffd85e; text-decoration: none; }
+footer a { color: #ffd85e; text-decoration: none; font-weight: 700; }
+footer a:hover { text-decoration: underline; }
+footer .footer-dot { opacity: .7; }
+footer .lang-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 12px 3px 10px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.25);
+  backdrop-filter: blur(8px);
+  transition: all .2s ease;
+}
+footer .lang-wrap:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: #ffd85e;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2), 0 0 10px rgba(255,216,94,0.35);
+}
+footer .lang-icon { font-size: 14px; line-height: 1; user-select: none; }
+footer .lang-select {
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  outline: none;
+  padding: 2px 0;
+  text-shadow: 1px 1px 2px rgba(0,0,0,.45);
+}
+footer .lang-select option { color: #232a3d; background: #fff; text-shadow: none; font-weight: normal; }
 
 @media (max-width: 480px) {
   header { padding-top: 34px; }
@@ -327,9 +360,9 @@ footer a { color: #ffd85e; text-decoration: none; }
 <div class="cloud c3"></div>
 
 <header>
-  <div class="mario-logo">AI GENERATED · HTML5 GAME</div>
-  <h1>超级马里奥 · 版本选择</h1>
-  <p class="sub">同一份 Prompt，两个大模型，两种实现 —— <b>选择一个版本开始游玩</b></p>
+  <div class="mario-logo" data-i18n="logo">AI GENERATED · HTML5 GAME</div>
+  <h1 data-i18n="h1Title">超级马里奥 · 版本选择</h1>
+  <p class="sub" data-i18n-html="subTitle">同一份 Prompt，两个大模型，两种实现 —— <b>选择一个版本开始游玩</b></p>
 </header>
 
 <main>
@@ -337,31 +370,31 @@ footer a { color: #ffd85e; text-decoration: none; }
   <section class="card">
     <div class="banner grok">
       <div class="qbox">?</div>
-      <h2>超级玛丽</h2>
-      <span class="author">Grok Fast 生成 v5</span>
+      <h2 data-i18n="grokTitle">超级玛丽</h2>
+      <span class="author" data-i18n="grokAuthor">Grok Fast 生成 v5</span>
     </div>
     <div class="body">
       <div class="tags">
-        <span class="tag hot">迭代 6 轮 · V5</span>
-        <span class="tag ok">✅ 功能最完整</span>
+        <span class="tag hot" data-i18n="grokTagHot">迭代 6 轮 · V5</span>
+        <span class="tag ok" data-i18n="grokTagOk">✅ 功能最完整</span>
         <span class="tag">1100 × 650</span>
-        <span class="tag">六大主题关卡</span>
-        <span class="tag">七种语言</span>
+        <span class="tag" data-i18n="tagLevels">六大主题关卡</span>
+        <span class="tag" data-i18n="tagLangs">七种语言</span>
       </div>
       <ul class="feat">
-        <li>六大主题关卡：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同</li>
-        <li>每个跳坑落点必有守卫板栗仔，敌人数量 ≥ 坑数，难度逐关递增</li>
-        <li>坑上金币弧线、移动平台、双层砖阵、15% 幸运方块 +500</li>
-        <li>夺旗烟花庆祝，过关彩带 + 惊喜奖励 100~500</li>
-        <li>右上角 FPS 数字时钟、左上角版本标识、页面底部 GitHub 链接</li>
+        <li data-i18n="grokFeat1">六大主题关卡：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同</li>
+        <li data-i18n="grokFeat2">每个跳坑落点必有守卫板栗仔，敌人数量 ≥ 坑数，难度逐关递增</li>
+        <li data-i18n="grokFeat3">坑上金币弧线、移动平台、双层砖阵、15% 幸运方块 +500</li>
+        <li data-i18n="grokFeat4">夺旗烟花庆祝，过关彩带 + 惊喜奖励 100~500</li>
+        <li data-i18n="grokFeat5">右上角 FPS 数字时钟、多语言一键切换、页面底部 GitHub 链接</li>
       </ul>
-      <div class="meta">
+      <div class="meta" data-i18n-html="grokMeta">
         <b>V5 更新：</b>程序化生成 6 大主题关卡（固定种子）；新增金币收集 / 移动平台 / 幸运方块 / 烟花彩带；敌人 AI 坑边掉头；马里奥静止不动、走路 / 跳跃才有动画。
       </div>
     </div>
     <div class="actions">
-      <a class="btn play" href="mario-grok.html">▶ 开始游戏</a>
-      <a class="btn newtab" href="mario-grok.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+      <a class="btn play" data-i18n="btnPlay" href="mario-grok.html">▶ 开始游戏</a>
+      <a class="btn newtab" data-i18n="btnNewtab" href="mario-grok.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
     </div>
   </section>
 
@@ -369,45 +402,359 @@ footer a { color: #ffd85e; text-decoration: none; }
   <section class="card">
     <div class="banner hy4">
       <div class="qbox">?</div>
-      <h2>超级马里奥 · 六关历险</h2>
-      <span class="author">Hy4 Preview 生成 v2</span>
+      <h2 data-i18n="hy4Title">超级马里奥 · 六关历险</h2>
+      <span class="author" data-i18n="hy4Author">Hy4 Preview 生成 v2</span>
     </div>
     <div class="body">
       <div class="tags">
-        <span class="tag">迭代 3 轮 · V2</span>
-        <span class="tag ok">✅ 功能完整</span>
+        <span class="tag" data-i18n="hy4TagHot">迭代 3 轮 · V2</span>
+        <span class="tag ok" data-i18n="hy4TagOk">✅ 功能完整</span>
         <span class="tag">1000 × 560</span>
-        <span class="tag">六大主题关卡</span>
-        <span class="tag">七种语言</span>
+        <span class="tag" data-i18n="tagLevels">六大主题关卡</span>
+        <span class="tag" data-i18n="tagLangs">七种语言</span>
       </div>
       <ul class="feat">
-        <li>六大主题关卡：草原 → 黄昏 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同</li>
-        <li>每个悬崖落点都有板栗仔把守，敌人会在悬崖边主动掉头巡逻</li>
-        <li>坑上金币弧线 + 地面金币队列，收集计入金币数（+50）</li>
-        <li>修复双层问号顶不到：隔行双层设计，站上下层即可顶到</li>
-        <li>过关幸运奖励 100~600 + 彩带庆祝；FPS / 版本标识 / GitHub 链接</li>
+        <li data-i18n="hy4Feat1">六大主题关卡：草原 → 黄昏 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同</li>
+        <li data-i18n="hy4Feat2">每个悬崖落点都有板栗仔把守，敌人会在悬崖边主动掉头巡逻</li>
+        <li data-i18n="hy4Feat3">坑上金币弧线 + 地面金币队列，收集计入金币数（+50）</li>
+        <li data-i18n="hy4Feat4">修复双层问号顶不到：隔行双层设计，站上下层即可顶到</li>
+        <li data-i18n="hy4Feat5">过关幸运奖励 100~600 + 彩带庆祝；FPS / 多语言 / GitHub 链接</li>
       </ul>
-      <div class="meta">
+      <div class="meta" data-i18n-html="hy4Meta">
         <b>V2 更新：</b>扩展为六大主题关卡；新增金币系统与幸运奖励；敌人 AI 崖边掉头；修复双层问号不可达缺陷；后续完善工作由其他模型接力完成。
       </div>
     </div>
     <div class="actions">
-      <a class="btn play" href="mario-hy4.html">▶ 开始游戏</a>
-      <a class="btn newtab" href="mario-hy4.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+      <a class="btn play" data-i18n="btnPlay" href="mario-hy4.html">▶ 开始游戏</a>
+      <a class="btn newtab" data-i18n="btnNewtab" href="mario-hy4.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
     </div>
   </section>
 </main>
 
 <div class="tips">
-  <span><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> 左右移动</span>
-  <span><kbd>空格</kbd> / <kbd>↑</kbd> / <kbd>W</kbd> 跳跃</span>
-  <span><kbd>Shift</kbd> 加速奔跑</span>
-  <span><kbd>Enter</kbd> 重开本关</span>
+  <span><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> <span data-i18n="tipMove">左右移动</span></span>
+  <span><kbd id="keySpace" data-i18n="keySpace">空格</kbd> / <kbd>↑</kbd> / <kbd>W</kbd> <span data-i18n="tipJump">跳跃</span></span>
+  <span><kbd>Shift</kbd> <span data-i18n="tipRun">加速奔跑</span></span>
+  <span><kbd>Enter</kbd> <span data-i18n="tipRestart">重开本关</span></span>
 </div>
 
 <footer>
-  ⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a>
+  <span data-i18n="footerDisclaimer">⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · </span>
+  <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a></span>
+  <span class="footer-dot">·</span>
+  <div class="lang-wrap">
+    <span class="lang-icon" aria-hidden="true">🌐</span>
+    <select id="langSelect" class="lang-select" aria-label="Language / 语言">
+      <option value="zh-CN">简体中文</option>
+      <option value="zh-TW">繁體中文</option>
+      <option value="en">English</option>
+      <option value="ja">日本語</option>
+      <option value="pt-BR">Português</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+    </select>
+  </div>
 </footer>
 
+<script>
+const I18N = {
+  'zh-CN': {
+    docTitle: '超级马里奥 · 版本选择',
+    logo: 'AI GENERATED · HTML5 GAME',
+    h1Title: '超级马里奥 · 版本选择',
+    subTitle: '同一份 Prompt，两个大模型，两种实现 —— <b>选择一个版本开始游玩</b>',
+    grokTitle: '超级玛丽',
+    grokAuthor: 'Grok Fast 生成 v5',
+    grokTagHot: '迭代 6 轮 · V5',
+    grokTagOk: '✅ 功能最完整',
+    tagLevels: '六大主题关卡',
+    tagLangs: '七种语言',
+    grokFeat1: '六大主题关卡：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同',
+    grokFeat2: '每个跳坑落点必有守卫板栗仔，敌人数量 ≥ 坑数，难度逐关递增',
+    grokFeat3: '坑上金币弧线、移动平台、双层砖阵、15% 幸运方块 +500',
+    grokFeat4: '夺旗烟花庆祝，过关彩带 + 惊喜奖励 100~500',
+    grokFeat5: '右上角 FPS 数字时钟、多语言一键切换、页面底部 GitHub 链接',
+    grokMeta: '<b>V5 更新：</b>程序化生成 6 大主题关卡（固定种子）；新增金币收集 / 移动平台 / 幸运方块 / 烟花彩带；敌人 AI 坑边掉头；马里奥静止不动、走路 / 跳跃才有动画。',
+    hy4Title: '超级马里奥 · 六关历险',
+    hy4Author: 'Hy4 Preview 生成 v2',
+    hy4TagHot: '迭代 3 轮 · V2',
+    hy4TagOk: '✅ 功能完整',
+    hy4Feat1: '六大主题关卡：草原 → 黄昏 → 星夜 → 熔岩 → 冰雪 → 鬼域，砖块配色每关不同',
+    hy4Feat2: '每个悬崖落点都有板栗仔把守，敌人会在悬崖边主动掉头巡逻',
+    hy4Feat3: '坑上金币弧线 + 地面金币队列，收集计入金币数（+50）',
+    hy4Feat4: '修复双层问号顶不到：隔行双层设计，站上下层即可顶到',
+    hy4Feat5: '过关幸运奖励 100~600 + 彩带庆祝；FPS / 多语言 / GitHub 链接',
+    hy4Meta: '<b>V2 更新：</b>扩展为六大主题关卡；新增金币系统与幸运奖励；敌人 AI 崖边掉头；修复双层问号不可达缺陷；后续完善工作由其他模型接力完成。',
+    btnPlay: '▶ 开始游戏',
+    btnNewtab: '新窗口打开 ↗',
+    keySpace: '空格',
+    tipMove: '左右移动',
+    tipJump: '跳跃',
+    tipRun: '加速奔跑',
+    tipRestart: '重开本关',
+    footerDisclaimer: '⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · '
+  },
+  'zh-TW': {
+    docTitle: '超級瑪利歐 · 版本選擇',
+    logo: 'AI GENERATED · HTML5 GAME',
+    h1Title: '超級瑪利歐 · 版本選擇',
+    subTitle: '同一份 Prompt，兩個大模型，兩種實現 —— <b>選擇一個版本開始遊玩</b>',
+    grokTitle: '超級瑪利歐',
+    grokAuthor: 'Grok Fast 生成 v5',
+    grokTagHot: '反覆運算 6 輪 · V5',
+    grokTagOk: '✅ 功能最完整',
+    tagLevels: '六大主題關卡',
+    tagLangs: '七種語言',
+    grokFeat1: '六大主題關卡：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，磚塊配色每關不同',
+    grokFeat2: '每個跳坑落點必有守衛慄寶寶，敵人數量 ≥ 坑數，難度逐關遞增',
+    grokFeat3: '坑上金幣弧線、移動平臺、雙層磚陣、15% 幸運方塊 +500',
+    grokFeat4: '奪旗煙花慶祝，過關彩帶 + 驚喜獎勵 100~500',
+    grokFeat5: '右上角 FPS 數字時鐘、多語言一鍵切換、頁面底部 GitHub 連結',
+    grokMeta: '<b>V5 更新：</b>程序化生成 6 大主題關卡（固定種子）；新增金幣收集 / 移動平臺 / 幸運方塊 / 煙花彩帶；敵人 AI 坑邊掉頭；瑪利歐靜止不動、走路 / 跳躍才有動畫。',
+    hy4Title: '超級瑪利歐 · 六關歷險',
+    hy4Author: 'Hy4 Preview 生成 v2',
+    hy4TagHot: '反覆運算 3 輪 · V2',
+    hy4TagOk: '✅ 功能完整',
+    hy4Feat1: '六大主題關卡：草原 → 黃昏 → 星夜 → 熔岩 → 冰雪 → 鬼域，磚塊配色每關不同',
+    hy4Feat2: '每個懸崖落點都有慄寶寶把守，敵人會在懸崖邊主動掉頭巡邏',
+    hy4Feat3: '坑上金幣弧線 + 地面金幣佇列，收集計入金幣數（+50）',
+    hy4Feat4: '修復雙層問號頂不到：隔行雙層設計，站上下層即可頂到',
+    hy4Feat5: '過關幸運獎勵 100~600 + 彩帶慶祝；FPS / 多語言 / GitHub 連結',
+    hy4Meta: '<b>V2 更新：</b>擴展為六大主題關卡；新增金幣系統與幸運獎勵；敵人 AI 崖邊掉頭；修復雙層問號不可達缺陷；後續完善工作由其他模型接力完成。',
+    btnPlay: '▶ 開始遊戲',
+    btnNewtab: '新視窗打開 ↗',
+    keySpace: '空白鍵',
+    tipMove: '左右移動',
+    tipJump: '跳躍',
+    tipRun: '加速奔跑',
+    tipRestart: '重開本關',
+    footerDisclaimer: '⚖️ 僅用於 AI 編程能力研究與技術學習 · 素材均為原創替代品 · 請勿商用 · '
+  },
+  'en': {
+    docTitle: 'Super Mario · Version Selection',
+    logo: 'AI GENERATED · HTML5 GAME',
+    h1Title: 'Super Mario · Version Selection',
+    subTitle: 'Same Prompt, two LLMs, two implementations — <b>Choose a version to play</b>',
+    grokTitle: 'Super Mario',
+    grokAuthor: 'Grok Fast Build v5',
+    grokTagHot: '6 Iterations · V5',
+    grokTagOk: '✅ Most Feature-Rich',
+    tagLevels: '6 Themed Worlds',
+    tagLangs: '7 Languages',
+    grokFeat1: '6 Themed Worlds: Grassland → Desert → Starry Night → Lava → Snow → Ghost House with unique palettes',
+    grokFeat2: 'Guard Goomba at every pit landing; enemy count ≥ pits; difficulty scales per stage',
+    grokFeat3: 'Coin arcs above pits, moving platforms, tiered blocks, 15% lucky block +500',
+    grokFeat4: 'Flagpole fireworks, victory confetti + bonus reward 100~500',
+    grokFeat5: 'Top-right digital FPS clock, quick language switch, bottom GitHub repo link',
+    grokMeta: '<b>V5 Update:</b> Procedural 6 themed stages (fixed seed); added coin collection / moving platforms / lucky blocks / fireworks & confetti; cliff-turning enemy AI; idle sprite animations.',
+    hy4Title: 'Super Mario · 6 Level Quest',
+    hy4Author: 'Hy4 Preview Build v2',
+    hy4TagHot: '3 Iterations · V2',
+    hy4TagOk: '✅ Full-Featured',
+    hy4Feat1: '6 Themed Worlds: Grassland → Dusk → Starry Night → Lava → Snow → Ghost House with distinct tile palettes',
+    hy4Feat2: 'Goombas guard every cliff landing and turn around before falling',
+    hy4Feat3: 'Coin arcs above pits + ground coin trails, each gives +50 pts',
+    hy4Feat4: 'Fixed unreachable double blocks: staggered heights allow hitting from below & above',
+    hy4Feat5: 'Clear bonus reward 100~600 + confetti; FPS / multi-language / GitHub link',
+    hy4Meta: '<b>V2 Update:</b> Expanded to 6 themed worlds; coin system and lucky bonuses; cliff-turning enemy AI; fixed unreachable question blocks; completed with LLM collaboration.',
+    btnPlay: '▶ Play Now',
+    btnNewtab: 'Open in New Tab ↗',
+    keySpace: 'Space',
+    tipMove: 'Move Left / Right',
+    tipJump: 'Jump',
+    tipRun: 'Dash / Run Faster',
+    tipRestart: 'Restart Level',
+    footerDisclaimer: '⚖️ For AI programming research & educational learning only · Original placeholder assets · Non-commercial · '
+  },
+  'ja': {
+    docTitle: 'スーパーマリオ · バージョン選択',
+    logo: 'AI GENERATED · HTML5 GAME',
+    h1Title: 'スーパーマリオ · バージョン選択',
+    subTitle: '同じプロンプト、2つのAIモデル、2つの実装 —— <b>バージョンを選んでプレイ</b>',
+    grokTitle: 'スーパーマリオ',
+    grokAuthor: 'Grok Fast 生成 v5',
+    grokTagHot: '6回反復 · V5',
+    grokTagOk: '✅ 最も多機能',
+    tagLevels: '6大テーマコース',
+    tagLangs: '7言語対応',
+    grokFeat1: '6大テーマコース：草原 → 砂漠 → 星夜 → 溶岩 → 氷雪 → 幽霊屋敷、ステージごとに異なる配色',
+    grokFeat2: 'すべての落とし穴の着地地点にクリボーが巡回、難易度はコース毎に上昇',
+    grokFeat3: '穴の上のコインアーク、動く足場、2層ブロック、15%の確率でラッキーブロック +500',
+    grokFeat4: 'ゴール花火、クリア紙吹雪 + ラッキーボーナス 100~500',
+    grokFeat5: '右上デジタル時計風FPS、多言語切り替え、ページ下部GitHubリンク',
+    grokMeta: '<b>V5 更新：</b>固定シードによる6大テーマコース自動生成；コイン収集 / 動く足場 / ラッキーブロック / 花火と紙吹雪；崖際Uターン敵AI；静止・歩行・ジャンプ専用アニメーション。',
+    hy4Title: 'スーパーマリオ · 6コースの冒険',
+    hy4Author: 'Hy4 Preview 生成 v2',
+    hy4TagHot: '3回反復 · V2',
+    hy4TagOk: '✅ 機能完全',
+    hy4Feat1: '6大テーマコース：草原 → 黄昏 → 星夜 → 溶岩 → 氷雪 → 幽霊屋敷、ステージごとに異なる配色',
+    hy4Feat2: 'すべての崖の着地地点にクリボーが配置され、崖際で自動的に反転',
+    hy4Feat3: '穴の上のコインアーク + 地面のコイン列、取得で+50点',
+    hy4Feat4: '2層？ブロックの改善：段違い配置により上下両方から叩くことが可能',
+    hy4Feat5: 'クリアラッキーボーナス 100~600 + 紙吹雪；FPS / 多言語 / GitHubリンク',
+    hy4Meta: '<b>V2 更新：</b>6大テーマコースに拡張；コインシステムとラッキーボーナス；崖際Uターン敵AI；叩けない？ブロックの欠陥を修正；AI協働で完成。',
+    btnPlay: '▶ プレイ開始',
+    btnNewtab: '新しいタブで開く ↗',
+    keySpace: 'スペース',
+    tipMove: '左右移動',
+    tipJump: 'ジャンプ',
+    tipRun: 'ダッシュ加速',
+    tipRestart: 'リスタート',
+    footerDisclaimer: '⚖️ AIプログラミング研究・学習用 · オリジナル素材使用 · 商用利用禁止 · '
+  },
+  'pt-BR': {
+    docTitle: 'Super Mario · Seleção de Versões',
+    logo: 'AI GENERATED · HTML5 GAME',
+    h1Title: 'Super Mario · Seleção de Versões',
+    subTitle: 'Mesmo prompt, dois modelos de IA, duas implementações — <b>Escolha uma versão para jogar</b>',
+    grokTitle: 'Super Mario',
+    grokAuthor: 'Grok Fast Versão v5',
+    grokTagHot: '6 Iterações · V5',
+    grokTagOk: '✅ Mais Completo',
+    tagLevels: '6 Fases Temáticas',
+    tagLangs: '7 Idiomas',
+    grokFeat1: '6 Fases Temáticas: Planície → Deserto → Noite Estrelada → Lava → Neve → Fantasma com paleta única',
+    grokFeat2: 'Goombas guardando cada pouso de buraco; dificuldade aumenta a cada fase',
+    grokFeat3: 'Arcos de moedas sobre buracos, plataformas móveis, bloco da sorte 15% +500',
+    grokFeat4: 'Fogos de artifício na bandeira, confetes + bônus surpresa de 100~500',
+    grokFeat5: 'FPS em estilo relógio digital no canto superior, troca rápida de idioma, link do GitHub',
+    grokMeta: '<b>Atualização V5:</b> 6 fases temáticas procedurais (semente fixa); moedas / plataformas móveis / blocos da sorte / fogos e confetes; IA que desvia de buracos; animações precisas.',
+    hy4Title: 'Super Mario · Aventura de 6 Fases',
+    hy4Author: 'Hy4 Preview Versão v2',
+    hy4TagHot: '3 Iterações · V2',
+    hy4TagOk: '✅ Completo',
+    hy4Feat1: '6 Fases Temáticas: Planície → Crepúsculo → Noite Estrelada → Lava → Neve → Fantasma com paletas distintas',
+    hy4Feat2: 'Goombas protegem cada queda de penhasco e dão meia-volta antes de cair',
+    hy4Feat3: 'Arcos de moedas nos buracos + trilhas de moedas no chão (+50 pontos)',
+    hy4Feat4: 'Blocos duplos corrigidos: design escalonado permite acertar por baixo e por cima',
+    hy4Feat5: 'Bônus da sorte de 100~600 + confetes; FPS / multi-idioma / link do GitHub',
+    hy4Meta: '<b>Atualização V2:</b> Expandido para 6 fases temáticas; sistema de moedas e bônus da sorte; IA de penhasco; correção de blocos inalcançáveis; finalizado com colaboração de IA.',
+    btnPlay: '▶ Jogar Agora',
+    btnNewtab: 'Abrir em Nova Aba ↗',
+    keySpace: 'Espaço',
+    tipMove: 'Mover para os lados',
+    tipJump: 'Pular',
+    tipRun: 'Correr / Acelerar',
+    tipRestart: 'Reiniciar Fase',
+    footerDisclaimer: '⚖️ Apenas para pesquisa de programação com IA e aprendizado · Ativos originais · Não comercial · '
+  },
+  'es': {
+    docTitle: 'Super Mario · Selección de Versiones',
+    logo: 'AI GENERATED · HTML5 GAME',
+    h1Title: 'Super Mario · Selección de Versiones',
+    subTitle: 'Mismo prompt, dos modelos de IA, dos implementaciones — <b>Elige una versión para jugar</b>',
+    grokTitle: 'Súper Mario',
+    grokAuthor: 'Grok Fast Versión v5',
+    grokTagHot: '6 Iteraciones · V5',
+    grokTagOk: '✅ Más Completo',
+    tagLevels: '6 Fases Temáticas',
+    tagLangs: '7 Idiomas',
+    grokFeat1: '6 Fases Temáticas: Pradera → Desierto → Noche Estrellada → Lava → Nieve → Castillo Fantasma con paleta única',
+    grokFeat2: 'Goombas vigilando cada caída de precipicio; dificultad progresiva',
+    grokFeat3: 'Arcos de monedas sobre fosos, plataformas móviles, bloque de la suerte 15% +500',
+    grokFeat4: 'Fuegos artificiales al alcanzar la bandera, confeti + bono sorpresa 100~500',
+    grokFeat5: 'Reloj digital FPS en la esquina superior, selector de idioma rápido, enlace a GitHub',
+    grokMeta: '<b>Actualización V5:</b> 6 fases temáticas procedimentales (semilla fija); recolección de monedas / plataformas móviles / bloques de la suerte / fuegos y confeti; IA inteligente; animaciones.',
+    hy4Title: 'Super Mario · Aventura de 6 Fases',
+    hy4Author: 'Hy4 Preview Versión v2',
+    hy4TagHot: '3 Iteraciones · V2',
+    hy4TagOk: '✅ Funcional',
+    hy4Feat1: '6 Fases Temáticas: Pradera → Ocaso → Noche Estrellada → Lava → Nieve → Castillo Fantasma con paletas distintas',
+    hy4Feat2: 'Los Goombas vigilan cada caída de acantilado y dan la vuelta al borde',
+    hy4Feat3: 'Arcos de monedas sobre fosos + filas de monedas en el suelo (+50 puntos)',
+    hy4Feat4: 'Bloques dobles corregidos: diseño escalonado para golpear desde abajo y arriba',
+    hy4Feat5: 'Bono de la suerte de 100~600 + confeti; FPS / multi-idioma / enlace a GitHub',
+    hy4Meta: '<b>Actualización V2:</b> Ampliado a 6 fases temáticas; sistema de monedas y bonos; IA en bordes; corrección de bloques inalcanzables; completado con colaboración de IA.',
+    btnPlay: '▶ Jugar Ahora',
+    btnNewtab: 'Abrir en Nueva Pestaña ↗',
+    keySpace: 'Espacio',
+    tipMove: 'Mover izquierda / derecha',
+    tipJump: 'Saltar',
+    tipRun: 'Correr / Acelerar',
+    tipRestart: 'Reiniciar Nivel',
+    footerDisclaimer: '⚖️ Solo para investigación y aprendizaje de programación con IA · Recursos originales · No comercial · '
+  },
+  'fr': {
+    docTitle: 'Super Mario · Sélection des Versions',
+    logo: 'AI GENERATED · HTML5 GAME',
+    h1Title: 'Super Mario · Sélection des Versions',
+    subTitle: "Même prompt, deux modèles d'IA, deux implémentations — <b>Choisissez une version pour jouer</b>",
+    grokTitle: 'Super Mario',
+    grokAuthor: 'Grok Fast Version v5',
+    grokTagHot: '6 Itérations · V5',
+    grokTagOk: '✅ Le Plus Complet',
+    tagLevels: '6 Mondes Thématiques',
+    tagLangs: '7 Langues',
+    grokFeat1: '6 Mondes Thématiques : Prairie → Désert → Nuit Étoilée → Lave → Neige → Manoir Hanté avec palette unique',
+    grokFeat2: 'Goombas montant la garde à chaque fosse ; difficulté progressive',
+    grokFeat3: 'Arcs de pièces au-dessus des fosses, plates-formes mobiles, bloc chance 15% +500',
+    grokFeat4: 'Feux d\'artifice au drapeau, confettis + récompense bonus 100~500',
+    grokFeat5: 'Horloge numérique FPS en haut à droite, changement rapide de langue, lien GitHub',
+    grokMeta: '<b>Mise à jour V5 :</b> 6 mondes thématiques procéduraux (graine fixe) ; pièces / plates-formes mobiles / blocs chance / feux & confettis ; IA d\'ennemis évitant les trous ; animations fluides.',
+    hy4Title: 'Super Mario · L\'Aventure des 6 Niveaux',
+    hy4Author: 'Hy4 Preview Version v2',
+    hy4TagHot: '3 Itérations · V2',
+    hy4TagOk: '✅ Complet',
+    hy4Feat1: '6 Mondes Thématiques : Prairie → Crépuscule → Nuit Étoilée → Lave → Neige → Manoir Hanté avec palettes distinctes',
+    hy4Feat2: 'Les Goombas gardent chaque atterrissage de falaise et font demi-tour au bord',
+    hy4Feat3: 'Arcs de pièces sur les fosses + pistes de pièces au sol (+50 pts)',
+    hy4Feat4: 'Blocs doubles corrigés : disposition étagée permettant de frapper d\'en bas et d\'en haut',
+    hy4Feat5: 'Bonus chance de 100~600 + confettis ; FPS / multilingue / lien GitHub',
+    hy4Meta: '<b>Mise à jour V2 :</b> Étendu à 6 mondes thématiques ; système de pièces et bonus chance ; IA évitant les bords ; correction des blocs inaccessibles ; finalisé par collaboration IA.',
+    btnPlay: '▶ Jouer',
+    btnNewtab: 'Ouvrir dans un nouvel onglet ↗',
+    keySpace: 'Espace',
+    tipMove: 'Déplacement gauche / droite',
+    tipJump: 'Sauter',
+    tipRun: 'Courir plus vite',
+    tipRestart: 'Recommencer le niveau',
+    footerDisclaimer: '⚖️ Uniquement pour la recherche et l\'apprentissage de l\'IA · Ressources originales · Non commercial · '
+  }
+};
+
+function detectLang() {
+  const list = [].concat(navigator.languages || [], [navigator.language || 'en']);
+  const s = list.join(',').toLowerCase();
+  if (s.indexOf('zh') >= 0) return /tw|hk|mo|hant/.test(s) ? 'zh-TW' : 'zh-CN';
+  if (s.indexOf('ja') >= 0) return 'ja';
+  if (s.indexOf('pt') >= 0) return 'pt-BR';
+  if (s.indexOf('es') >= 0) return 'es';
+  if (s.indexOf('fr') >= 0) return 'fr';
+  return 'en';
+}
+
+let currentLang = 'zh-CN';
+try {
+  const saved = localStorage.getItem('mario_lang');
+  if (saved && I18N[saved]) currentLang = saved;
+  else currentLang = detectLang();
+} catch (e) {
+  currentLang = detectLang();
+}
+
+function applyLanguage() {
+  const t = I18N[currentLang] || I18N['zh-CN'];
+  document.title = t.docTitle;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (t[k] != null) el.textContent = t[k];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const k = el.getAttribute('data-i18n-html');
+    if (t[k] != null) el.innerHTML = t[k];
+  });
+  const sel = document.getElementById('langSelect');
+  if (sel) sel.value = currentLang;
+  document.documentElement.lang = currentLang;
+}
+
+document.getElementById('langSelect').addEventListener('change', e => {
+  currentLang = e.target.value;
+  try { localStorage.setItem('mario_lang', currentLang); } catch (err) {}
+  applyLanguage();
+});
+
+applyLanguage();
+</script>
 </body>
 </html>

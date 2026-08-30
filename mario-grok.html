@@ -122,14 +122,6 @@ canvas {
 }
 .ctrl-btn:hover:not(:disabled) { background:rgba(0,0,0,.62); transform:translateY(-1px); }
 .ctrl-btn:disabled { opacity:.4; cursor:default; }
-.lang-select {
-  font-family:"Microsoft YaHei","微软雅黑",Arial,sans-serif;
-  font-size:13px; color:#fff; background:rgba(0,0,0,.4);
-  border:1px solid rgba(255,255,255,.55); border-radius:6px;
-  padding:5px 6px; cursor:pointer; outline:none; text-shadow:1px 1px 0 #000;
-}
-.lang-select option { color:#1a1a2e; background:#fff; text-shadow:none; }
-.lang-select:focus-visible { outline:2px solid #ffd700; }
 #pauseScreen { background:rgba(10,16,38,.78); }
 #hud {
   position: absolute;
@@ -148,19 +140,49 @@ canvas {
 }
 .hidden { display: none !important; }
 
-/* 页面底部 GitHub 链接 */
+/* 页面底部 GitHub 链接 & 语言选择 */
 .game-footer {
-  margin-top: 10px;
-  text-align: center;
+  margin-top: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   font-size: 14px;
   color: #aab4d4;
   letter-spacing: .5px;
 }
+.game-footer .footer-dot { opacity: .6; }
 .game-footer a {
   color: #7fb3ff; text-decoration: none; font-weight: 600;
   transition: color .15s ease, text-shadow .15s ease;
 }
 .game-footer a:hover { color: #b3d7ff; text-shadow: 0 0 10px rgba(127,179,255,.8); }
+.game-footer .lang-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 3px 12px 3px 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  transition: all .2s ease;
+}
+.game-footer .lang-wrap:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(127, 179, 255, 0.6);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3), 0 0 12px rgba(127,179,255,0.35);
+}
+.game-footer .lang-icon { font-size: 14px; line-height: 1; user-select: none; }
+.game-footer .lang-select {
+  font-family: "Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  font-size: 13px; font-weight: 600; color: #e2e8f0; background: transparent;
+  border: 0; padding: 2px 0; cursor: pointer; outline: none; text-shadow: 1px 1px 2px rgba(0,0,0,.6);
+}
+.game-footer .lang-select option { color: #1a1a2e; background: #fff; text-shadow: none; }
 
 /* 过关惊喜彩带 */
 #confettiBox { position:absolute; inset:0; overflow:hidden; border-radius:8px; pointer-events:none; }
@@ -171,7 +193,7 @@ canvas {
 @keyframes confFall { to { transform: translateY(720px) rotate(760deg); } }
 #luckyMsg { color:#ffd700; font-weight:800; font-size:20px; text-shadow:0 0 12px rgba(255,215,0,.55); }
 
-/* 语言切换已合并到右上角 #topBar 的下拉框 */
+/* 语言切换已移至底部页脚 */
 </style>
 </head>
 <body>
@@ -187,15 +209,6 @@ canvas {
   <div id="topBar">
     <button id="btnTopPause" class="ctrl-btn" type="button">⏸ 暂停</button>
     <button id="btnTopRestart" class="ctrl-btn" type="button">↻ 重新开始</button>
-    <select id="langSelect" class="lang-select" aria-label="Language">
-      <option value="zh-CN">简体中文</option>
-      <option value="zh-TW">繁體中文</option>
-      <option value="en">English</option>
-      <option value="ja">日本語</option>
-      <option value="pt-BR">Português</option>
-      <option value="es">Español</option>
-      <option value="fr">Français</option>
-    </select>
   </div>
 
   <div id="startScreen" class="screen">
@@ -243,7 +256,22 @@ canvas {
   </div>
 </div>
 <div class="game-footer">
-  超级玛丽 Grok Fast 生成 v5 · GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a>
+  <span>超级玛丽 Grok Fast 生成 v5</span>
+  <span class="footer-dot">·</span>
+  <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a></span>
+  <span class="footer-dot">·</span>
+  <div class="lang-wrap">
+    <span class="lang-icon" aria-hidden="true">🌐</span>
+    <select id="langSelect" class="lang-select" aria-label="Language / 语言">
+      <option value="zh-CN">简体中文</option>
+      <option value="zh-TW">繁體中文</option>
+      <option value="en">English</option>
+      <option value="ja">日本語</option>
+      <option value="pt-BR">Português</option>
+      <option value="es">Español</option>
+      <option value="fr">Français</option>
+    </select>
+  </div>
 </div>
 
 <script>
