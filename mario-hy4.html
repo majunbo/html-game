@@ -1,9 +1,23 @@
 <!DOCTYPE html>
+<!--
+================================================================================
+ 🎮 玩五分钟 (Play 5 Mins) · 网页游戏项目 (Hy4 Preview Build)
+ 版权所有 (C) 2026 120442759@qq.com. 保留所有权利。
+ 
+ 【法律与版权声明】
+ 本项目代码与界面设计版权归属 120442759@qq.com。
+ 未经版权所有者明确书面授权，任何组织或个人不得以任何形式（包括但不限于复制、
+ 镜像、反编译、修改源码、去除版权标识或暗水印等手段）进行传播、再次分发或用于商业营利行为。
+ 仅供个人技术研究与学习交流。
+================================================================================
+-->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>超级马里奥 · 六关历险</title>
+<title>玩五分钟 · 超级马里奥 · 六关历险</title>
+<link rel="icon" href="static/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 <style>
   /* ============ 全局：中文字体统一（积分、中文说明、按钮完全一致） ============ */
   :root{
@@ -31,6 +45,25 @@
   /* 1002 = 画布 1000 + 卡片左右边框各 1px，保证画布完整铺满卡片 */
   .app{ width:1002px; max-width:100%; }
 
+  /* ============ 顶部品牌栏（独立一行居左） ============ */
+  .top-brand-bar{ display:flex; align-items:center; margin-bottom:12px; }
+  .top-logo{
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+    transition:transform .18s ease, opacity .18s ease;
+  }
+  .top-logo:hover{ transform:scale(1.06); opacity:.95; }
+  .top-logo img{ width:30px; height:30px; display:block; filter:drop-shadow(0 2px 8px rgba(0,0,0,.25)); }
+  .top-logo .logo-text{
+    font-size:22px; font-weight:900; color:#fff; letter-spacing:1px;
+    text-shadow:0 1px 3px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.2);
+    white-space:nowrap; user-select:none;
+  }
+  @media (max-width:600px){
+    .top-brand-bar{ margin-bottom:8px; }
+    .top-logo img{ width:24px; height:24px; }
+    .top-logo .logo-text{ font-size:17px; }
+  }
+
   /* ============ 页头 ============ */
   .topbar{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
   .title{
@@ -52,20 +85,20 @@
     box-shadow:0 18px 50px rgba(31,45,90,.14); overflow:hidden;
   }
   .hud{
-    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-    padding:12px 16px; background:linear-gradient(180deg,#fbfcff,#f1f5fd);
+    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+    padding:8px 12px; background:linear-gradient(180deg,#fbfcff,#f1f5fd);
     border-bottom:1px solid var(--line);
   }
   .pill{
-    display:flex; align-items:center; gap:8px;
-    background:#fff; border:1px solid var(--line); border-radius:12px;
-    padding:7px 14px; font-size:15px; font-weight:700; color:var(--ink);
+    display:flex; align-items:center; gap:5px;
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:5px 9px; font-size:13px; font-weight:700; color:var(--ink);
     box-shadow:0 2px 5px rgba(30,45,90,.05); white-space:nowrap;
   }
-  .pill .lbl{ font-size:13px; font-weight:600; color:var(--ink-2); }
+  .pill .lbl{ font-size:12px; font-weight:600; color:var(--ink-2); }
   .pill .val{ font-variant-numeric:tabular-nums; min-width:1.2em; }
-  .pill.score .val{ color:#e5392b; font-size:19px; }
-  .pill.life .val{ color:#e5392b; letter-spacing:2px; }
+  .pill.score .val{ color:#e5392b; font-size:15px; }
+  .pill.life .val{ color:#e5392b; letter-spacing:1px; }
   .hud .spacer{ flex:1 1 auto; }
 
   /* ============ 按钮 ============ */
@@ -90,7 +123,7 @@
     box-shadow:0 5px 0 #c98c00, 0 10px 18px rgba(245,179,1,.32);
   }
   .btn.gold:active{ box-shadow:0 1px 0 #c98c00; }
-  .btn.small{ font-size:13px; padding:8px 14px; box-shadow:0 4px 0 rgba(0,0,0,.12); }
+  .btn.small{ font-size:12px; padding:6px 11px; letter-spacing:.5px; box-shadow:0 4px 0 rgba(0,0,0,.12); }
 
   /* ============ 舞台 / 画布 ============ */
   .stage{ position:relative; background:#8fd3ff; display:flex; justify-content:center; }
@@ -185,6 +218,16 @@
     color:#3d6fd9; text-decoration:none; font-weight:700;
     transition:color .15s ease, text-shadow .15s ease;
   }
+  .footer-email-link{
+    display:inline-flex; align-items:center; justify-content:center;
+    vertical-align:-2.5px; margin-left:6px; color:#3d6fd9; opacity:.88;
+    transition:opacity .18s ease, transform .18s ease, color .18s ease;
+    text-decoration:none;
+  }
+  .footer-email-link:hover{
+    opacity:1; transform:scale(1.18); color:#e5392b; text-decoration:none;
+  }
+  .footer-email-link svg{ display:block; }
   .lang-selector-wrap{
     position:relative; display:inline-block; z-index:100;
   }
@@ -249,6 +292,13 @@
 <body>
 <div class="app">
 
+  <div class="top-brand-bar">
+    <a href="index.html" class="top-logo" title="返回首页" aria-label="Logo">
+      <img src="static/manghe-white.png" alt="Logo">
+      <span class="logo-text" data-i18n="brandText">玩五分钟</span>
+    </a>
+  </div>
+
   <div class="topbar">
     <div>
       <div class="title" data-i18n="title">超级马里奥 · 六关历险</div>
@@ -271,6 +321,7 @@
       <div class="pill"><span class="lbl" data-i18n="hudTime">时间</span><span class="val" id="hudTime">300</span></div>
       <div class="pill"><span class="lbl" data-i18n="hudBest">最高分</span><span class="val" id="hudBest">0</span></div>
       <div class="spacer"></div>
+      <button class="btn small ghost" id="btnScreenshot" type="button">截图</button>
       <button class="btn small ghost" id="btnMusic" type="button">音乐：开</button>
       <button class="btn small ghost" id="btnPause" type="button">暂停</button>
     </div>
@@ -394,7 +445,7 @@
   <div class="github-link">
     <span>超级马里奥 · 六关历险 Hy4 Preview 生成 v3</span>
     <span class="footer-dot">·</span>
-    <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a></span>
+    <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a> <a href="mailto:120442759@qq.com" class="footer-email-link" title="联系邮箱：120442759@qq.com" aria-label="Email: 120442759@qq.com"><svg class="email-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a></span>
     <div class="lang-selector-wrap" id="langWrap">
       <button class="lang-trigger-btn" id="langTrigger" type="button" aria-haspopup="true" aria-expanded="false">
         <span class="flag-icon" id="currentFlag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5,5 L5.7,7.2 L8,7.2 L6.1,8.6 L6.8,10.8 L5,9.4 L3.2,10.8 L3.9,8.6 L2,7.2 L4.3,7.2 Z" fill="#ffde00"/><path d="M10,2 L10.3,3.1 L11.4,3.1 L10.5,3.8 L10.8,4.9 L10,4.2 L9.2,4.9 L9.5,3.8 L8.6,3.1 L9.7,3.1 Z" fill="#ffde00"/><path d="M12,4 L12.3,5.1 L13.4,5.1 L12.5,5.8 L12.8,6.9 L12,6.2 L11.2,6.9 L11.5,5.8 L10.6,5.1 L11.7,5.1 Z" fill="#ffde00"/><path d="M12,8 L12.3,9.1 L13.4,9.1 L12.5,9.8 L12.8,10.9 L12,10.2 L11.2,10.9 L11.5,9.8 L10.6,9.1 L11.7,9.1 Z" fill="#ffde00"/><path d="M10,10 L10.3,11.1 L11.4,11.1 L10.5,11.8 L10.8,12.9 L10,12.2 L9.2,12.9 L9.5,11.8 L8.6,11.1 L9.7,11.1 Z" fill="#ffde00"/></svg></span>
@@ -428,6 +479,8 @@
    * ========================================================================= */
   var I18N = {
     'zh-CN': {
+      brandText: '玩五分钟',
+      docTitle: '玩五分钟 · 超级马里奥 · 六关历险',
       title: '超级马里奥 · 六关历险',
       gameVer: 'Hy4 Preview 生成 v3',
       subtitle: '纯前端 Canvas 手绘像素版 · 顶问号、踩板栗仔、夺下终点红旗',
@@ -435,7 +488,7 @@
       badgeZero: '零依赖单文件',
       badgeLang: '多语言界面',
       hudLevel: '关卡', hudScore: '积分', hudCoin: '金币', hudLife: '生命', hudTime: '时间', hudBest: '最高分',
-      musicOn: '音乐：开', musicOff: '音乐：关', pause: '暂停', resume: '继续',
+      screenshot: '截图', musicOn: '音乐：开', musicOff: '音乐：关', pause: '暂停', resume: '继续',
       startLead: '帮助马里奥穿越六大主题关卡：跳过悬崖、顶碎问号、踩扁板栗仔，空中还有金币等你收集，最后夺下终点的红旗！',
       opsTitle: '操作说明',
       ops1: '<kbd>←</kbd><kbd>→</kbd> 或 <kbd>A</kbd><kbd>D</kbd><span>左右移动</span>',
@@ -489,6 +542,8 @@
       banner: function (n, c) { return n + '　（板栗仔 ' + c + ' 只）'; }
     },
     'zh-TW': {
+      brandText: '玩五分鐘',
+      docTitle: '玩五分鐘 · 超級瑪利歐 · 六關歷險',
       title: '超級瑪利歐 · 六關歷險',
       gameVer: 'Hy4 Preview 生成 v2',
       subtitle: '純前端 Canvas 手繪像素版 · 頂問號、踩慄寶寶、奪下終點紅旗',
@@ -496,7 +551,7 @@
       badgeZero: '零依賴單檔案',
       badgeLang: '多語言介面',
       hudLevel: '關卡', hudScore: '積分', hudCoin: '金幣', hudLife: '生命', hudTime: '時間', hudBest: '最高分',
-      musicOn: '音樂：開', musicOff: '音樂：關', pause: '暫停', resume: '繼續',
+      screenshot: '截圖', musicOn: '音樂：開', musicOff: '音樂：關', pause: '暫停', resume: '繼續',
       startLead: '幫助瑪利歐穿越六大主題關卡：跳過懸崖、頂碎問號、踩扁慄寶寶，空中還有金幣等你收集，最後奪下終點的紅旗！',
       opsTitle: '操作說明',
       ops1: '<kbd>←</kbd><kbd>→</kbd> 或 <kbd>A</kbd><kbd>D</kbd><span>左右移動</span>',
@@ -550,6 +605,8 @@
       banner: function (n, c) { return n + '　（慄寶寶 ' + c + ' 隻）'; }
     },
     'en': {
+      brandText: 'Play 5 Mins',
+      docTitle: '5-Minute Fun · Super Mario · 6 Level Quest',
       title: 'Super Mario · Six-Level Adventure',
       gameVer: 'Hy4 Preview Build v2',
       subtitle: 'Pure-frontend hand-drawn pixel Canvas · Hit ? blocks, stomp Goombas, grab the goal flag',
@@ -557,7 +614,7 @@
       badgeZero: 'Zero-dependency single file',
       badgeLang: 'Multilingual UI',
       hudLevel: 'Level', hudScore: 'Score', hudCoin: 'Coins', hudLife: 'Lives', hudTime: 'Time', hudBest: 'Best',
-      musicOn: 'Music: On', musicOff: 'Music: Off', pause: 'Pause', resume: 'Resume',
+      screenshot: 'Screenshot', musicOn: 'Music: On', musicOff: 'Music: Off', pause: 'Pause', resume: 'Resume',
       startLead: 'Help Mario through six themed levels: leap the cliffs, hit the ? blocks, stomp the Goombas, grab floating coins, and take the red flag at the finish!',
       opsTitle: 'Controls',
       ops1: '<kbd>←</kbd><kbd>→</kbd> or <kbd>A</kbd><kbd>D</kbd><span>Move left / right</span>',
@@ -611,6 +668,8 @@
       banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
     },
     'ja': {
+      brandText: '5分で遊ぶ',
+      docTitle: '5分で楽しむ · スーパーマリオ · 6コースの冒険',
       title: 'スーパーマリオ · 6コースアドベンチャー',
       gameVer: 'Hy4 Preview 生成 v2',
       subtitle: '純フロントエンド Canvas 手描きドット絵 · ？ブロックを叩き、クリボーを踏んで、ゴールの旗を取ろう',
@@ -618,7 +677,7 @@
       badgeZero: '依存ゼロの単一ファイル',
       badgeLang: '多言語対応',
       hudLevel: 'コース', hudScore: 'スコア', hudCoin: 'コイン', hudLife: '残機', hudTime: 'タイム', hudBest: 'ハイスコア',
-      musicOn: '音楽：ON', musicOff: '音楽：OFF', pause: '一時停止', resume: '再開',
+      screenshot: 'スクリーンショット', musicOn: '音楽：ON', musicOff: '音楽：OFF', pause: '一時停止', resume: '再開',
       startLead: 'マリオと一緒に6コースを駆け抜けよう！崖を飛び越え、？ブロックを叩き、クリボーを踏みつぶし、空中のコインも集めて、ゴールの赤い旗を取るのだ！',
       opsTitle: '操作方法',
       ops1: '<kbd>←</kbd><kbd>→</kbd> または <kbd>A</kbd><kbd>D</kbd><span>左右に移動</span>',
@@ -672,6 +731,8 @@
       banner: function (n, c) { return n + '　（クリボー ' + c + ' 匹）'; }
     },
     'pt-BR': {
+      brandText: 'Jogar 5 Min',
+      docTitle: '5 Minutos de Diversão · Super Mario · Aventura de 6 Fases',
       title: 'Super Mario · Aventura em Seis Fases',
       gameVer: 'Hy4 Preview v2',
       subtitle: 'Versão pixel desenhada à mão em Canvas puro · Acerte blocos ?, pise nos Goombas e pegue a bandeira final',
@@ -679,7 +740,7 @@
       badgeZero: 'Arquivo único, zero dependências',
       badgeLang: 'Interface multilíngue',
       hudLevel: 'Fase', hudScore: 'Pontos', hudCoin: 'Moedas', hudLife: 'Vidas', hudTime: 'Tempo', hudBest: 'Recorde',
-      musicOn: 'Música: Ligada', musicOff: 'Música: Desligada', pause: 'Pausar', resume: 'Continuar',
+      screenshot: 'Captura', musicOn: 'Música: Ligada', musicOff: 'Música: Desligada', pause: 'Pausar', resume: 'Continuar',
       startLead: 'Ajude o Mario a atravessar seis fases temáticas: salte os penhascos, acerte os blocos ?, colete moedas no ar e pegue a bandeira vermelha no final!',
       opsTitle: 'Controles',
       ops1: '<kbd>←</kbd><kbd>→</kbd> ou <kbd>A</kbd><kbd>D</kbd><span>Mover</span>',
@@ -733,6 +794,8 @@
       banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
     },
     'es': {
+      brandText: 'Jugar 5 Min',
+      docTitle: '5 Minutos de Diversión · Super Mario · Aventura de 6 Fases',
       title: 'Súper Mario · Aventura de Seis Niveles',
       gameVer: 'Hy4 Preview v2',
       subtitle: 'Versión pixel dibujada a mano con Canvas puro · Golpea bloques ?, pisa Goombas y toma la bandera final',
@@ -740,7 +803,7 @@
       badgeZero: 'Un solo archivo, cero dependencias',
       badgeLang: 'Interfaz multilingüe',
       hudLevel: 'Nivel', hudScore: 'Puntos', hudCoin: 'Monedas', hudLife: 'Vidas', hudTime: 'Tiempo', hudBest: 'Récord',
-      musicOn: 'Música: Sí', musicOff: 'Música: No', pause: 'Pausar', resume: 'Reanudar',
+      screenshot: 'Captura', musicOn: 'Música: Sí', musicOff: 'Música: No', pause: 'Pausar', resume: 'Reanudar',
       startLead: '¡Ayuda a Mario a cruzar seis niveles temáticos: salta los precipicios, golpea los bloques ?, recoge monedas en el aire y toma la bandera roja de la meta!',
       opsTitle: 'Controles',
       ops1: '<kbd>←</kbd><kbd>→</kbd> o <kbd>A</kbd><kbd>D</kbd><span>Moverse</span>',
@@ -794,6 +857,8 @@
       banner: function (n, c) { return n + '　(Goombas: ' + c + ')'; }
     },
     'fr': {
+      brandText: 'Jouer 5 Min',
+      docTitle: '5 Minutes de Plaisir · Super Mario · L\'Aventure des 6 Niveaux',
       title: 'Super Mario · Aventure en Six Niveaux',
       gameVer: 'Hy4 Preview v2',
       subtitle: 'Version pixel dessinée à la main en Canvas pur · Frappe les blocs ?, écrase les Goombas et prends le drapeau final',
@@ -801,7 +866,7 @@
       badgeZero: 'Fichier unique, zéro dépendance',
       badgeLang: 'Interface multilingue',
       hudLevel: 'Niveau', hudScore: 'Score', hudCoin: 'Pièces', hudLife: 'Vies', hudTime: 'Temps', hudBest: 'Record',
-      musicOn: 'Musique : oui', musicOff: 'Musique : non', pause: 'Pause', resume: 'Reprendre',
+      screenshot: 'Capture', musicOn: 'Musique : oui', musicOff: 'Musique : non', pause: 'Pause', resume: 'Reprendre',
       startLead: 'Aide Mario à traverser six niveaux thématiques : saute les falaises, frappe les blocs ?, ramasse des pièces en plein vol et prends le drapeau rouge à l’arrivée !',
       opsTitle: 'Commandes',
       ops1: '<kbd>←</kbd><kbd>→</kbd> ou <kbd>A</kbd><kbd>D</kbd><span>Se déplacer</span>',
@@ -917,7 +982,7 @@
       k = htmls[i].getAttribute('data-i18n-html');
       if (t[k] != null) htmls[i].innerHTML = t[k];
     }
-    document.title = t.title;
+    document.title = t.docTitle || ('玩五分钟 · ' + t.title);
     var gn = document.getElementById('gtName'), gv = document.getElementById('gtVer');
     if (gn) gn.textContent = t.title;
     if (gv) gv.textContent = t.gameVer;
@@ -944,6 +1009,8 @@
 
   function syncLangButtons() {
     var t = T();
+    var bs = document.getElementById('btnScreenshot');
+    if (bs) bs.textContent = t.screenshot || '截图';
     var bm = document.getElementById('btnMusic');
     if (bm) bm.textContent = Sound.on ? t.musicOn : t.musicOff;
     var bp = document.getElementById('btnPause');
@@ -2533,6 +2600,254 @@
     else Sound.stopMusic();
   }
 
+  function drawRoundRect(ctx, x, y, width, height, radius) {
+    if (typeof radius === 'number') radius = [radius, radius, radius, radius];
+    ctx.beginPath();
+    ctx.moveTo(x + radius[0], y);
+    ctx.lineTo(x + width - radius[1], y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius[1]);
+    ctx.lineTo(x + width, y + height - radius[2]);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius[2], y + height);
+    ctx.lineTo(x + radius[3], y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius[3]);
+    ctx.lineTo(x, y + radius[0]);
+    ctx.quadraticCurveTo(x, y, x + radius[0], y);
+    ctx.closePath();
+  }
+
+  function drawWrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    var words = text.split('');
+    var line = '';
+    for (var n = 0; n < words.length; n++) {
+      var testLine = line + words[n];
+      var metrics = ctx.measureText(testLine);
+      if (metrics.width > maxWidth && n > 0) {
+        ctx.fillText(line, x, y);
+        line = words[n];
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, x, y);
+    return y;
+  }
+
+  function takeScreenshot() {
+    try {
+      var cv = document.getElementById('game') || canvas;
+      if (!cv) return;
+
+      var exp = document.createElement('canvas');
+      exp.width = 1000;
+      exp.height = 608; // 48px HUD + 560px Stage
+      var ectx = exp.getContext('2d');
+      var t = T();
+      var fontFam = getComputedStyle(document.body).fontFamily;
+
+      // 1. HUD 顶栏背景
+      var hudGrad = ectx.createLinearGradient(0, 0, 0, 48);
+      hudGrad.addColorStop(0, '#fbfcff');
+      hudGrad.addColorStop(1, '#f1f5fd');
+      ectx.fillStyle = hudGrad;
+      ectx.fillRect(0, 0, 1000, 48);
+      ectx.strokeStyle = '#dfe5f2';
+      ectx.lineWidth = 1;
+      ectx.beginPath();
+      ectx.moveTo(0, 47.5);
+      ectx.lineTo(1000, 47.5);
+      ectx.stroke();
+
+      // 绘制 HUD 各标签
+      var pills = [
+        { lbl: t.hudLevel || '关卡', val: to('hudLevel').textContent, score: false },
+        { lbl: t.hudScore || '积分', val: to('hudScore').textContent, score: true },
+        { lbl: t.hudCoin || '金币', val: to('hudCoin').textContent, score: false },
+        { lbl: t.hudLife || '生命', val: to('hudLife').textContent, life: true },
+        { lbl: t.hudTime || '时间', val: to('hudTime').textContent, score: false },
+        { lbl: t.hudBest || '最高分', val: to('hudBest').textContent, score: false }
+      ];
+
+      var px = 12;
+      for (var i = 0; i < pills.length; i++) {
+        var p = pills[i];
+        ectx.font = 'bold 12px ' + fontFam;
+        var lblW = ectx.measureText(p.lbl).width;
+        ectx.font = 'bold ' + (p.score ? '15px' : '13px') + ' ' + fontFam;
+        var valW = ectx.measureText(p.val).width;
+        var pw = lblW + valW + 22;
+
+        ectx.fillStyle = '#ffffff';
+        ectx.strokeStyle = '#dfe5f2';
+        drawRoundRect(ectx, px, 8, pw, 32, 10);
+        ectx.fill();
+        ectx.stroke();
+
+        ectx.fillStyle = '#5b6580';
+        ectx.font = '600 12px ' + fontFam;
+        ectx.textAlign = 'left';
+        ectx.textBaseline = 'middle';
+        ectx.fillText(p.lbl, px + 8, 24);
+
+        ectx.fillStyle = (p.score || p.life) ? '#e5392b' : '#232a3d';
+        ectx.font = 'bold ' + (p.score ? '15px' : '13px') + ' ' + fontFam;
+        ectx.fillText(p.val, px + 8 + lblW + 5, 24);
+
+        px += pw + 6;
+      }
+
+      // 2. 绘制游戏 Canvas (y=48 处)
+      ectx.drawImage(cv, 0, 48, 1000, 560);
+
+      // 3. 检查并绘制活动浮层及文字描述
+      function isShown(id) {
+        var el = document.getElementById(id);
+        return el && el.classList.contains('show');
+      }
+
+      var activeOverlay = null;
+      if (isShown('ovStart')) activeOverlay = 'ovStart';
+      else if (isShown('ovHelp')) activeOverlay = 'ovHelp';
+      else if (isShown('ovPause')) activeOverlay = 'ovPause';
+      else if (isShown('ovClear')) activeOverlay = 'ovClear';
+      else if (isShown('ovOver')) activeOverlay = 'ovOver';
+
+      if (activeOverlay) {
+        ectx.fillStyle = 'rgba(14, 22, 44, 0.58)';
+        ectx.fillRect(0, 48, 1000, 560);
+
+        var ovEl = document.getElementById(activeOverlay);
+        var panelEl = ovEl.querySelector('.panel');
+        if (panelEl) {
+          var panW = 640, panH = Math.min(490, panelEl.offsetHeight || 440);
+          var panX = (1000 - panW) / 2;
+          var panY = 48 + (560 - panH) / 2;
+
+          ectx.save();
+          ectx.shadowColor = 'rgba(10, 20, 50, 0.35)';
+          ectx.shadowBlur = 30;
+          ectx.shadowOffsetY = 14;
+          ectx.fillStyle = '#ffffff';
+          drawRoundRect(ectx, panX, panY, panW, panH, 20);
+          ectx.fill();
+          ectx.restore();
+
+          ectx.strokeStyle = '#e8edf8';
+          ectx.lineWidth = 1;
+          drawRoundRect(ectx, panX, panY, panW, panH, 20);
+          ectx.stroke();
+
+          var h2 = panelEl.querySelector('h2');
+          var titleText = h2 ? h2.textContent : '';
+          ectx.textAlign = 'center';
+          ectx.textBaseline = 'top';
+          ectx.fillStyle = (h2 && h2.classList.contains('lose')) ? '#e5392b' : ((h2 && h2.classList.contains('win')) ? '#1f9d55' : '#232a3d');
+          ectx.font = '900 24px ' + fontFam;
+          ectx.fillText(titleText, 500, panY + 22);
+
+          var lead = panelEl.querySelector('.lead') || panelEl.querySelector('.hero');
+          var curY = panY + 58;
+          if (lead) {
+            ectx.fillStyle = '#5b6580';
+            ectx.font = '500 13.5px ' + fontFam;
+            curY = drawWrapText(ectx, lead.textContent, panX + 30, curY, panW - 60, 20) + 14;
+          }
+
+          var keysBox = panelEl.querySelector('.keys');
+          if (keysBox) {
+            var keysH3 = keysBox.querySelector('h3');
+            var lis = keysBox.querySelectorAll('li');
+            var boxW = panW - 60;
+            var boxH = 26 + lis.length * 24 + 10;
+            var boxX = panX + 30;
+            var boxY = curY;
+
+            ectx.fillStyle = '#f6f9ff';
+            ectx.strokeStyle = '#dfe5f2';
+            drawRoundRect(ectx, boxX, boxY, boxW, boxH, 14);
+            ectx.fill();
+            ectx.stroke();
+
+            if (keysH3) {
+              ectx.fillStyle = '#232a3d';
+              ectx.font = 'bold 13px ' + fontFam;
+              ectx.textAlign = 'left';
+              ectx.fillText(keysH3.textContent, boxX + 16, boxY + 10);
+            }
+
+            ectx.font = '500 12.5px ' + fontFam;
+            ectx.fillStyle = '#3a4358';
+            var liY = boxY + 34;
+            lis.forEach(function (li) {
+              ectx.fillText(li.textContent.replace(/\s+/g, ' '), boxX + 16, liY);
+              liY += 24;
+            });
+
+            curY = boxY + boxH + 16;
+          }
+
+          var btns = panelEl.querySelectorAll('.btns .btn');
+          if (btns.length > 0) {
+            var totalBtnsW = btns.length * 110 + (btns.length - 1) * 12;
+            var bx = (1000 - totalBtnsW) / 2;
+            btns.forEach(function (btn) {
+              var isPri = btn.classList.contains('primary');
+              ectx.fillStyle = isPri ? '#e5392b' : '#eaeef8';
+              ectx.strokeStyle = isPri ? '#c92a1d' : '#c3cbdc';
+              drawRoundRect(ectx, bx, curY, 110, 36, 18);
+              ectx.fill();
+              ectx.stroke();
+
+              ectx.fillStyle = isPri ? '#ffffff' : '#39425c';
+              ectx.font = 'bold 13px ' + fontFam;
+              ectx.textAlign = 'center';
+              ectx.textBaseline = 'middle';
+              ectx.fillText(btn.textContent, bx + 55, curY + 18);
+              bx += 110 + 12;
+            });
+            curY += 46;
+          }
+
+          var hint = panelEl.querySelector('.hint');
+          if (hint) {
+            ectx.fillStyle = '#98a2ba';
+            ectx.font = '11.5px ' + fontFam;
+            ectx.textAlign = 'center';
+            ectx.textBaseline = 'top';
+            ectx.fillText(hint.textContent, 500, curY + 4);
+          }
+        }
+      } else {
+        var fpsEl = document.getElementById('fpsBox');
+        if (fpsEl) {
+          ectx.fillStyle = '#04140a';
+          ectx.strokeStyle = '#0f3d22';
+          drawRoundRect(ectx, 1000 - 80, 48 + 8, 70, 22, 4);
+          ectx.fill();
+          ectx.stroke();
+          ectx.fillStyle = '#8dffb9';
+          ectx.font = 'bold 11px Consolas, monospace';
+          ectx.textAlign = 'center';
+          ectx.textBaseline = 'middle';
+          ectx.fillText(fpsEl.textContent, 1000 - 45, 48 + 19);
+        }
+      }
+
+      var dataUrl = exp.toDataURL('image/png');
+      var a = document.createElement('a');
+      var now = new Date();
+      var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+      var timeStr = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate()) + '_' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
+      a.download = 'mario_screenshot_' + timeStr + '.png';
+      a.href = dataUrl;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (e) {
+      console.error('Screenshot error:', e);
+    }
+  }
+
   // ---- 按钮事件（全部真实按钮，天然可点击；并支持回车） ----
   to('btnStart').addEventListener('click', function () { ensureAudio(); startLevel(0, true, true); });
   to('btnHelp').addEventListener('click', function () { show('ovHelp'); });
@@ -2542,6 +2857,7 @@
     G.best = 0; syncHUD();
   });
 
+  to('btnScreenshot').addEventListener('click', function () { takeScreenshot(); });
   to('btnMusic').addEventListener('click', function () { ensureAudio(); toggleMusic(); });
   to('btnPause').addEventListener('click', function () {
     if (G.state === 'playing') pauseGame();
@@ -2599,7 +2915,15 @@
       }
     });
   }
+
+  // 版权数字签名与控制台暗水印保护
+  try {
+    var _0xsign = "8J+OriDnjqnkupTliIbpkp8gwrcgUGxheSA1IE1pbnMgfCDniYjmnYPmiYDmnIkgKEMpIDIwMjYgMTIwNDQyNzU5QHFxLmNvbS4gQWxsIFJpZ2h0cyBSZXNlcnZlZC4g5pyq57uP5o6I5p2D5Lil56aB5ou36LSd44CB5L+u5pS55LiO5ZWG55So44CC";
+    var _0xstr = decodeURIComponent(escape(atob(_0xsign)));
+    console.log("%c " + _0xstr + " ", "background:#e5392b;color:#fff;padding:6px 12px;font-size:12px;font-weight:bold;border-radius:4px;");
+  } catch (e) {}
 })();
 </script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "53a666c8130641eba76813d383a02702"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

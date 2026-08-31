@@ -1,9 +1,23 @@
 <!DOCTYPE html>
+<!--
+================================================================================
+ 🎮 玩五分钟 (Play 5 Mins) · 网页游戏项目 (Grok Fast Build)
+ 版权所有 (C) 2026 120442759@qq.com. 保留所有权利。
+ 
+ 【法律与版权声明】
+ 本项目代码与界面设计版权归属 120442759@qq.com。
+ 未经版权所有者明确书面授权，任何组织或个人不得以任何形式（包括但不限于复制、
+ 镜像、反编译、修改源码、去除版权标识或暗水印等手段）进行传播、再次分发或用于商业营利行为。
+ 仅供个人技术研究与学习交流。
+================================================================================
+-->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>超级玛丽 Grok Fast 生成 v6</title>
+<title>玩五分钟 · 超级玛丽</title>
+<link rel="icon" href="static/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <style>
 :root {
   --font: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
@@ -113,11 +127,53 @@ canvas {
   font-family: var(--font);
 }
 
-/* 顶部游戏标题栏（居中放大展示） */
+/* 顶部品牌栏（独立一行居左，与游戏舞台对齐） */
+.top-brand-bar {
+  width: 1100px;
+  max-width: 100%;
+  margin: 4px auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 4px;
+}
+.top-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.top-logo:hover {
+  transform: scale(1.06);
+  opacity: .95;
+}
+.top-logo img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));
+}
+.top-logo .logo-text {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  text-shadow: 1px 1px 2px rgba(0,0,0,.6);
+  user-select: none;
+}
+@media (max-width: 600px) {
+  .top-brand-bar { margin: 2px auto 6px; }
+  .top-logo img { width: 24px; height: 24px; }
+  .top-logo .logo-text { font-size: 16px; }
+}
+
+/* 顶部游戏标题栏（独立一行居中放大展示） */
 .game-header {
   width: 1100px;
   max-width: 100%;
-  margin: 10px auto 14px;
+  margin: 0 auto 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,7 +234,7 @@ canvas {
   top: 14px;
   left: 0;
   right: 0;
-  padding-right: 250px;
+  padding-right: 340px;
   display: flex;
   justify-content: space-around;
   color: #fff;
@@ -207,6 +263,24 @@ canvas {
 .game-footer a { color: #ffd85e; text-decoration: none; font-weight: 700; }
 .game-footer a:hover { text-decoration: underline; }
 .game-footer .footer-dot { opacity: .5; }
+.footer-email-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -2.5px;
+  margin-left: 6px;
+  color: #ffd85e;
+  opacity: .88;
+  transition: opacity .18s ease, transform .18s ease, color .18s ease;
+  text-decoration: none;
+}
+.footer-email-link:hover {
+  opacity: 1;
+  transform: scale(1.18);
+  color: #fff;
+  text-decoration: none;
+}
+.footer-email-link svg { display: block; }
 
 /* 自定义语言选择器 (DIV 层) */
 .lang-selector-wrap {
@@ -303,6 +377,12 @@ canvas {
 </style>
 </head>
 <body>
+<div class="top-brand-bar">
+  <a href="index.html" class="top-logo" title="返回首页" aria-label="Logo">
+    <img src="static/manghe-white.png" alt="Logo">
+    <span class="logo-text" id="brandText">玩五分钟</span>
+  </a>
+</div>
 <div class="game-header">
   <span id="gtName">超级玛丽</span>
   <span id="gtVer" class="ver">Grok Fast 生成 v6</span>
@@ -318,6 +398,7 @@ canvas {
   <div id="fpsCounter" class="fps-counter">FPS --</div>
 
   <div id="topBar">
+    <button id="btnTopScreenshot" class="ctrl-btn" type="button">📷 截图</button>
     <button id="btnTopPause" class="ctrl-btn" type="button">⏸ 暂停</button>
     <button id="btnTopRestart" class="ctrl-btn" type="button">↻ 重新开始</button>
   </div>
@@ -370,7 +451,7 @@ canvas {
 <div class="game-footer">
   <span id="footerTitle">超级玛丽 Grok Fast 生成 v6</span>
   <span class="footer-dot">·</span>
-  <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a></span>
+  <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a> <a href="mailto:120442759@qq.com" class="footer-email-link" title="联系邮箱：120442759@qq.com" aria-label="Email: 120442759@qq.com"><svg class="email-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a></span>
   <div class="lang-selector-wrap" id="langWrap">
     <button class="lang-trigger-btn" id="langTrigger" type="button" aria-haspopup="true" aria-expanded="false">
       <span class="flag-icon" id="currentFlag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5,5 L5.7,7.2 L8,7.2 L6.1,8.6 L6.8,10.8 L5,9.4 L3.2,10.8 L3.9,8.6 L2,7.2 L4.3,7.2 Z" fill="#ffde00"/><path d="M10,2 L10.3,3.1 L11.4,3.1 L10.5,3.8 L10.8,4.9 L10,4.2 L9.2,4.9 L9.5,3.8 L8.6,3.1 L9.7,3.1 Z" fill="#ffde00"/><path d="M12,4 L12.3,5.1 L13.4,5.1 L12.5,5.8 L12.8,6.9 L12,6.2 L11.2,6.9 L11.5,5.8 L10.6,5.1 L11.7,5.1 Z" fill="#ffde00"/><path d="M12,8 L12.3,9.1 L13.4,9.1 L12.5,9.8 L12.8,10.9 L12,10.2 L11.2,10.9 L11.5,9.8 L10.6,9.1 L11.7,9.1 Z" fill="#ffde00"/><path d="M10,10 L10.3,11.1 L11.4,11.1 L10.5,11.8 L10.8,12.9 L10,12.2 L9.2,12.9 L9.5,11.8 L8.6,11.1 L9.7,11.1 Z" fill="#ffde00"/></svg></span>
@@ -454,6 +535,8 @@ const LANG_MAP = {
 
 const I18N = {
   'zh-CN': {
+    brandText: '玩五分钟',
+    docTitle: '玩五分钟 · 超级玛丽',
     title: '超级玛丽', gameTitle: '超级玛丽', gameVer: 'Grok Fast 生成 v6', lucky: '惊喜奖励 +',
     score: '积分：', level: '关卡：', lives: '生命：', start: '开始游戏', clear: '恭喜通关！',
     next: '进入下一关', retry: '重新挑战本关', restart: '回到第一关', win: '全部通关！',
@@ -461,7 +544,7 @@ const I18N = {
     ops: ['← → 或 A D ：左右移动', '空格 / W / ↑ ：跳跃', 'Shift ：加速奔跑（加速时跳得更高）', '顶问号块获得积分，踩板栗仔消灭敌人', '到达终点红旗即可过关'],
     clearMsg: lv => `第 ${lv} 关完成！`, finalScore: '最终积分：', currentScore: '当前总分：',
     failTitle: '再接再厉！', failText: '别灰心，失败是成功之母！', currentPoints: '当前积分：',
-    fps: 'FPS', pause: '暂停', resume: '继续', restartGame: '重新开始', pausedTitle: '游戏暂停',
+    fps: 'FPS', screenshot: '截图', pause: '暂停', resume: '继续', restartGame: '重新开始', pausedTitle: '游戏暂停',
     pausedText: '休息一下，马里奥在等你回来。', resumeBtn: '继续游戏', pauseHint: '按 P 或 Esc 继续游戏',
     levelThemes: [
       { name: '第 1 关 · 草原平原', sub: '冒险的起点：掌握奔跑与跳跃技巧' },
@@ -473,6 +556,8 @@ const I18N = {
     ]
   },
   'zh-TW': {
+    brandText: '玩五分鐘',
+    docTitle: '玩五分鐘 · 超級瑪利歐',
     title: '超級瑪利歐', gameTitle: '超級瑪利歐', gameVer: 'Grok Fast 生成 v6', lucky: '驚喜獎勵 +',
     score: '積分：', level: '關卡：', lives: '生命：', start: '開始遊戲', clear: '恭喜過關！',
     next: '進入下一關', retry: '重新挑戰本關', restart: '回到第一關', win: '全部過關！',
@@ -480,7 +565,7 @@ const I18N = {
     ops: ['← → 或 A D ：左右移動', '空格 / W / ↑ ：跳躍', 'Shift ：加速奔跑（加速時跳得更高）', '頂問號方塊獲得積分，踩慄寶寶消滅敵人', '到達終點紅旗即可過關'],
     clearMsg: lv => `第 ${lv} 關完成！`, finalScore: '最終積分：', currentScore: '目前總分：',
     failTitle: '再接再厲！', failText: '別灰心，失敗為成功之母！', currentPoints: '目前積分：',
-    fps: 'FPS', pause: '暫停', resume: '繼續', restartGame: '重新開始', pausedTitle: '遊戲暫停',
+    fps: 'FPS', screenshot: '截圖', pause: '暫停', resume: '繼續', restartGame: '重新開始', pausedTitle: '遊戲暫停',
     pausedText: '休息一下，瑪利歐在等你回來。', resumeBtn: '繼續遊戲', pauseHint: '按 P 或 Esc 繼續遊戲',
     levelThemes: [
       { name: '第 1 關 · 草原平原', sub: '冒險的起點：掌握奔跑與跳躍技巧' },
@@ -492,6 +577,8 @@ const I18N = {
     ]
   },
   'en': {
+    brandText: 'Play 5 Mins',
+    docTitle: '5-Minute Fun · Super Mario',
     title: 'Super Mario', gameTitle: 'Super Mario', gameVer: 'Grok Fast Build v6', lucky: 'Surprise Bonus +',
     score: 'Score: ', level: 'Level: ', lives: 'Lives: ', start: 'Start Game', clear: 'Level Clear!',
     next: 'Next Level', retry: 'Retry Level', restart: 'Back to Level 1', win: 'All Levels Clear!',
@@ -499,7 +586,7 @@ const I18N = {
     ops: ['← → or A D: Move', 'Space / W / ↑: Jump', 'Shift: Run faster and jump higher', 'Hit ? blocks for points; stomp enemies', 'Reach the red flag to clear the level'],
     clearMsg: lv => `Level ${lv} complete!`, finalScore: 'Final Score: ', currentScore: 'Current Score: ',
     failTitle: 'Try Again!', failText: 'Keep going. Practice makes progress!', currentPoints: 'Current Score: ',
-    fps: 'FPS', pause: 'Pause', resume: 'Resume', restartGame: 'Restart', pausedTitle: 'Game Paused',
+    fps: 'FPS', screenshot: 'Screenshot', pause: 'Pause', resume: 'Resume', restartGame: 'Restart', pausedTitle: 'Game Paused',
     pausedText: 'Take a break — Mario is waiting for you.', resumeBtn: 'Resume Game', pauseHint: 'Press P or Esc to resume',
     levelThemes: [
       { name: 'Level 1 · Grassland Plains', sub: 'Journey begins: Learn running and jumping skills' },
@@ -511,6 +598,8 @@ const I18N = {
     ]
   },
   'ja': {
+    brandText: '5分で遊ぶ',
+    docTitle: '5分で楽しむ · スーパーマリオ',
     title: 'スーパーマリオ', gameTitle: 'スーパーマリオ', gameVer: 'Grok Fast 生成 v6', lucky: 'ラッキーボーナス +',
     score: 'スコア：', level: 'コース：', lives: '残機：', start: 'ゲームスタート', clear: 'コースクリア！',
     next: '次のコースへ', retry: 'このコースを再挑戦', restart: '1コース目に戻る', win: '全コースクリア！',
@@ -518,7 +607,7 @@ const I18N = {
     ops: ['← → または A D ：左右移動', 'スペース / W / ↑ ：ジャンプ', 'Shift ：ダッシュ（加速中は高く跳べる）', '？ブロックを叩いて得点、クリボーを踏んで倒そう', 'ゴールの赤い旗に触れればクリア'],
     clearMsg: lv => `第${lv}コース クリア！`, finalScore: '最終スコア：', currentScore: '現在の合計：',
     failTitle: 'あと少し！', failText: 'くじけないで、失敗は成功のもと！', currentPoints: '現在のスコア：',
-    fps: 'FPS', pause: '一時停止', resume: '再開', restartGame: '最初から', pausedTitle: '一時停止中',
+    fps: 'FPS', screenshot: 'スクリーンショット', pause: '一時停止', resume: '再開', restartGame: '最初から', pausedTitle: '一時停止中',
     pausedText: '少し休憩しよう。マリオが待っている。', resumeBtn: 'ゲーム再開', pauseHint: 'P または Esc で再開',
     levelThemes: [
       { name: '第1コース · 草原の平原', sub: '冒険の出発点：ダッシュとジャンプを使いこなそう' },
@@ -530,6 +619,8 @@ const I18N = {
     ]
   },
   'pt-BR': {
+    brandText: 'Jogar 5 Min',
+    docTitle: '5 Minutos de Diversão · Super Mario',
     title: 'Super Mario', gameTitle: 'Super Mario', gameVer: 'Grok Fast Versão v6', lucky: 'Bônus Surpresa +',
     score: 'Pontos: ', level: 'Fase: ', lives: 'Vidas: ', start: 'Começar Jogo', clear: 'Fase Concluída!',
     next: 'Próxima Fase', retry: 'Tentar de Novo', restart: 'Voltar à Fase 1', win: 'Todas as Fases Concluídas!',
@@ -537,7 +628,7 @@ const I18N = {
     ops: ['← → ou A D: mover', 'Espaço / W / ↑: pular', 'Shift: correr (pule mais alto com velocidade)', 'Acerte blocos ? para pontos; pise nos inimigos', 'Alcance a bandeira vermelha para concluir'],
     clearMsg: lv => `Fase ${lv} concluída!`, finalScore: 'Pontuação Final: ', currentScore: 'Pontuação Atual: ',
     failTitle: 'Tente de Novo!', failText: 'Não desanime — a prática leva à perfeição!', currentPoints: 'Pontos Atuais: ',
-    fps: 'FPS', pause: 'Pausar', resume: 'Continuar', restartGame: 'Reiniciar', pausedTitle: 'Jogo Pausado',
+    fps: 'FPS', screenshot: 'Captura', pause: 'Pausar', resume: 'Continuar', restartGame: 'Reiniciar', pausedTitle: 'Jogo Pausado',
     pausedText: 'Relaxe um pouco — o Mario está esperando.', resumeBtn: 'Continuar Jogo', pauseHint: 'Pressione P ou Esc para continuar',
     levelThemes: [
       { name: 'Fase 1 · Planície da Grama', sub: 'Início da jornada: domine a corrida e o pulo' },
@@ -549,6 +640,8 @@ const I18N = {
     ]
   },
   'es': {
+    brandText: 'Jugar 5 Min',
+    docTitle: '5 Minutos de Diversión · Super Mario',
     title: 'Súper Mario', gameTitle: 'Súper Mario', gameVer: 'Grok Fast Versión v6', lucky: 'Bonus Sorpresa +',
     score: 'Puntos: ', level: 'Nivel: ', lives: 'Vidas: ', start: 'Comenzar Juego', clear: '¡Nivel Superado!',
     next: 'Siguiente Nivel', retry: 'Reintentar Nivel', restart: 'Volver al Nivel 1', win: '¡Todos los Niveles Superados!',
@@ -556,7 +649,7 @@ const I18N = {
     ops: ['← → o A D: moverse', 'Espacio / W / ↑: saltar', 'Shift: correr (saltas más alto con impulso)', 'Golpea bloques ? para puntos; salta sobre enemigos', 'Llega a la bandera roja para superar el nivel'],
     clearMsg: lv => `¡Nivel ${lv} completado!`, finalScore: 'Puntuación Final: ', currentScore: 'Puntuación Actual: ',
     failTitle: '¡Inténtalo otra vez!', failText: '¡No te rindas, la práctica hace al maestro!', currentPoints: 'Puntos Actuales: ',
-    fps: 'FPS', pause: 'Pausar', resume: 'Reanudar', restartGame: 'Reiniciar', pausedTitle: 'Juego en Pausa',
+    fps: 'FPS', screenshot: 'Captura', pause: 'Pausar', resume: 'Reanudar', restartGame: 'Reiniciar', pausedTitle: 'Juego en Pausa',
     pausedText: 'Descansa un momento, Mario te espera.', resumeBtn: 'Reanudar juego', pauseHint: 'Pulsa P o Esc para reanudar',
     levelThemes: [
       { name: 'Nivel 1 · Pradera Verde', sub: 'El inicio del viaje: domina la carrera y el salto' },
@@ -568,6 +661,8 @@ const I18N = {
     ]
   },
   'fr': {
+    brandText: 'Jouer 5 Min',
+    docTitle: '5 Minutes de Plaisir · Super Mario',
     title: 'Super Mario', gameTitle: 'Super Mario', gameVer: 'Grok Fast Version v6', lucky: 'Bonus Surprise +',
     score: 'Score : ', level: 'Niveau : ', lives: 'Vies : ', start: 'Commencer', clear: 'Niveau Terminé !',
     next: 'Niveau suivant', retry: 'Réessayer ce niveau', restart: 'Retour au Niveau 1', win: 'Tous les Niveaux Terminés !',
@@ -575,7 +670,7 @@ const I18N = {
     ops: ['← → ou A D : se déplacer', 'Espace / W / ↑ : sauter', 'Shift : courir (tu sautes plus haut avec de l’élan)', 'Frappe les blocs ? pour des points ; écrase les ennemis', 'Atteins le drapeau rouge pour finir le niveau'],
     clearMsg: lv => `Niveau ${lv} terminé !`, finalScore: 'Score Final : ', currentScore: 'Score Actuel : ',
     failTitle: 'Encore un essai !', failText: 'N’abandonne pas, la persévérance porte ses fruits !', currentPoints: 'Score Actuel : ',
-    fps: 'FPS', pause: 'Pause', resume: 'Reprendre', restartGame: 'Recommencer', pausedTitle: 'Jeu en Pause',
+    fps: 'FPS', screenshot: 'Capture', pause: 'Pause', resume: 'Reprendre', restartGame: 'Recommencer', pausedTitle: 'Jeu en Pause',
     pausedText: 'Fais une pause, Mario t’attend.', resumeBtn: 'Reprendre le jeu', pauseHint: 'Appuie sur P ou Échap pour reprendre',
     levelThemes: [
       { name: 'Niveau 1 · Plaine Verdoyante', sub: 'Début de l\'aventure : apprenez à courir et sauter' },
@@ -616,8 +711,11 @@ try {
 
 function applyLanguage() {
   const t = I18N[currentLang] || I18N['zh-CN'];
-  document.title = `${t.gameTitle} ${t.gameVer}`;
+  document.title = t.docTitle || `玩五分钟 · ${t.gameTitle}`;
   
+  const brandEl = document.getElementById('brandText');
+  if (brandEl && t.brandText) brandEl.textContent = t.brandText;
+
   const gn = document.getElementById('gtName'), gv = document.getElementById('gtVer');
   if (gn) gn.textContent = t.gameTitle;
   if (gv) gv.textContent = t.gameVer;
@@ -716,6 +814,10 @@ if (langTrigger && langWrap) {
 let lastUiState = '';
 function updateCtrlButtons() {
   const t = I18N[currentLang] || I18N['zh-CN'];
+  const bS = document.getElementById('btnTopScreenshot');
+  if (bS) {
+    bS.innerHTML = '📷 ' + (t.screenshot || '截图');
+  }
   const bP = document.getElementById('btnTopPause');
   if (bP) {
     bP.innerHTML = gameState === 'paused' ? '▶ ' + t.resume : '⏸ ' + t.pause;
@@ -731,6 +833,236 @@ function syncCtrlButtons() {
   if (gameState !== lastUiState) {
     lastUiState = gameState;
     updateCtrlButtons();
+  }
+}
+function drawRoundRect(ctx, x, y, width, height, radius) {
+  if (typeof radius === 'number') radius = [radius, radius, radius, radius];
+  ctx.beginPath();
+  ctx.moveTo(x + radius[0], y);
+  ctx.lineTo(x + width - radius[1], y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius[1]);
+  ctx.lineTo(x + width, y + height - radius[2]);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius[2], y + height);
+  ctx.lineTo(x + radius[3], y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius[3]);
+  ctx.lineTo(x, y + radius[0]);
+  ctx.quadraticCurveTo(x, y, x + radius[0], y);
+  ctx.closePath();
+}
+
+function takeScreenshot() {
+  try {
+    const cv = document.getElementById('gameCanvas') || canvas;
+    if (!cv) return;
+
+    const exp = document.createElement('canvas');
+    exp.width = 1100;
+    exp.height = 650;
+    const ectx = exp.getContext('2d');
+    const t = I18N[currentLang] || I18N['zh-CN'];
+    const fontFam = getComputedStyle(document.body).fontFamily;
+
+    // 1. 绘制底层游戏画面
+    ectx.drawImage(cv, 0, 0, 1100, 650);
+
+    // 2. HUD 统计信息（如果非开始界面）
+    const hudEl = document.getElementById('hud');
+    if (hudEl && !hudEl.classList.contains('hidden')) {
+      const sVal = document.getElementById('scoreText') ? document.getElementById('scoreText').textContent : '0';
+      const lVal = document.getElementById('levelText') ? document.getElementById('levelText').textContent : '1';
+      const vVal = document.getElementById('livesText') ? document.getElementById('livesText').textContent : '3';
+
+      const hudItems = [
+        (t.score || '积分：') + sVal,
+        (t.level || '关卡：') + lVal,
+        (t.lives || '生命：') + vVal
+      ];
+
+      let hx = 30;
+      hudItems.forEach(item => {
+        ectx.font = 'bold 18px ' + fontFam;
+        const tw = ectx.measureText(item).width;
+        ectx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+        ectx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        drawRoundRect(ectx, hx, 14, tw + 20, 36, 8);
+        ectx.fill();
+        ectx.stroke();
+
+        ectx.fillStyle = '#ffffff';
+        ectx.textAlign = 'left';
+        ectx.textBaseline = 'middle';
+        ectx.fillText(item, hx + 10, 32);
+        hx += tw + 32;
+      });
+    }
+
+    // 3. 右上角 FPS 仪表
+    const fpsEl = document.getElementById('fpsCounter');
+    if (fpsEl) {
+      ectx.fillStyle = '#04140a';
+      ectx.strokeStyle = '#0f3d22';
+      drawRoundRect(ectx, 1100 - 90, 56, 76, 24, 4);
+      ectx.fill();
+      ectx.stroke();
+      ectx.fillStyle = '#8dffb9';
+      ectx.font = 'bold 11px Consolas, monospace';
+      ectx.textAlign = 'center';
+      ectx.textBaseline = 'middle';
+      ectx.fillText(fpsEl.textContent, 1100 - 52, 68);
+    }
+
+    // 4. 浮层屏幕检测及描述文字绘制
+    function getVisibleScreen() {
+      const screens = ['startScreen', 'pauseScreen', 'levelClearScreen', 'failScreen', 'winScreen'];
+      for (let s of screens) {
+        const el = document.getElementById(s);
+        if (el && !el.classList.contains('hidden')) return { id: s, el: el };
+      }
+      return null;
+    }
+
+    const scr = getVisibleScreen();
+    if (scr) {
+      ectx.fillStyle = 'rgba(10, 16, 38, 0.88)';
+      ectx.fillRect(0, 0, 1100, 650);
+
+      if (scr.id === 'startScreen') {
+        const h1 = scr.el.querySelector('h1');
+        ectx.textAlign = 'center';
+        ectx.textBaseline = 'top';
+        ectx.font = '900 48px ' + fontFam;
+        ectx.fillStyle = '#ffd700';
+        ectx.fillText(h1 ? h1.textContent : '超级玛丽', 550, 100);
+
+        const opsP = scr.el.querySelectorAll('.ops p');
+        const boxW = 560, boxH = 40 + opsP.length * 28;
+        const boxX = (1100 - boxW) / 2, boxY = 190;
+        ectx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+        ectx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+        drawRoundRect(ectx, boxX, boxY, boxW, boxH, 16);
+        ectx.fill();
+        ectx.stroke();
+
+        ectx.font = '500 15px ' + fontFam;
+        ectx.fillStyle = '#ffffff';
+        ectx.textAlign = 'center';
+        let py = boxY + 22;
+        opsP.forEach(p => {
+          ectx.fillText(p.textContent, 550, py);
+          py += 28;
+        });
+
+        const startBtn = document.getElementById('startBtn');
+        const btnW = 200, btnH = 46;
+        const btnX = (1100 - btnW) / 2, btnY = boxY + boxH + 28;
+        ectx.fillStyle = '#e5392b';
+        ectx.strokeStyle = '#a81d12';
+        drawRoundRect(ectx, btnX, btnY, btnW, btnH, 23);
+        ectx.fill();
+        ectx.stroke();
+        ectx.fillStyle = '#ffffff';
+        ectx.font = 'bold 18px ' + fontFam;
+        ectx.textBaseline = 'middle';
+        ectx.fillText(startBtn ? startBtn.textContent : '开始游戏', 550, btnY + 23);
+      } else if (scr.id === 'pauseScreen') {
+        const pTitle = document.getElementById('pauseTitle');
+        const pText = document.getElementById('pauseText');
+        const pHint = document.getElementById('pauseHint');
+
+        ectx.textAlign = 'center';
+        ectx.textBaseline = 'top';
+        ectx.font = '900 42px ' + fontFam;
+        ectx.fillStyle = '#ffffff';
+        ectx.fillText(pTitle ? pTitle.textContent : '游戏暂停', 550, 180);
+
+        ectx.font = '500 18px ' + fontFam;
+        ectx.fillStyle = '#ccd5f0';
+        ectx.fillText(pText ? pText.textContent : '休息一下，马里奥在等你回来。', 550, 250);
+
+        const resumeBtn = document.getElementById('btnResume');
+        ectx.fillStyle = '#e5392b';
+        drawRoundRect(ectx, 450, 310, 200, 46, 23);
+        ectx.fill();
+        ectx.fillStyle = '#ffffff';
+        ectx.font = 'bold 17px ' + fontFam;
+        ectx.textBaseline = 'middle';
+        ectx.fillText(resumeBtn ? resumeBtn.textContent : '继续游戏', 550, 333);
+
+        if (pHint) {
+          ectx.font = '14px ' + fontFam;
+          ectx.fillStyle = '#aab4d4';
+          ectx.textBaseline = 'top';
+          ectx.fillText(pHint.textContent, 550, 410);
+        }
+      } else if (scr.id === 'levelClearScreen') {
+        const h2 = scr.el.querySelector('h2');
+        const cMsg = document.getElementById('clearMsg');
+        const lMsg = document.getElementById('luckyMsg');
+        const cScore = document.getElementById('clearScore');
+        const lblC = document.getElementById('lblClearScore');
+
+        ectx.textAlign = 'center';
+        ectx.textBaseline = 'top';
+        ectx.font = '900 44px ' + fontFam;
+        ectx.fillStyle = '#ffd700';
+        ectx.fillText(h2 ? h2.textContent : '恭喜通关！', 550, 160);
+
+        ectx.font = 'bold 20px ' + fontFam;
+        ectx.fillStyle = '#ffffff';
+        ectx.fillText(cMsg ? cMsg.textContent : '', 550, 230);
+
+        ectx.fillStyle = '#ffd700';
+        ectx.fillText(lMsg ? lMsg.textContent : '', 550, 270);
+
+        ectx.fillStyle = '#ffffff';
+        ectx.fillText((lblC ? lblC.textContent : '当前总分：') + (cScore ? cScore.textContent : '0'), 550, 310);
+      } else if (scr.id === 'failScreen') {
+        const h2 = scr.el.querySelector('h2');
+        const p = scr.el.querySelector('p');
+        const fScore = document.getElementById('failScore');
+        const lblF = document.getElementById('lblFailScore');
+
+        ectx.textAlign = 'center';
+        ectx.textBaseline = 'top';
+        ectx.font = '900 44px ' + fontFam;
+        ectx.fillStyle = '#e5392b';
+        ectx.fillText(h2 ? h2.textContent : '再接再厉！', 550, 180);
+
+        ectx.font = '500 18px ' + fontFam;
+        ectx.fillStyle = '#ffffff';
+        ectx.fillText(p ? p.textContent : '别灰心，失败是成功之母！', 550, 250);
+        ectx.fillText((lblF ? lblF.textContent : '当前积分：') + (fScore ? fScore.textContent : '0'), 550, 290);
+      } else if (scr.id === 'winScreen') {
+        const h2 = scr.el.querySelector('h2');
+        const p = scr.el.querySelector('p');
+        const wScore = document.getElementById('winScore');
+        const lblW = document.getElementById('lblWinScore');
+
+        ectx.textAlign = 'center';
+        ectx.textBaseline = 'top';
+        ectx.font = '900 46px ' + fontFam;
+        ectx.fillStyle = '#ffd700';
+        ectx.fillText(h2 ? h2.textContent : '全部通关！', 550, 180);
+
+        ectx.font = 'bold 22px ' + fontFam;
+        ectx.fillStyle = '#ffffff';
+        ectx.fillText(p ? p.textContent : '', 550, 250);
+        ectx.fillText((lblW ? lblW.textContent : '最终积分：') + (wScore ? wScore.textContent : '0'), 550, 295);
+      }
+    }
+
+    const dataUrl = exp.toDataURL('image/png');
+    const a = document.createElement('a');
+    const now = new Date();
+    const pad = n => (n < 10 ? '0' : '') + n;
+    const timeStr = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    a.download = `mario_screenshot_${timeStr}.png`;
+    a.href = dataUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error('Screenshot error:', err);
   }
 }
 function pauseGame() {
@@ -767,6 +1099,7 @@ function restartGame() {
   updateCtrlButtons();
 }
 
+document.getElementById('btnTopScreenshot').onclick = takeScreenshot;
 document.getElementById('btnTopPause').onclick = togglePause;
 document.getElementById('btnTopRestart').onclick = restartGame;
 document.getElementById('btnResume').onclick = resumeGame;
@@ -2008,6 +2341,16 @@ applyLanguage();
 initLevel(1);
 draw();
 loop();
+
+// 版权数字签名与控制台暗水印保护
+(function () {
+  try {
+    var _0xsign = "8J+OriDnjqnkupTliIbpkp8gwrcgUGxheSA1IE1pbnMgfCDniYjmnYPmiYDmnIkgKEMpIDIwMjYgMTIwNDQyNzU5QHFxLmNvbS4gQWxsIFJpZ2h0cyBSZXNlcnZlZC4g5pyq57uP5o6I5p2D5Lil56aB5ou36LSd44CB5L+u5pS55LiO5ZWG55So44CC";
+    var _0xstr = decodeURIComponent(escape(atob(_0xsign)));
+    console.log("%c " + _0xstr + " ", "background:#e5392b;color:#fff;padding:6px 12px;font-size:12px;font-weight:bold;border-radius:4px;");
+  } catch (e) {}
+})();
 </script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "53a666c8130641eba76813d383a02702"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

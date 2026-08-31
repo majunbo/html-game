@@ -1,9 +1,23 @@
 <!DOCTYPE html>
+<!--
+================================================================================
+ 🎮 玩五分钟 (Play 5 Mins) · 网页游戏项目
+ 版权所有 (C) 2026 120442759@qq.com. 保留所有权利。
+ 
+ 【法律与版权声明】
+ 本项目代码与界面设计版权归属 120442759@qq.com。
+ 未经版权所有者明确书面授权，任何组织或个人不得以任何形式（包括但不限于复制、
+ 镜像、反编译、修改源码、去除版权标识或暗水印等手段）进行传播、再次分发或用于商业营利行为。
+ 仅供个人技术研究与学习交流。
+================================================================================
+-->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>娱乐五分钟 · 超级马里奥</title>
+<title>玩五分钟 · 超级马里奥</title>
+<link rel="icon" href="static/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <style>
 
 :root {
@@ -64,7 +78,12 @@ header {
   position: relative;
   z-index: 2;
   text-align: center;
-  padding: 34px 16px 8px;
+  padding: 30px 0 8px;
+}
+.header-container {
+  position: relative;
+  width: min(1080px, 94vw);
+  margin: 0 auto;
 }
 .mario-logo {
   font-size: 12px;
@@ -301,6 +320,24 @@ footer {
 footer a { color: #ffd85e; text-decoration: none; font-weight: 700; }
 footer a:hover { text-decoration: underline; }
 footer .footer-dot { opacity: .7; }
+.footer-email-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -2.5px;
+  margin-left: 6px;
+  color: #ffd85e;
+  opacity: .88;
+  transition: opacity .18s ease, transform .18s ease, color .18s ease;
+  text-decoration: none;
+}
+.footer-email-link:hover {
+  opacity: 1;
+  transform: scale(1.18);
+  color: #fff;
+  text-decoration: none;
+}
+.footer-email-link svg { display: block; }
 
 /* ============ 美观自定义语言选择器 (DIV 层) ============ */
 .lang-selector-wrap {
@@ -352,7 +389,7 @@ footer .footer-dot { opacity: .7; }
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease, visibility .18s;
+  transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
   z-index: 1000;
 }
 .lang-selector-wrap.active .lang-dropdown-menu {
@@ -364,12 +401,12 @@ footer .footer-dot { opacity: .7; }
 .lang-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 7px 12px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #232a3d;
+  color: #2b364b;
   cursor: pointer;
   transition: background .12s ease, color .12s ease;
   user-select: none;
@@ -400,8 +437,42 @@ footer .footer-dot { opacity: .7; }
   height: 12px;
 }
 
+/* ============ 左上角 LOGO（与下方主内容区垂直左对齐） ============ */
+.top-logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.top-logo:hover {
+  transform: scale(1.06);
+  opacity: .95;
+}
+.top-logo img {
+  width: 30px;
+  height: 30px;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));
+}
+.top-logo .logo-text {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.2);
+  white-space: nowrap;
+  user-select: none;
+}
+
 @media (max-width: 480px) {
-  header { padding-top: 12px; }
+  .top-logo img { width: 24px; height: 24px; }
+  .top-logo .logo-text { font-size: 18px; }
+  header { padding-top: 14px; }
   .banner h2 { font-size: 19px; }
   .card .actions { flex-direction: column; }
   .btn.newtab { width: 100%; }
@@ -415,9 +486,15 @@ footer .footer-dot { opacity: .7; }
 <div class="cloud c3"></div>
 
 <header>
-  <div class="mario-logo" data-i18n="logo">AI GENERATED · HTML5 GAME</div>
-  <h1 data-i18n="h1Title">娱乐五分钟 · 超级马里奥</h1>
-  <p class="sub" data-i18n-html="subTitle">打开就玩，不用下载，找回小时候的快乐，<b>不会上瘾的简单小游戏</b></p>
+  <div class="header-container">
+    <a href="index.html" class="top-logo" aria-label="Logo">
+      <img src="static/manghe-white.png" alt="Logo">
+      <span class="logo-text" data-i18n="brandText">玩五分钟</span>
+    </a>
+    <div class="mario-logo" data-i18n="logo">AI GENERATED · HTML5 GAME</div>
+    <h1 data-i18n="h1Title">玩五分钟 · 超级马里奥</h1>
+    <p class="sub" data-i18n-html="subTitle">打开就玩，不用下载，找回小时候的快乐，无广告，<b>不会上瘾的简单小游戏</b></p>
+  </div>
 </header>
 
 <main>
@@ -440,7 +517,7 @@ footer .footer-dot { opacity: .7; }
         <li data-i18n="grokFeat2">阶梯式难度进阶：落点守卫、高空移速平台、复杂砖阵机关，挑战不断升级</li>
         <li data-i18n="grokFeat3">空中金币弧线、高空浮动平台、精巧立体砖阵、15% 概率触发高额幸运方块</li>
         <li data-i18n="grokFeat4">终点夺旗漫天烟花盛典、过关彩带飞舞与 100~500 惊喜过关结算奖励</li>
-        <li data-i18n="grokFeat5">右上角液晶数字时钟风格高帧率 FPS 监控、多语言无缝切换与全触控支持</li>
+        <li data-i18n="grokFeat5">一键游戏全景截图（带文字说明与HUD合成保存）、高帧率FPS监控与七国语言</li>
       </ul>
     </div>
     <div class="actions">
@@ -468,7 +545,7 @@ footer .footer-dot { opacity: .7; }
         <li data-i18n="hy4Feat2">智能巡逻板栗仔：悬崖边界自动掉头警戒、每个落点均有敌人守卫</li>
         <li data-i18n="hy4Feat3">立体金币系统：悬崖腾空金币弧线 + 地面金币长廊，每次拾取即时计入高分</li>
         <li data-i18n="hy4Feat4">层次化探索关卡：立体阶梯与错层高低砖阵，所有问号均可通过精妙操作顶取</li>
-        <li data-i18n="hy4Feat5">全方位过关结算：旗杆高度奖励 + 剩余时间兑换 + 惊喜幸运大奖 100~600 分</li>
+        <li data-i18n="hy4Feat5">一键游戏全景截图（带文字说明与HUD合成保存）、全方位结算大奖与七国语言</li>
       </ul>
     </div>
     <div class="actions">
@@ -487,7 +564,7 @@ footer .footer-dot { opacity: .7; }
 
 <footer>
   <span data-i18n="footerDisclaimer">⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · </span>
-  <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a></span>
+  <span>GitHub：<a href="https://github.com/majunbo/html-game" target="_blank" rel="noopener">majunbo/html-game</a> <a href="mailto:120442759@qq.com" class="footer-email-link" title="联系邮箱：120442759@qq.com" aria-label="Email: 120442759@qq.com"><svg class="email-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a></span>
   <div class="lang-selector-wrap" id="langWrap">
     <button class="lang-trigger-btn" id="langTrigger" type="button" aria-haspopup="true" aria-expanded="false">
       <span class="flag-icon" id="currentFlag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5,5 L5.7,7.2 L8,7.2 L6.1,8.6 L6.8,10.8 L5,9.4 L3.2,10.8 L3.9,8.6 L2,7.2 L4.3,7.2 Z" fill="#ffde00"/><path d="M10,2 L10.3,3.1 L11.4,3.1 L10.5,3.8 L10.8,4.9 L10,4.2 L9.2,4.9 L9.5,3.8 L8.6,3.1 L9.7,3.1 Z" fill="#ffde00"/><path d="M12,4 L12.3,5.1 L13.4,5.1 L12.5,5.8 L12.8,6.9 L12,6.2 L11.2,6.9 L11.5,5.8 L10.6,5.1 L11.7,5.1 Z" fill="#ffde00"/><path d="M12,8 L12.3,9.1 L13.4,9.1 L12.5,9.8 L12.8,10.9 L12,10.2 L11.2,10.9 L11.5,9.8 L10.6,9.1 L11.7,9.1 Z" fill="#ffde00"/><path d="M10,10 L10.3,11.1 L11.4,11.1 L10.5,11.8 L10.8,12.9 L10,12.2 L9.2,12.9 L9.5,11.8 L8.6,11.1 L9.7,11.1 Z" fill="#ffde00"/></svg></span>
@@ -529,28 +606,29 @@ const LANG_MAP = {
 
 const I18N = {
   'zh-CN': {
-    docTitle: '娱乐五分钟 · 超级马里奥',
+    brandText: '玩五分钟',
+    docTitle: '玩五分钟 · 超级马里奥',
     logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '娱乐五分钟 · 超级马里奥',
-    subTitle: '打开就玩，不用下载，找回小时候的快乐，<b>不会上瘾的简单小游戏</b>',
+    h1Title: '玩五分钟 · 超级马里奥',
+    subTitle: '打开就玩，不用下载，找回小时候的快乐，无广告，<b>不会上瘾的简单小游戏</b>',
     grokTitle: '超级玛丽',
     grokAuthor: 'Grok Fast 生成 v6',
-    grokTagOk: '✅ 关卡多变 挑战递进',
+    grokTagOk: '✅ 关卡多变 截图分享',
     tagLevels: '六大主题关卡',
     tagLangs: '七种语言',
     grokFeat1: '六大主题独立地貌：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，关关不同',
     grokFeat2: '阶梯式难度进阶：落点守卫、高空移速平台、复杂砖阵机关，挑战不断升级',
     grokFeat3: '空中金币弧线、高空浮动平台、精巧立体砖阵、15% 概率触发高额幸运方块',
     grokFeat4: '终点夺旗漫天烟花盛典、过关彩带飞舞与 100~500 惊喜过关结算奖励',
-    grokFeat5: '右上角液晶数字时钟风格高帧率 FPS 监控、多语言无缝切换与全触控支持',
+    grokFeat5: '一键游戏全景截图（带文字说明与HUD合成保存）、高帧率FPS监控与七国语言',
     hy4Title: '超级马里奥 · 六关历险',
     hy4Author: 'Hy4 Preview 生成 v3',
-    hy4TagOk: '✅ 经典硬核 冒险升级',
+    hy4TagOk: '✅ 经典硬核 截图分享',
     hy4Feat1: '六大沉浸主题关卡：草原 → 黄昏 → 星夜 → 熔岩 → 冰雪 → 幽暗城堡',
     hy4Feat2: '智能巡逻板栗仔：悬崖边界自动掉头警戒、每个落点均有敌人守卫',
     hy4Feat3: '立体金币系统：悬崖腾空金币弧线 + 地面金币长廊，每次拾取即时计入高分',
     hy4Feat4: '层次化探索关卡：立体阶梯与错层高低砖阵，所有问号均可通过精妙操作顶取',
-    hy4Feat5: '全方位过关结算：旗杆高度奖励 + 剩余时间兑换 + 惊喜幸运大奖 100~600 分',
+    hy4Feat5: '一键游戏全景截图（带文字说明与HUD合成保存）、全方位结算大奖与七国语言',
     btnPlay: '▶ 开始游戏',
     btnNewtab: '新窗口打开 ↗',
     keySpace: '空格',
@@ -561,28 +639,29 @@ const I18N = {
     footerDisclaimer: '⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · '
   },
   'zh-TW': {
-    docTitle: '娛樂五分鐘 · 超級瑪利歐',
+    brandText: '玩五分鐘',
+    docTitle: '玩五分鐘 · 超級瑪利歐',
     logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '娛樂五分鐘 · 超級瑪利歐',
-    subTitle: '打開就玩，不用下載，找回小時候的快樂，<b>不會上癮的簡單小遊戲</b>',
+    h1Title: '玩五分鐘 · 超級瑪利歐',
+    subTitle: '打開就玩，不用下載，找回小時候的快樂，無廣告，<b>不會上癮的簡單小遊戲</b>',
     grokTitle: '超級瑪利歐',
     grokAuthor: 'Grok Fast 生成 v6',
-    grokTagOk: '✅ 關卡多變 挑戰遞進',
+    grokTagOk: '✅ 關卡多變 截圖分享',
     tagLevels: '六大主題關卡',
     tagLangs: '七種語言',
     grokFeat1: '六大主題獨立地貌：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，關關不同',
     grokFeat2: '階梯式難度進階：落點守衛、高空移速平臺、複雜磚陣機關，挑戰不斷升級',
     grokFeat3: '空中金幣弧線、高空浮動平臺、精巧立體磚陣、15% 機率觸發高額幸運方塊',
     grokFeat4: '終點奪旗漫天煙花盛典、過關彩帶飛舞與 100~500 驚喜過關結算獎勵',
-    grokFeat5: '右上角液晶數位時鐘風格高幀率 FPS 監控、多語言無縫切換與全觸控支援',
+    grokFeat5: '一鍵遊戲全景截圖（帶文字說明與HUD合成保存）、高幀率FPS監控與七國語言',
     hy4Title: '超級瑪利歐 · 六關歷險',
     hy4Author: 'Hy4 Preview 生成 v3',
-    hy4TagOk: '✅ 經典硬核 冒險升級',
+    hy4TagOk: '✅ 經典硬核 截圖分享',
     hy4Feat1: '六大沉浸主題關卡：草原 → 黃昏 → 星夜 → 熔岩 → 冰雪 → 幽暗城堡',
     hy4Feat2: '智慧巡邏慄寶寶：懸崖邊界自動掉頭警戒、每個落點均有敵人守衛',
     hy4Feat3: '立體金幣系統：懸崖騰空金幣弧線 + 地面金幣長廊，每次拾取即時計入高分',
     hy4Feat4: '層次化探索關卡：立體階梯與錯層高低磚陣，所有問號均可透過精妙操作頂取',
-    hy4Feat5: '全方位過關結算：旗桿高度獎勵 + 剩餘時間兌換 + 驚喜幸運大獎 100~600 分',
+    hy4Feat5: '一鍵遊戲全景截圖（帶文字說明與HUD合成保存）、全方位結算大獎與七國語言',
     btnPlay: '▶ 開始遊戲',
     btnNewtab: '新視窗打開 ↗',
     keySpace: '空白鍵',
@@ -593,10 +672,11 @@ const I18N = {
     footerDisclaimer: '⚖️ 僅用於 AI 編程能力研究與技術學習 · 素材均為原創替代品 · 請勿商用 · '
   },
   'en': {
+    brandText: 'Play 5 Mins',
     docTitle: '5-Minute Fun · Super Mario',
     logo: 'AI GENERATED · HTML5 GAME',
     h1Title: '5-Minute Fun · Super Mario',
-    subTitle: 'Instant play, no downloads — Relive childhood joy with a <b>casual, stress-free mini game</b>',
+    subTitle: 'Instant play, no downloads, ad-free — Relive childhood joy with a <b>casual, stress-free mini game</b>',
     grokTitle: 'Super Mario',
     grokAuthor: 'Grok Fast Build v6',
     grokTagOk: '✅ Dynamic Levels & Scaling Challenge',
@@ -606,7 +686,7 @@ const I18N = {
     grokFeat2: 'Steep difficulty scaling: pit guards, moving platforms, tiered obstacle mazes for thrilling platforming',
     grokFeat3: 'Aerial coin arcs, floating platforms, multi-level brick pyramids, 15% lucky block rewards',
     grokFeat4: 'Flagpole fireworks celebration, victory confetti storms & 100~500 surprise bonus scores',
-    grokFeat5: 'Top-right LCD clock style high-precision FPS monitor, instant multi-language switching',
+    grokFeat5: 'One-click full game screenshot (composites HUD & text descriptions to PNG), FPS monitor & 7 languages',
     hy4Title: 'Super Mario · 6 Level Quest',
     hy4Author: 'Hy4 Preview Build v3',
     hy4TagOk: '✅ Classic Hardcore Adventure',
@@ -614,7 +694,7 @@ const I18N = {
     hy4Feat2: 'Smart patrol Goombas: edge-sensing AI patrols with Goombas guarding every cliff landing',
     hy4Feat3: 'Dynamic coin system: mid-air coin arcs + ground coin corridors for instant score boosts',
     hy4Feat4: 'Multi-tiered level exploration: climb pyramids and jump across stepped blocks to hit every ? block',
-    hy4Feat5: 'Comprehensive score tally: flagpole height bonus + remaining time rewards + 100~600 lucky bonus',
+    hy4Feat5: 'One-click full game screenshot (composites HUD & text descriptions to PNG), comprehensive score tally & 7 languages',
     btnPlay: '▶ Play Now',
     btnNewtab: 'Open in New Tab ↗',
     keySpace: 'Space',
@@ -625,10 +705,11 @@ const I18N = {
     footerDisclaimer: '⚖️ For AI programming research & educational learning only · Original placeholder assets · Non-commercial · '
   },
   'ja': {
+    brandText: '5分で遊ぶ',
     docTitle: '5分で楽しむ · スーパーマリオ',
     logo: 'AI GENERATED · HTML5 GAME',
     h1Title: '5分で楽しむ · スーパーマリオ',
-    subTitle: 'ダウンロード不要ですぐ遊べる！子供の頃の楽しさを思い出す、<b>手軽で夢中になりすぎないミニゲーム</b>',
+    subTitle: 'ダウンロード不要ですぐ遊べる！広告なしで子供の頃の楽しさを思い出す、<b>手軽で夢中になりすぎないミニゲーム</b>',
     grokTitle: 'スーパーマリオ',
     grokAuthor: 'Grok Fast 生成 v6',
     grokTagOk: '✅ 多彩なコースと難度上昇',
@@ -638,7 +719,7 @@ const I18N = {
     grokFeat2: '段階的な難易度上昇：穴の着地クリボー、空中移動足場、複雑なレンガ構造による爽快アクション',
     grokFeat3: '空中コインアーク、動く浮島、立体ピラミッドブロック、15%の確率でラッキーブロック発動',
     grokFeat4: 'ゴール旗の花火ショー、クリア紙吹雪と100~500のサプライズボーナス得点',
-    grokFeat5: '右上LCD時計風の高精度FPSカウンター、即時言語切り替えとタッチ対応',
+    grokFeat5: 'ワンクリック全画面スクショ（HUDや説明テキストをPNG合成保存）、FPS表示と7言語対応',
     hy4Title: 'スーパーマリオ · 6コースの冒険',
     hy4Author: 'Hy4 Preview 生成 v3',
     hy4TagOk: '✅ クラシック骨太アドベンチャー',
@@ -646,7 +727,7 @@ const I18N = {
     hy4Feat2: '崖際Uターン敵AI：穴の縁で自動反転し、すべての着地点にクリボーが待ち受ける',
     hy4Feat3: '立体コイン配置：ジャンプ軌道のコインアーク＋地上コイン街道で即時スコアアップ',
     hy4Feat4: '立体探索コース：多層ステップ配置により、すべての？ブロックを快適に叩ける設計',
-    hy4Feat5: '充実のクリア集計：旗の高さボーナス＋残りタイム換算＋100~600のラッキーボーナス',
+    hy4Feat5: 'ワンクリック全画面スクショ（HUDや説明テキストをPNG合成保存）、多彩なクリア集計と7言語対応',
     btnPlay: '▶ プレイ開始',
     btnNewtab: '新しいタブで開く ↗',
     keySpace: 'スペース',
@@ -657,10 +738,11 @@ const I18N = {
     footerDisclaimer: '⚖️ AIプログラミング研究・学習用 · オリジナル素材使用 · 商用利用禁止 · '
   },
   'pt-BR': {
+    brandText: 'Jogar 5 Min',
     docTitle: '5 Minutos de Diversão · Super Mario',
     logo: 'AI GENERATED · HTML5 GAME',
     h1Title: '5 Minutos de Diversão · Super Mario',
-    subTitle: 'Jogue direto no navegador, sem download — Reviva a alegria da infância com um <b>jogo simples e descontraído</b>',
+    subTitle: 'Jogue direto no navegador, sem download e sem anúncios — Reviva a alegria da infância com um <b>jogo simples e descontraído</b>',
     grokTitle: 'Super Mario',
     grokAuthor: 'Grok Fast Versão v6',
     grokTagOk: '✅ Fases Dinâmicas e Desafio Escalonado',
@@ -670,7 +752,7 @@ const I18N = {
     grokFeat2: 'Dificuldade progressiva: guardas nos buracos, plataformas móveis e armadilhas desafiadoras',
     grokFeat3: 'Arcos de moedas aéreas, blocos suspensos, pirâmides de tijolos e 15% de blocos da sorte',
     grokFeat4: 'Fogos de artifício na bandeira, confetes vibrantes e bônus surpresa de 100~500 pontos',
-    grokFeat5: 'Monitor FPS digital estilo LCD no topo direito, troca rápida de idioma e controles fluidos',
+    grokFeat5: 'Captura de tela com 1 clique (salva HUD e textos explicativos em PNG), monitor FPS e 7 idiomas',
     hy4Title: 'Super Mario · Aventura de 6 Fases',
     hy4Author: 'Hy4 Preview Versão v3',
     hy4TagOk: '✅ Aventura Clássica Hardcore',
@@ -678,7 +760,7 @@ const I18N = {
     hy4Feat2: 'Inimigos inteligentes: patrulhas que evitam quedas em penhascos e protegem cada pouso',
     hy4Feat3: 'Sistema de moedas no ar e no chão com pontuação em tempo real',
     hy4Feat4: 'Exploração em múltiplos níveis: pirâmides e blocos acessíveis para coletar todos os ?',
-    hy4Feat5: 'Pontuação completa: bônus de altura na bandeira + conversão de tempo + bônus da sorte de 100~600',
+    hy4Feat5: 'Captura de tela com 1 clique (salva HUD e textos explicativos em PNG), bônus completos e 7 idiomas',
     btnPlay: '▶ Jogar Agora',
     btnNewtab: 'Abrir em Nova Aba ↗',
     keySpace: 'Espaço',
@@ -689,10 +771,11 @@ const I18N = {
     footerDisclaimer: '⚖️ Apenas para pesquisa de programação com IA e aprendizado · Ativos originais · Não comercial · '
   },
   'es': {
+    brandText: 'Jugar 5 Min',
     docTitle: '5 Minutos de Diversión · Super Mario',
     logo: 'AI GENERATED · HTML5 GAME',
     h1Title: '5 Minutos de Diversión · Super Mario',
-    subTitle: 'Juega al instante sin descargas — Revive la alegría de la infancia con un <b>minijuego simple y relajante</b>',
+    subTitle: 'Juega al instante sin descargas y sin anuncios — Revive la alegría de la infancia con un <b>minijuego simple y relajante</b>',
     grokTitle: 'Súper Mario',
     grokAuthor: 'Grok Fast Versión v6',
     grokTagOk: '✅ Niveles Variados y Dificultad Progresiva',
@@ -702,15 +785,15 @@ const I18N = {
     grokFeat2: 'Dificultad escalonada: guardias en precipicios, plataformas móviles veloces y laberintos de ladrillos',
     grokFeat3: 'Arcos de monedas aéreas, plataformas flotantes, pirámides de bloques y 15% de bloques de la suerte',
     grokFeat4: 'Fuegos artificiales al alcanzar la bandera, confeti festivo y bonos sorpresa de 100~500 puntos',
-    grokFeat5: 'Contador FPS digital estilo reloj LCD, selector rápido de idiomas y soporte táctil',
+    grokFeat5: 'Captura de pantalla en 1 clic (guarda HUD y textos en PNG), contador FPS y 7 idiomas',
     hy4Title: 'Super Mario · Aventura de 6 Fases',
-    hy4Author: 'Hy4 Preview Versión v3',
-    hy4TagOk: '✅ Aventura Clásica Desafiante',
+    hy4Author: 'Hy4 Preview Versão v3',
+    hy4TagOk: '✅ Aventura Clássica Desafiante',
     hy4Feat1: '6 Mundos Inmersivos: Pradera → Ocaso → Noche Estrellada → Lava → Nieve → Fortaleza Encantada',
     hy4Feat2: 'Goombas con IA inteligente: giran al borde de los fosos y custodian cada zona de aterrizaje',
     hy4Feat3: 'Sistema de monedas en arco y pasillos de tierra con recuento de puntuación inmediata',
     hy4Feat4: 'Exploración por alturas: escaleras y bloques organizados para golpear todos los bloques ? con destreza',
-    hy4Feat5: 'Puntuación detallada: bonificación por altura de bandera + tiempo restante + bono de la suerte 100~600',
+    hy4Feat5: 'Captura de pantalla en 1 clic (guarda HUD y textos en PNG), recompensas completas y 7 idiomas',
     btnPlay: '▶ Jugar Ahora',
     btnNewtab: 'Abrir en Nueva Pestaña ↗',
     keySpace: 'Espacio',
@@ -721,10 +804,11 @@ const I18N = {
     footerDisclaimer: '⚖️ Solo para investigación y aprendizaje de programación con IA · Recursos originales · No comercial · '
   },
   'fr': {
+    brandText: 'Jouer 5 Min',
     docTitle: '5 Minutes de Plaisir · Super Mario',
     logo: 'AI GENERATED · HTML5 GAME',
     h1Title: '5 Minutes de Plaisir · Super Mario',
-    subTitle: "Jouez instantanément sans téléchargement — Retrouvez la joie de l'enfance avec un <b>mini-jeu simple et sans stress</b>",
+    subTitle: "Jouez instantanément sans téléchargement et sans pub — Retrouvez la joie de l'enfance avec un <b>mini-jeu simple et sans stress</b>",
     grokTitle: 'Super Mario',
     grokAuthor: 'Grok Fast Version v6',
     grokTagOk: '✅ Niveaux Variés & Défi Progressif',
@@ -734,15 +818,15 @@ const I18N = {
     grokFeat2: 'Difficulté progressive : gardes de fosses, plates-formes mouvantes et dédales de briques palpitants',
     grokFeat3: 'Arcs de pièces aériennes, plates-formes flottantes, pyramides de blocs et 15% de blocs chance',
     grokFeat4: 'Feux d’artifice au drapeau, pluie de confettis et bonus surprises de 100~500 points',
-    grokFeat5: 'Compteur FPS style horloge LCD, changement de langue instantané et prise en charge tactile',
+    grokFeat5: 'Capture d\'écran en 1 clic (fusionne le HUD et les textes explicatifs en PNG), compteur FPS et 7 langues',
     hy4Title: 'Super Mario · L\'Aventure des 6 Niveaux',
     hy4Author: 'Hy4 Preview Version v3',
     hy4TagOk: '✅ Aventure Classique Captivante',
     hy4Feat1: '6 Mondes Immersifs : Prairie → Crépuscule → Nuit Étoilée → Lave → Neige → Manoir Mystérieux',
     hy4Feat2: 'Goombas intelligents : font demi-tour au bord du gouffre et montent la garde à chaque réception',
     hy4Feat3: 'Collecte dynamique : arcs de pièces au-dessus des gouffres et pistes de pièces au sol',
-    hy4Feat4: 'Exploration en hauteur : marches et blocs disposés pour atteindre chaque bloc ? avec adresse',
-    hy4Feat5: 'Décompte complet : bonus de hauteur de drapeau + temps restant + super bonus chance de 100~600',
+    hy4Feat4: 'Exploration en hauteur : marches et blocks disposés pour atteindre chaque bloc ? avec adresse',
+    hy4Feat5: 'Capture d\'écran en 1 clic (fusionne le HUD et les textes explicatifs en PNG), récompenses complètes et 7 langues',
     btnPlay: '▶ Jouer',
     btnNewtab: 'Ouvrir dans un nouvel onglet ↗',
     keySpace: 'Espace',
@@ -852,6 +936,16 @@ if (langTrigger && langWrap) {
 }
 
 applyLanguage();
+
+// 版权数字签名与控制台暗水印保护
+(function () {
+  try {
+    var _0xsign = "8J+OriDnjqnkupTliIbpkp8gwrcgUGxheSA1IE1pbnMgfCDniYjmnYPmiYDmnIkgKEMpIDIwMjYgMTIwNDQyNzU5QHFxLmNvbS4gQWxsIFJpZ2h0cyBSZXNlcnZlZC4g5pyq57uP5o6I5p2D5Lil56aB5ou36LSd44CB5L+u5pS55LiO5ZWG55So44CC";
+    var _0xstr = decodeURIComponent(escape(atob(_0xsign)));
+    console.log("%c " + _0xstr + " ", "background:#e5392b;color:#fff;padding:6px 12px;font-size:12px;font-weight:bold;border-radius:4px;");
+  } catch (e) {}
+})();
 </script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "53a666c8130641eba76813d383a02702"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
