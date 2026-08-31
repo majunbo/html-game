@@ -1491,9 +1491,13 @@
         for (i = 0; i < len; i++) grid[row][bx + i] = (rnd() < 0.45) ? T_QUESTION : T_BRICK;
         grid[row][bx + Math.floor(len / 2)] = T_QUESTION;
         if (cfg.double && rnd() < 0.45 && len >= 4) {
+          // 双层砖阵：下层放置可顶问号（下方净空），上层为实体砖桥并在上方放置金币，绝不在砖块上方叠放不可顶的问号
           var upperRow = row - 2;
           for (i = 1; i < len - 1; i++) {
-            if (grid[upperRow][bx + i] === 0) grid[upperRow][bx + i] = (rnd() < 0.3) ? T_QUESTION : T_BRICK;
+            if (grid[upperRow][bx + i] === 0) {
+              grid[upperRow][bx + i] = T_BRICK;
+              coinList.push({ x: (bx + i + 0.5) * TILE, y: (upperRow - 1 + 0.5) * TILE });
+            }
           }
         }
         for (i = -2; i < len + 2; i++) if (bx + i >= 0 && bx + i < cols) resBlock[bx + i] = true;

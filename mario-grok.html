@@ -1284,7 +1284,7 @@ function createLevels() {
     // 起点教学金币
     coins.push({x: 160, y: 460, taken: false}, {x: 200, y: 460, taken: false});
 
-    // 砖阵生成与100%可达问号放置
+    // 砖阵生成与100%可达问号放置（所有问号下方严格净空，绝不在砖块上方叠放问号）
     cfg.clusters.forEach(cl => {
       if (cl.type === 'flat') {
         const qIdx = cl.qIndex != null ? cl.qIndex : 1;
@@ -1298,17 +1298,15 @@ function createLevels() {
           }
         }
       } else if (cl.type === 'stair') {
+        // 台阶阶梯：全实体砖块，顶部与阶面上铺金币，不放不可顶的问号
         for (let i = 0; i < cl.len; i++) {
           const bx = cl.x + i * 40;
           const by = cl.y - i * 36;
-          if (i === cl.len - 1) {
-            questions.push({x: bx, y: by, w: 40, h: 40, hit: false, bump: 0, flash: 0});
-            coins.push({x: bx + 20, y: by - 48, taken: false});
-          } else {
-            bricks.push({x: bx, y: by, w: 40, h: 40});
-          }
+          bricks.push({x: bx, y: by, w: 40, h: 40});
+          coins.push({x: bx + 20, y: by - 36, taken: false});
         }
       } else if (cl.type === 'pyramid') {
+        // 金字塔阶梯：全实体石阶，顶点放金币供玩家跃过收集，不放下方受阻的问号
         const base = cl.base || 5;
         const half = Math.floor(base / 2);
         for (let r = 0; r <= half; r++) {
@@ -1316,15 +1314,12 @@ function createLevels() {
           for (let i = 0; i < count; i++) {
             const bx = cl.x + (r + i) * 40;
             const by = cl.y - r * 40;
-            if (r === half && i === 0) {
-              questions.push({x: bx, y: by, w: 40, h: 40, hit: false, bump: 0, flash: 0});
-              coins.push({x: bx + 20, y: by - 48, taken: false});
-            } else {
-              bricks.push({x: bx, y: by, w: 40, h: 40});
-            }
+            bricks.push({x: bx, y: by, w: 40, h: 40});
           }
         }
+        coins.push({x: cl.x + half * 40 + 20, y: cl.y - half * 40 - 36, taken: false});
       } else if (cl.type === 'island') {
+        // 浮空岛：单层悬空，下方完全开阔，马里奥可直接从下方起跳顶问号
         const qIdx = cl.qIndex != null ? cl.qIndex : 1;
         for (let i = 0; i < cl.len; i++) {
           const bx = cl.x + i * 40;
@@ -1336,25 +1331,21 @@ function createLevels() {
           }
         }
       } else if (cl.type === 'double_safe') {
+        // 双层平台：下层放置可顶问号（下方净空），上层为实体砖桥并放金币，不叠放无法顶的问号
         const len = cl.len;
         for (let i = 0; i < len; i++) {
           const bx = cl.x + i * 40;
           if (i === 1) {
             questions.push({x: bx, y: cl.y, w: 40, h: 40, hit: false, bump: 0, flash: 0});
-          } else if (i === len - 2) {
-            continue;
+            coins.push({x: bx + 20, y: cl.y - 48, taken: false});
           } else {
             bricks.push({x: bx, y: cl.y, w: 40, h: 40});
           }
         }
         const upperY = cl.y - 120;
-        const upperQCol = len - 2;
-        questions.push({x: cl.x + upperQCol * 40, y: upperY, w: 40, h: 40, hit: false, bump: 0, flash: 0});
-        coins.push({x: cl.x + upperQCol * 40 + 20, y: upperY - 48, taken: false});
         for (let i = 1; i < len - 1; i++) {
-          if (i !== upperQCol) {
-            bricks.push({x: cl.x + i * 40, y: upperY, w: 40, h: 40});
-          }
+          bricks.push({x: cl.x + i * 40, y: upperY, w: 40, h: 40});
+          coins.push({x: cl.x + i * 40 + 20, y: upperY - 36, taken: false});
         }
       }
     });
