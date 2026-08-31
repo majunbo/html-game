@@ -512,6 +512,9 @@ function playFlag() {
   [523,659,784,1046].forEach((f,i)=>setTimeout(()=>playTone(f,0.25,'triangle',0.18),i*180));
 }
 function playHurt() { playTone(150,0.3,'sawtooth',0.2); }
+function playShatter() { playTone(1100, 0.08, 'triangle', 0.1); setTimeout(() => playTone(600, 0.1, 'sawtooth', 0.08), 35); }
+function playFlame() { playTone(260, 0.14, 'sawtooth', 0.12); }
+function playGhostCry() { playTone(460, 0.2, 'sine', 0.08); }
 
 const FLAGS = {
   'zh-CN': '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5,5 L5.7,7.2 L8,7.2 L6.1,8.6 L6.8,10.8 L5,9.4 L3.2,10.8 L3.9,8.6 L2,7.2 L4.3,7.2 Z" fill="#ffde00"/><path d="M10,2 L10.3,3.1 L11.4,3.1 L10.5,3.8 L10.8,4.9 L10,4.2 L9.2,4.9 L9.5,3.8 L8.6,3.1 L9.7,3.1 Z" fill="#ffde00"/><path d="M12,4 L12.3,5.1 L13.4,5.1 L12.5,5.8 L12.8,6.9 L12,6.2 L11.2,6.9 L11.5,5.8 L10.6,5.1 L11.7,5.1 Z" fill="#ffde00"/><path d="M12,8 L12.3,9.1 L13.4,9.1 L12.5,9.8 L12.8,10.9 L12,10.2 L11.2,10.9 L11.5,9.8 L10.6,9.1 L11.7,9.1 Z" fill="#ffde00"/><path d="M10,10 L10.3,11.1 L11.4,11.1 L10.5,11.8 L10.8,12.9 L10,12.2 L9.2,12.9 L9.5,11.8 L8.6,11.1 L9.7,11.1 Z" fill="#ffde00"/></svg>',
@@ -1176,97 +1179,95 @@ function seededRand(seed) {
 // 构建各具特色且难度递进的6个关卡
 function createLevels() {
   const configs = [
-    // 第1关：草原平原（教学上手，短坑，低速敌人，经典单层砖阵）
+    // 第1关：草原平原（极简新手友好，宽阔平坦，仅1个浅坑，2个矮管，基础单层砖块与教学问号，3只慢速怪）
     {
-      levelIdx: 1, seed: 10101, width: 3600, enemySpeed: 1.15,
-      pits: [{x: 880, w: 80}, {x: 1720, w: 85}, {x: 2560, w: 90}],
-      pipes: [{x: 620, h: 60}, {x: 1380, h: 75}, {x: 2200, h: 70}],
+      levelIdx: 1, seed: 10101, width: 3000, enemySpeed: 0.85,
+      pits: [{x: 1500, w: 65}],
+      pipes: [{x: 750, h: 50}, {x: 2200, h: 55}],
       platCount: 0,
       clusters: [
-        {type: 'flat', x: 320, y: 400, len: 4, qIndex: 1},
-        {type: 'flat', x: 1060, y: 400, len: 5, qIndex: 2},
-        {type: 'stair', x: 1950, y: 400, len: 3},
-        {type: 'flat', x: 2780, y: 400, len: 4, qIndex: 2}
+        {type: 'flat', x: 380, y: 400, len: 3, qIndex: 1},
+        {type: 'flat', x: 1080, y: 400, len: 4, qIndex: 2},
+        {type: 'stair', x: 1780, y: 420, len: 3},
+        {type: 'flat', x: 2420, y: 400, len: 3, qIndex: 1}
       ]
     },
-    // 第2关：黄昏沙漠（沙丘阶梯，高耸管道，沙坑拓宽，敌人提速）
+    // 第2关：黄昏沙漠（沙丘阶梯金字塔，高耸管道，黄昏沙尘微阻与飞沙）
     {
-      levelIdx: 2, seed: 20202, width: 4400, enemySpeed: 1.35,
-      pits: [{x: 750, w: 95}, {x: 1540, w: 100}, {x: 2360, w: 105}, {x: 3200, w: 110}],
-      pipes: [{x: 520, h: 80}, {x: 1220, h: 100}, {x: 2000, h: 115}, {x: 2820, h: 90}],
+      levelIdx: 2, seed: 20202, width: 3800, enemySpeed: 1.05,
+      pits: [{x: 900, w: 85}, {x: 1800, w: 90}, {x: 2700, w: 95}],
+      pipes: [{x: 600, h: 75}, {x: 1450, h: 85}, {x: 2300, h: 90}],
       platCount: 0,
       clusters: [
-        {type: 'flat', x: 300, y: 400, len: 3, qIndex: 1},
-        {type: 'pyramid', x: 960, y: 440, base: 5},
-        {type: 'stair', x: 1740, y: 420, len: 4},
-        {type: 'stair', x: 2560, y: 420, len: 4},
-        {type: 'flat', x: 3420, y: 400, len: 5, qIndex: 2}
+        {type: 'pyramid', x: 320, y: 440, base: 5},
+        {type: 'flat', x: 1120, y: 390, len: 4, qIndex: 1},
+        {type: 'stair', x: 1980, y: 420, len: 4},
+        {type: 'pyramid', x: 2880, y: 440, base: 5}
       ]
     },
-    // 第3关：星夜洞窟（高空浮岛，移动平台横跨深渊，高空金币弧线）
+    // 第3关：星夜洞窟（高空浮岛与双层错落星石，横跨深渊移动平台，洞顶星芒钟乳石坠落预警）
     {
-      levelIdx: 3, seed: 30303, width: 5200, enemySpeed: 1.5,
-      pits: [{x: 700, w: 110}, {x: 1480, w: 120}, {x: 2280, w: 125}, {x: 3100, w: 130}, {x: 3950, w: 130}],
-      pipes: [{x: 480, h: 70}, {x: 1200, h: 85}, {x: 2020, h: 90}, {x: 2840, h: 95}, {x: 3660, h: 90}],
+      levelIdx: 3, seed: 30303, width: 4800, enemySpeed: 1.25,
+      pits: [{x: 750, w: 100}, {x: 1600, w: 110}, {x: 2450, w: 115}, {x: 3350, w: 120}, {x: 4100, w: 120}],
+      pipes: [{x: 520, h: 70}, {x: 1300, h: 80}, {x: 2150, h: 85}, {x: 3000, h: 80}, {x: 3800, h: 85}],
       platCount: 3,
       clusters: [
-        {type: 'flat', x: 300, y: 400, len: 3, qIndex: 1},
-        {type: 'island', x: 920, y: 340, len: 4, qIndex: 1},
-        {type: 'double_safe', x: 1720, y: 400, len: 5},
-        {type: 'island', x: 2520, y: 330, len: 4, qIndex: 2},
-        {type: 'pyramid', x: 3360, y: 440, base: 5},
-        {type: 'flat', x: 4220, y: 400, len: 5, qIndex: 2}
+        {type: 'island', x: 300, y: 330, len: 4, qIndex: 1},
+        {type: 'double_safe', x: 1050, y: 400, len: 5},
+        {type: 'island', x: 1900, y: 320, len: 5, qIndex: 2},
+        {type: 'island', x: 2750, y: 340, len: 4, qIndex: 1},
+        {type: 'double_safe', x: 3550, y: 400, len: 5}
       ]
     },
-    // 第4关：熔岩火山（翻滚岩浆坑，狭窄石柱立足点，低空横梁压制跳跃）
+    // 第4关：熔岩火山（翻滚沸腾岩浆坑，狭窄石柱立足点，火山喷发岩浆火球弹幕考验跳跃时机）
     {
-      levelIdx: 4, seed: 40404, width: 6000, enemySpeed: 1.68,
-      pits: [{x: 650, w: 115}, {x: 1380, w: 125}, {x: 2150, w: 130}, {x: 2920, w: 135}, {x: 3720, w: 140}, {x: 4550, w: 140}],
-      pipes: [{x: 450, h: 90}, {x: 1120, h: 105}, {x: 1880, h: 115}, {x: 2650, h: 120}, {x: 3450, h: 105}, {x: 4260, h: 110}],
+      levelIdx: 4, seed: 40404, width: 5800, enemySpeed: 1.45,
+      pits: [{x: 650, w: 110}, {x: 1450, w: 120}, {x: 2300, w: 125}, {x: 3150, w: 130}, {x: 4000, w: 130}, {x: 4850, w: 135}],
+      pipes: [{x: 450, h: 85}, {x: 1180, h: 100}, {x: 1980, h: 105}, {x: 2800, h: 110}, {x: 3650, h: 105}, {x: 4480, h: 100}],
       platCount: 3,
       clusters: [
-        {type: 'stair', x: 280, y: 420, len: 3},
-        {type: 'double_safe', x: 860, y: 400, len: 5},
-        {type: 'flat', x: 1600, y: 360, len: 4, qIndex: 2},
-        {type: 'pyramid', x: 2380, y: 440, base: 5},
-        {type: 'double_safe', x: 3160, y: 400, len: 6},
-        {type: 'island', x: 3960, y: 330, len: 4, qIndex: 1},
-        {type: 'stair', x: 4800, y: 420, len: 4}
+        {type: 'stair', x: 260, y: 420, len: 3},
+        {type: 'double_safe', x: 880, y: 400, len: 5},
+        {type: 'flat', x: 1680, y: 360, len: 4, qIndex: 2},
+        {type: 'pyramid', x: 2500, y: 440, base: 5},
+        {type: 'double_safe', x: 3350, y: 400, len: 6},
+        {type: 'island', x: 4200, y: 330, len: 4, qIndex: 1},
+        {type: 'stair', x: 5050, y: 420, len: 4}
       ]
     },
-    // 第5关：冰雪世界（超宽冰坑，多段浮空冰桥与移动平台，金字塔群，高速巡逻）
+    // 第5关：冰雪世界（极地极滑冰面，高速滑行，超宽冰坑，高空冰阶金字塔，悬挂冰锥坠落）
     {
-      levelIdx: 5, seed: 50505, width: 6800, enemySpeed: 1.82,
-      pits: [{x: 640, w: 125}, {x: 1400, w: 135}, {x: 2200, w: 140}, {x: 3040, w: 145}, {x: 3900, w: 150}, {x: 4780, w: 150}, {x: 5640, w: 155}],
-      pipes: [{x: 420, h: 80}, {x: 1150, h: 95}, {x: 1940, h: 105}, {x: 2760, h: 110}, {x: 3600, h: 115}, {x: 4480, h: 100}, {x: 5350, h: 105}],
+      levelIdx: 5, seed: 50505, width: 6600, enemySpeed: 1.6,
+      pits: [{x: 640, w: 120}, {x: 1450, w: 130}, {x: 2300, w: 135}, {x: 3150, w: 140}, {x: 4050, w: 145}, {x: 4950, w: 145}, {x: 5750, w: 150}],
+      pipes: [{x: 400, h: 80}, {x: 1150, h: 95}, {x: 1950, h: 100}, {x: 2780, h: 105}, {x: 3650, h: 110}, {x: 4550, h: 100}, {x: 5400, h: 105}],
       platCount: 4,
       clusters: [
-        {type: 'pyramid', x: 260, y: 440, base: 5},
-        {type: 'island', x: 880, y: 320, len: 4, qIndex: 2},
-        {type: 'double_safe', x: 1640, y: 400, len: 5},
-        {type: 'stair', x: 2450, y: 420, len: 4},
-        {type: 'island', x: 3300, y: 320, len: 5, qIndex: 2},
-        {type: 'pyramid', x: 4180, y: 440, base: 7},
-        {type: 'double_safe', x: 5040, y: 400, len: 6},
-        {type: 'stair', x: 5920, y: 420, len: 4}
+        {type: 'pyramid', x: 240, y: 440, base: 7},
+        {type: 'island', x: 900, y: 310, len: 5, qIndex: 2},
+        {type: 'double_safe', x: 1700, y: 400, len: 5},
+        {type: 'stair', x: 2520, y: 420, len: 4},
+        {type: 'island', x: 3380, y: 310, len: 5, qIndex: 2},
+        {type: 'pyramid', x: 4280, y: 440, base: 7},
+        {type: 'double_safe', x: 5180, y: 400, len: 6},
+        {type: 'stair', x: 6000, y: 420, len: 4}
       ]
     },
-    // 第6关：幽暗鬼域（终极试炼，深渊天险，全速鬼怪板栗仔，立体迷宫高难度通关）
+    // 第6关：幽暗鬼域（终极试炼，立体迷宫高难度砖阵，深渊天险，全速巡逻与游荡穿行幽灵）
     {
-      levelIdx: 6, seed: 60606, width: 7800, enemySpeed: 2.0,
-      pits: [{x: 620, w: 135}, {x: 1380, w: 145}, {x: 2180, w: 150}, {x: 3000, w: 155}, {x: 3860, w: 160}, {x: 4740, w: 160}, {x: 5620, w: 165}, {x: 6520, w: 170}],
-      pipes: [{x: 400, h: 90}, {x: 1120, h: 110}, {x: 1900, h: 120}, {x: 2700, h: 125}, {x: 3560, h: 130}, {x: 4420, h: 120}, {x: 5300, h: 125}, {x: 6180, h: 115}],
+      levelIdx: 6, seed: 60606, width: 7600, enemySpeed: 1.8,
+      pits: [{x: 600, w: 130}, {x: 1380, w: 140}, {x: 2200, w: 145}, {x: 3050, w: 150}, {x: 3950, w: 155}, {x: 4850, w: 155}, {x: 5750, w: 160}, {x: 6600, w: 165}],
+      pipes: [{x: 380, h: 90}, {x: 1100, h: 110}, {x: 1880, h: 115}, {x: 2700, h: 120}, {x: 3580, h: 125}, {x: 4450, h: 115}, {x: 5350, h: 120}, {x: 6250, h: 115}],
       platCount: 5,
       clusters: [
-        {type: 'double_safe', x: 240, y: 400, len: 6},
-        {type: 'pyramid', x: 860, y: 440, base: 7},
-        {type: 'island', x: 1620, y: 320, len: 5, qIndex: 2},
-        {type: 'double_safe', x: 2420, y: 400, len: 6},
-        {type: 'pyramid', x: 3250, y: 440, base: 7},
-        {type: 'island', x: 4120, y: 320, len: 5, qIndex: 2},
-        {type: 'double_safe', x: 4980, y: 400, len: 6},
-        {type: 'pyramid', x: 5880, y: 440, base: 7},
-        {type: 'stair', x: 6800, y: 420, len: 5}
+        {type: 'double_safe', x: 220, y: 400, len: 6},
+        {type: 'pyramid', x: 840, y: 440, base: 7},
+        {type: 'island', x: 1620, y: 310, len: 5, qIndex: 2},
+        {type: 'double_safe', x: 2440, y: 400, len: 6},
+        {type: 'pyramid', x: 3300, y: 440, base: 7},
+        {type: 'island', x: 4180, y: 310, len: 5, qIndex: 2},
+        {type: 'double_safe', x: 5060, y: 400, len: 6},
+        {type: 'pyramid', x: 5960, y: 440, base: 7},
+        {type: 'stair', x: 6850, y: 420, len: 5}
       ]
     }
   ];
@@ -1290,7 +1291,6 @@ function createLevels() {
         for (let i = 0; i < cl.len; i++) {
           const bx = cl.x + i * 40;
           if (i === qIdx) {
-            // 问号方块：下方必须净空（无方块阻挡）
             questions.push({x: bx, y: cl.y, w: 40, h: 40, hit: false, bump: 0, flash: 0});
             coins.push({x: bx + 20, y: cl.y - 48, taken: false});
           } else {
@@ -1298,7 +1298,6 @@ function createLevels() {
           }
         }
       } else if (cl.type === 'stair') {
-        // 阶梯式：每一阶梯顶端或台阶均留出起跳空间
         for (let i = 0; i < cl.len; i++) {
           const bx = cl.x + i * 40;
           const by = cl.y - i * 36;
@@ -1310,7 +1309,6 @@ function createLevels() {
           }
         }
       } else if (cl.type === 'pyramid') {
-        // 金字塔：底座阶梯，顶点留给问号，所有问号均能从下方或侧下方顶到
         const base = cl.base || 5;
         const half = Math.floor(base / 2);
         for (let r = 0; r <= half; r++) {
@@ -1327,7 +1325,6 @@ function createLevels() {
           }
         }
       } else if (cl.type === 'island') {
-        // 浮空岛屿：高处单层浮岛，下方完全腾空，便于跳跃顶砖
         const qIdx = cl.qIndex != null ? cl.qIndex : 1;
         for (let i = 0; i < cl.len; i++) {
           const bx = cl.x + i * 40;
@@ -1339,22 +1336,17 @@ function createLevels() {
           }
         }
       } else if (cl.type === 'double_safe') {
-        // 错层双层砖阵：关键改进——下层与上层错开，且上层问号的正下方不放砖，
-        // 马里奥可以站在地面直接起跳顶下层，或者跳上下层平台后顶上层，100%可以顶到！
         const len = cl.len;
-        // 下层：中间留出空隙，不阻挡上层问号
         for (let i = 0; i < len; i++) {
           const bx = cl.x + i * 40;
           if (i === 1) {
             questions.push({x: bx, y: cl.y, w: 40, h: 40, hit: false, bump: 0, flash: 0});
           } else if (i === len - 2) {
-            // 此处下层留空，让上方问号可从地面直接穿透起跳，或者作为落脚点
             continue;
           } else {
             bricks.push({x: bx, y: cl.y, w: 40, h: 40});
           }
         }
-        // 上层（位于 y-120）：两端留空作为跳跃踏板，中间放置问号
         const upperY = cl.y - 120;
         const upperQCol = len - 2;
         questions.push({x: cl.x + upperQCol * 40, y: upperY, w: 40, h: 40, hit: false, bump: 0, flash: 0});
@@ -1371,13 +1363,11 @@ function createLevels() {
     const pits = cfg.pits.map(p => ({x: p.x, y: GROUND_Y, w: p.w, h: H - GROUND_Y}));
     cfg.pits.forEach((p, pidx) => {
       const cx = p.x + p.w / 2;
-      // 坑上三连金币弧线
       coins.push(
         {x: cx - 36, y: GROUND_Y - 110, taken: false},
         {x: cx, y: GROUND_Y - 145, taken: false},
         {x: cx + 36, y: GROUND_Y - 110, taken: false}
       );
-      // 落点守卫板栗仔
       enemies.push({
         x: p.x + p.w + 42,
         y: GROUND_Y - 32,
@@ -1385,7 +1375,6 @@ function createLevels() {
         vx: -cfg.enemySpeed,
         alive: true, squished: false, squishTimer: 0, turnCooldown: 0, frame: 0
       });
-      // 关卡递进：后几关部分深坑上方添加移动平台
       if (cfg.platCount > 0 && pidx % 2 === 1) {
         platforms.push({
           baseX: cx, y: GROUND_Y - 135, w: 100, h: 16,
@@ -1398,7 +1387,6 @@ function createLevels() {
     // 管道
     const pipes = cfg.pipes.map(p => ({x: p.x, y: GROUND_Y - p.h, w: 56, h: p.h}));
     cfg.pipes.forEach(p => {
-      // 管道后方巡逻板栗仔
       enemies.push({
         x: p.x + 80,
         y: GROUND_Y - 32,
@@ -1408,7 +1396,7 @@ function createLevels() {
       });
     });
 
-    // 终点旗杆（留出安全距离）
+    // 终点旗杆
     const flagX = cfg.width - 280;
 
     // 终点前5阶登顶台阶
@@ -1444,6 +1432,16 @@ let flag = { x: 0, poleH: 220, flagY: 0, falling: false };
 let flagScoreGiven = false;
 let marioOnFlag = false;
 
+// 关卡特色专属危险系统（沙尘暴阻力、洞窟落星碎石、火山喷发火球、冰面滑行冰锥、幽灵出没）
+let hazards = {
+  type: 'none',
+  sandParticles: [],
+  stalactites: [],
+  fireballs: [],
+  icicles: [],
+  ghosts: []
+};
+
 function initLevel(lv) {
   currentLevel = lv;
   levelData = levels[lv - 1] || levels[0];
@@ -1461,6 +1459,70 @@ function initLevel(lv) {
     range: p.range, speed: p.speed, t: p.t,
     x: p.baseX - p.w / 2
   }));
+
+  // 初始化关卡专属危险
+  hazards = {
+    type: 'none',
+    sandParticles: [],
+    stalactites: [],
+    fireballs: [],
+    icicles: [],
+    ghosts: []
+  };
+
+  if (lv === 2) {
+    // 第2关：黄昏沙漠（沙尘暴风沙与跳跃风阻）
+    hazards.type = 'desert';
+    for (let i = 0; i < 45; i++) {
+      hazards.sandParticles.push({
+        x: Math.random() * W,
+        y: Math.random() * (GROUND_Y - 20),
+        vx: -3.5 - Math.random() * 3.5,
+        vy: 0.5 + Math.random() * 0.8,
+        size: 2 + Math.random() * 3,
+        alpha: 0.3 + Math.random() * 0.5
+      });
+    }
+  } else if (lv === 3) {
+    // 第3关：星夜洞窟（洞顶星岩/钟乳石，玩家靠近预警坠落）
+    hazards.type = 'cavern';
+    const stX = [620, 1150, 1800, 2350, 2900, 3500, 4200];
+    hazards.stalactites = stX.map(x => ({
+      x, y: 70, origY: 70, w: 18, h: 38,
+      state: 'idle', shakeTimer: 0, vy: 0, active: true
+    }));
+  } else if (lv === 4) {
+    // 第4关：熔岩火山（熔岩坑与火山口向上周期性喷发火球）
+    hazards.type = 'lava';
+    hazards.fireballs = pits.map((p, idx) => ({
+      x: p.x + p.w / 2,
+      baseY: GROUND_Y + 12,
+      y: GROUND_Y + 12,
+      vy: 0,
+      state: 'submerged',
+      timer: (idx * 45) % 150,
+      interval: 160 + (idx % 3) * 30
+    }));
+  } else if (lv === 5) {
+    // 第5关：冰雪世界（地面极滑冰面，且悬空冰砖下悬挂冰锥）
+    hazards.type = 'ice';
+    const icX = [850, 1500, 2350, 3200, 4100, 4950, 5800];
+    hazards.icicles = icX.map(x => ({
+      x, y: 260, origY: 260, w: 16, h: 32,
+      state: 'hanging', shakeTimer: 0, vy: 0, active: true
+    }));
+  } else if (lv === 6) {
+    // 第6关：幽暗鬼域（游荡飘忽的幽灵，穿墙浮空，带神秘光晕）
+    hazards.type = 'ghost';
+    const ghX = [680, 1480, 2320, 3200, 4100, 5000, 5900, 6750];
+    hazards.ghosts = ghX.map((x, idx) => ({
+      x, baseY: 300 + (idx % 3) * 45, y: 300,
+      vx: (idx % 2 === 0 ? -1.3 : 1.3),
+      w: 36, h: 36,
+      minX: x - 180, maxX: x + 180,
+      t: idx * 1.2
+    }));
+  }
   
   mario.standingPlat = null;
   levelFrame = 0;
@@ -1847,6 +1909,182 @@ function drawBackground() {
   }
 }
 
+function damageMario() {
+  if (mario.invincible > 0 || gameState !== 'playing') return;
+  lives--;
+  document.getElementById('livesText').textContent = lives;
+  playHurt();
+  addParticles(mario.x + 16, mario.y + 24, '#e52521');
+  mario.invincible = 90;
+  mario.vy = -11;
+  mario.vx = -mario.facing * 4;
+  if (lives <= 0) {
+    gameState = 'fail';
+    document.getElementById('failScore').textContent = score;
+    document.getElementById('failScreen').classList.remove('hidden');
+    document.getElementById('hud').classList.add('hidden');
+  }
+}
+
+function drawHazards() {
+  const htype = hazards.type;
+  if (htype === 'desert') {
+    // 绘制沙尘暴风沙
+    ctx.save();
+    for (const p of hazards.sandParticles) {
+      ctx.fillStyle = `rgba(235, 180, 80, ${p.alpha})`;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // 绘制微风流动线条
+    ctx.strokeStyle = 'rgba(245, 200, 100, 0.18)';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 6; i++) {
+      const lx = ((i * 190 + levelFrame * 7) % (W + 200)) - 100;
+      const ly = 120 + (i * 70) % (GROUND_Y - 200);
+      ctx.beginPath();
+      ctx.moveTo(W - lx, ly);
+      ctx.lineTo(W - lx - 45, ly + 4);
+      ctx.stroke();
+    }
+    ctx.restore();
+  } else if (htype === 'cavern') {
+    // 绘制洞窟星晶/钟乳石
+    for (const st of hazards.stalactites) {
+      if (!st.active) continue;
+      const sx = st.x - cameraX + (st.state === 'shaking' ? (Math.random() - 0.5) * 5 : 0);
+      if (sx < -40 || sx > W + 40) continue;
+      ctx.save();
+      // 晶石渐变
+      const g = ctx.createLinearGradient(sx, st.y, sx + st.w, st.y + st.h);
+      g.addColorStop(0, '#5a7bb5');
+      g.addColorStop(0.5, '#8ab4f8');
+      g.addColorStop(1, '#e3f2fd');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(sx, st.y);
+      ctx.lineTo(sx + st.w, st.y);
+      ctx.lineTo(sx + st.w / 2, st.y + st.h);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#2d4b80';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // 星晶顶端星芒微光
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(sx + st.w / 2 - 1, st.y + 4, 3, 3);
+      ctx.restore();
+    }
+  } else if (htype === 'lava') {
+    // 绘制火山喷发火球
+    for (const fb of hazards.fireballs) {
+      if (fb.state !== 'airborne') continue;
+      const fx = fb.x - cameraX;
+      if (fx < -50 || fx > W + 50) continue;
+      ctx.save();
+      // 火球光晕
+      const rad = 16;
+      const g = ctx.createRadialGradient(fx, fb.y, 2, fx, fb.y, rad);
+      g.addColorStop(0, '#ffff80');
+      g.addColorStop(0.4, '#ff6600');
+      g.addColorStop(0.8, '#cc1100');
+      g.addColorStop(1, 'rgba(200, 0, 0, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(fx, fb.y, rad, 0, Math.PI * 2);
+      ctx.fill();
+      // 火球核心
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(fx, fb.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  } else if (htype === 'ice') {
+    // 绘制冰锥
+    for (const ic of hazards.icicles) {
+      if (!ic.active) continue;
+      const ix = ic.x - cameraX + (ic.state === 'shaking' ? (Math.random() - 0.5) * 4 : 0);
+      if (ix < -40 || ix > W + 40) continue;
+      ctx.save();
+      const g = ctx.createLinearGradient(ix, ic.y, ix + ic.w, ic.y + ic.h);
+      g.addColorStop(0, '#cceeff');
+      g.addColorStop(0.5, '#70d0ff');
+      g.addColorStop(1, '#ffffff');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.moveTo(ix, ic.y);
+      ctx.lineTo(ix + ic.w, ic.y);
+      ctx.lineTo(ix + ic.w / 2, ic.y + ic.h);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#40b0f0';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+  } else if (htype === 'ghost') {
+    // 绘制幽暗幽灵 (Boo)
+    for (const gh of hazards.ghosts) {
+      const gx = gh.x - cameraX;
+      if (gx < -60 || gx > W + 60) continue;
+      ctx.save();
+      ctx.translate(gx + 18, gh.y + 18);
+      if (gh.vx > 0) ctx.scale(-1, 1);
+      
+      // 幽灵紫色光晕
+      const rad = 24;
+      const g = ctx.createRadialGradient(0, 0, 8, 0, 0, rad);
+      g.addColorStop(0, 'rgba(240, 220, 255, 0.9)');
+      g.addColorStop(0.6, 'rgba(180, 130, 240, 0.45)');
+      g.addColorStop(1, 'rgba(120, 50, 200, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(0, 0, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 幽灵身体
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+      ctx.beginPath();
+      ctx.arc(0, -2, 16, Math.PI, 0, false);
+      // 波浪下摆
+      ctx.quadraticCurveTo(14, 16, 8, 14);
+      ctx.quadraticCurveTo(0, 18, -8, 14);
+      ctx.quadraticCurveTo(-14, 16, -16, -2);
+      ctx.closePath();
+      ctx.fill();
+
+      // 幽灵眼睛与狡黠笑容
+      ctx.fillStyle = '#2d1052';
+      ctx.beginPath();
+      ctx.arc(-6, -4, 2.5, 0, Math.PI * 2);
+      ctx.arc(3, -4, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 诡异红光眼神
+      ctx.fillStyle = '#ff2255';
+      ctx.fillRect(-7, -5, 2, 2);
+      ctx.fillRect(2, -5, 2, 2);
+
+      // 嘴巴
+      ctx.strokeStyle = '#2d1052';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(-2, 4, 4, 0, Math.PI);
+      ctx.stroke();
+
+      // 小幽灵手
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+      ctx.beginPath();
+      ctx.ellipse(-14, 2, 4, 2.5, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+}
+
 function draw() {
   ctx.clearRect(0, 0, W, H);
   drawBackground();
@@ -1889,6 +2127,9 @@ function draw() {
       drawGoomba(e.x - cameraX, e.y, e.frame, e.squished);
     }
   }
+
+  // 关卡专属危险物体
+  drawHazards();
 
   // 终点旗
   drawFlag();
@@ -2046,6 +2287,169 @@ function updateFPS() {
   }
 }
 
+function updateHazards() {
+  const htype = hazards.type;
+  if (htype === 'desert') {
+    // 沙尘暴风沙粒子更新
+    for (const p of hazards.sandParticles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0) {
+        p.x = W + Math.random() * 20;
+        p.y = Math.random() * (GROUND_Y - 20);
+      }
+      if (p.y > GROUND_Y) p.y = 0;
+    }
+    // 沙漠风阻（滞空或向右移动时产生微弱逆风感，但绝不影响跳跃过关）
+    if (!mario.onGround || mario.vx > 0) {
+      mario.vx -= 0.12;
+    }
+    if (mario.onGround && Math.abs(mario.vx) > 1.5 && levelFrame % 4 === 0) {
+      particles.push({
+        x: mario.x + 16, y: GROUND_Y - 4,
+        vx: -mario.facing * 1.5 + (Math.random() - 0.5),
+        vy: -Math.random() * 2,
+        life: 18, color: '#e5b868'
+      });
+    }
+  } else if (htype === 'cavern') {
+    // 星夜洞窟钟乳石/星晶落石
+    for (const st of hazards.stalactites) {
+      if (!st.active) continue;
+      if (st.state === 'idle') {
+        if (Math.abs(mario.x + mario.w / 2 - (st.x + st.w / 2)) < 160 && mario.y > st.y) {
+          st.state = 'shaking';
+          st.shakeTimer = 30;
+        }
+      } else if (st.state === 'shaking') {
+        st.shakeTimer--;
+        if (st.shakeTimer <= 0) {
+          st.state = 'falling';
+          st.vy = 2.2;
+        }
+      } else if (st.state === 'falling') {
+        st.vy += 0.42;
+        st.y += st.vy;
+        // 与马里奥碰撞
+        if (rectsCollide(mario, {x: st.x, y: st.y, w: st.w, h: st.h})) {
+          damageMario();
+          st.active = false;
+          addParticles(st.x + 9, st.y + 19, '#80d8ff');
+          playShatter();
+        }
+        // 与地面或砖块碰撞
+        if (st.y + st.h >= GROUND_Y) {
+          st.active = false;
+          addParticles(st.x + 9, GROUND_Y - 4, '#80d8ff');
+          playShatter();
+        }
+      }
+    }
+  } else if (htype === 'lava') {
+    // 熔岩火山喷发火球
+    for (const fb of hazards.fireballs) {
+      if (fb.state === 'submerged') {
+        fb.timer--;
+        if (fb.timer <= 0) {
+          fb.state = 'airborne';
+          fb.y = fb.baseY;
+          fb.vy = -14.2;
+          fb.timer = fb.interval;
+          playFlame();
+        }
+      } else if (fb.state === 'airborne') {
+        fb.vy += 0.38;
+        fb.y += fb.vy;
+        // 喷射火焰尾迹粒子
+        if (levelFrame % 2 === 0) {
+          particles.push({
+            x: fb.x + (Math.random() - 0.5) * 8,
+            y: fb.y + 10,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: Math.random() * 2,
+            life: 16,
+            color: Math.random() < 0.6 ? '#ff4500' : '#ffd700'
+          });
+        }
+        // 碰撞马里奥
+        if (rectsCollide(mario, {x: fb.x - 12, y: fb.y - 12, w: 24, h: 24})) {
+          damageMario();
+        }
+        // 掉回岩浆
+        if (fb.y >= fb.baseY && fb.vy > 0) {
+          fb.state = 'submerged';
+          fb.y = fb.baseY;
+          addParticles(fb.x, fb.baseY - 6, '#ff5722');
+        }
+      }
+    }
+  } else if (htype === 'ice') {
+    // 冰雪世界：悬垂冰锥
+    for (const ic of hazards.icicles) {
+      if (!ic.active) continue;
+      if (ic.state === 'hanging') {
+        if (Math.abs(mario.x + mario.w / 2 - (ic.x + ic.w / 2)) < 130 && mario.y > ic.y) {
+          ic.state = 'shaking';
+          ic.shakeTimer = 24;
+        }
+      } else if (ic.state === 'shaking') {
+        ic.shakeTimer--;
+        if (ic.shakeTimer <= 0) {
+          ic.state = 'falling';
+          ic.vy = 2.6;
+        }
+      } else if (ic.state === 'falling') {
+        ic.vy += 0.48;
+        ic.y += ic.vy;
+        if (rectsCollide(mario, {x: ic.x, y: ic.y, w: ic.w, h: ic.h})) {
+          damageMario();
+          ic.active = false;
+          addParticles(ic.x + 8, ic.y + 16, '#cceeff');
+          playShatter();
+        }
+        if (ic.y + ic.h >= GROUND_Y) {
+          ic.active = false;
+          addParticles(ic.x + 8, GROUND_Y - 4, '#cceeff');
+          playShatter();
+        }
+      }
+    }
+    // 冰面滑行特效
+    if (mario.onGround && Math.abs(mario.vx) > 1.2 && levelFrame % 3 === 0) {
+      particles.push({
+        x: mario.x + 16, y: GROUND_Y - 2,
+        vx: -mario.facing * 1.8 + (Math.random() - 0.5),
+        vy: -Math.random() * 2,
+        life: 14, color: '#e0f7fa'
+      });
+    }
+  } else if (htype === 'ghost') {
+    // 幽暗鬼域幽灵浮动巡游
+    for (const gh of hazards.ghosts) {
+      gh.t += 0.038;
+      gh.y = gh.baseY + Math.sin(gh.t) * 36;
+      gh.x += gh.vx;
+      if (gh.x < gh.minX) { gh.x = gh.minX; gh.vx = Math.abs(gh.vx); }
+      else if (gh.x > gh.maxX) { gh.x = gh.maxX; gh.vx = -Math.abs(gh.vx); }
+      // 幽灵暗影粒子
+      if (levelFrame % 4 === 0) {
+        particles.push({
+          x: gh.x + 18 + (Math.random() - 0.5) * 12,
+          y: gh.y + 18 + (Math.random() - 0.5) * 12,
+          vx: (Math.random() - 0.5) * 1,
+          vy: -0.6 - Math.random() * 0.8,
+          life: 22,
+          color: '#d1c4e9'
+        });
+      }
+      // 触碰幽灵受到伤害
+      if (rectsCollide(mario, {x: gh.x, y: gh.y, w: gh.w, h: gh.h})) {
+        damageMario();
+      }
+    }
+  }
+}
+
 function update() {
   if (gameState !== 'playing' && gameState !== 'flagAnim') return;
 
@@ -2058,25 +2462,32 @@ function update() {
   }
   levelFrame++;
 
+  // 更新关卡专属危险
+  updateHazards();
+
   // 问号受击回弹动画恢复
   for (const q of questions) {
     if (q.bump < 0) q.bump += 1;
     if (q.flash > 0) q.flash -= 1;
   }
 
-  // 输入
+  // 输入与摩擦力（冰雪世界地面滑行摩擦力极小）
+  const onIce = (hazards.type === 'ice' && mario.onGround);
+  const friction = onIce ? 0.96 : 0.78;
   let speed = keys['Shift'] ? RUN_SPEED : MOVE_SPEED;
   if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-    mario.vx = -speed;
+    if (onIce) mario.vx = Math.max(-speed, mario.vx - 0.45);
+    else mario.vx = -speed;
     mario.facing = -1;
     mario.frame += 0.2;
   } else if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-    mario.vx = speed;
+    if (onIce) mario.vx = Math.min(speed, mario.vx + 0.45);
+    else mario.vx = speed;
     mario.facing = 1;
     mario.frame += 0.2;
   } else {
-    mario.vx *= 0.78;
-    if (Math.abs(mario.vx) < 0.25) mario.vx = 0;
+    mario.vx *= friction;
+    if (Math.abs(mario.vx) < (onIce ? 0.1 : 0.25)) mario.vx = 0;
   }
 
   // 跳跃
@@ -2167,34 +2578,15 @@ function update() {
         addParticles(e.x + 16, e.y + 12, '#f5d76e');
         playStomp();
       } else if (mario.invincible <= 0) {
-        lives--;
-        document.getElementById('livesText').textContent = lives;
-        playHurt();
-        addParticles(mario.x + 16, mario.y + 24, '#e52521');
-        mario.invincible = 90;
-        mario.vy = -11;
-        mario.vx = -mario.facing * 4;
-        if (lives <= 0) {
-          gameState = 'fail';
-          document.getElementById('failScore').textContent = score;
-          document.getElementById('failScreen').classList.remove('hidden');
-          document.getElementById('hud').classList.add('hidden');
-        }
+        damageMario();
       }
     }
   }
 
   // 掉坑判定
   if (gameState === 'playing' && mario.y + mario.h > GROUND_Y + 24) {
-    lives--;
-    document.getElementById('livesText').textContent = lives;
-    playHurt();
-    if (lives <= 0) {
-      gameState = 'fail';
-      document.getElementById('failScore').textContent = score;
-      document.getElementById('failScreen').classList.remove('hidden');
-      document.getElementById('hud').classList.add('hidden');
-    } else {
+    damageMario();
+    if (lives > 0) {
       let rx = Math.max(40, mario.x - 120);
       const nearPitEdge = (px) => pits.some(p => px + mario.w + 26 > p.x && px < p.x + p.w + 26);
       while (rx > 40 && nearPitEdge(rx)) rx -= 16;

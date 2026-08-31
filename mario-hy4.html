@@ -1289,6 +1289,8 @@
     stomp: function () { this.tone(240, 0.14, 'square', 0, 0.24, 90); this.noise(0.08, 0.12); },
     bump: function () { this.tone(150, 0.09, 'square', 0, 0.2, 110); },
     coin: function () { this.tone(988, 0.07, 'square', 0, 0.2); this.tone(1319, 0.16, 'square', 0.07, 0.2); },
+    shatter: function () { this.tone(1100, 0.08, 'triangle', 0, 0.15, 550); this.noise(0.06, 0.1); },
+    flame: function () { this.tone(260, 0.14, 'sawtooth', 0, 0.18, 120); },
     die: function () {
       this.tone(523, 0.12, 'square', 0, 0.22);
       this.tone(392, 0.12, 'square', 0.13, 0.22);
@@ -1361,36 +1363,36 @@
     };
   }
 
-  // V2：扩展为六大主题关卡，长度 / 悬崖 / 敌人速度 / 砖阵密度逐关递增
+  // V2：扩展为六大主题关卡，地貌与危险完全独立，难度由浅入深显著递进
   var LEVELS = [
     {
-      name: '第一关 · 草原起步', seed: 20260101, cols: 168,
-      enemies: 6, enemySpeed: 0.85, pitW: [2, 3], blockRows: [9],
-      clusterLen: [3, 5], stairs: 2, double: false, time: 300, theme: 'day'
+      name: '第一关 · 草原起步', seed: 20260101, cols: 140,
+      enemies: 3, enemySpeed: 0.8, pitW: [2, 2], maxPits: 1, blockRows: [9],
+      clusterLen: [3, 4], stairs: 1, double: false, time: 300, theme: 'day'
     },
     {
-      name: '第二关 · 黄昏砖道', seed: 20260202, cols: 198,
-      enemies: 8, enemySpeed: 1.0, pitW: [2, 3], blockRows: [9, 8],
-      clusterLen: [3, 6], stairs: 3, double: false, time: 285, theme: 'dusk'
+      name: '第二关 · 黄昏砖道', seed: 20260202, cols: 175,
+      enemies: 6, enemySpeed: 1.0, pitW: [2, 3], blockRows: [9, 8],
+      clusterLen: [3, 5], stairs: 3, double: false, time: 285, theme: 'dusk'
     },
     {
-      name: '第三关 · 星夜险境', seed: 20260303, cols: 228,
-      enemies: 10, enemySpeed: 1.15, pitW: [3, 4], blockRows: [9, 8],
-      clusterLen: [4, 7], stairs: 3, double: true, time: 270, theme: 'night'
+      name: '第三关 · 星夜险境', seed: 20260303, cols: 215,
+      enemies: 8, enemySpeed: 1.15, pitW: [3, 4], blockRows: [9, 8],
+      clusterLen: [4, 6], stairs: 3, double: true, time: 270, theme: 'night'
     },
     {
-      name: '第四关 · 熔岩洞窟', seed: 20260404, cols: 258,
-      enemies: 12, enemySpeed: 1.25, pitW: [3, 4], blockRows: [9, 8],
+      name: '第四关 · 熔岩洞窟', seed: 20260404, cols: 255,
+      enemies: 10, enemySpeed: 1.3, pitW: [3, 4], blockRows: [9, 8],
       clusterLen: [4, 7], stairs: 4, double: true, time: 255, theme: 'lava'
     },
     {
-      name: '第五关 · 冰雪奇缘', seed: 20260505, cols: 288,
-      enemies: 14, enemySpeed: 1.35, pitW: [3, 5], blockRows: [9, 8],
+      name: '第五关 · 冰雪奇缘', seed: 20260505, cols: 295,
+      enemies: 12, enemySpeed: 1.45, pitW: [3, 5], blockRows: [9, 8],
       clusterLen: [4, 8], stairs: 4, double: true, time: 240, theme: 'ice'
     },
     {
-      name: '第六关 · 幽暗鬼域', seed: 20260606, cols: 318,
-      enemies: 16, enemySpeed: 1.45, pitW: [4, 5], blockRows: [9, 8],
+      name: '第六关 · 幽暗鬼域', seed: 20260606, cols: 335,
+      enemies: 15, enemySpeed: 1.6, pitW: [4, 5], blockRows: [9, 8],
       clusterLen: [5, 8], stairs: 5, double: true, time: 230, theme: 'ghost'
     }
   ];
@@ -1415,11 +1417,12 @@
     // 起点教学块（第 9 行：底边 y=400，地面 480，净空 80px > 马里奥 40px，可直接从下面走过）
     grid[9][7] = T_QUESTION; grid[9][8] = T_BRICK; grid[9][9] = T_QUESTION;
 
-    // --- 悬崖（V2：同时记录坑位，坑上铺金币弧线） ---
+    // --- 悬崖（记录坑位，坑上铺金币弧线） ---
     var pitRanges = [];
     var coinList = [];
-    var x = 22;
-    while (x < END_ZONE - 6) {
+    var x = 24;
+    var maxP = cfg.maxPits != null ? cfg.maxPits : 99;
+    while (x < END_ZONE - 6 && pitRanges.length < maxP) {
       var w = cfg.pitW[0] + Math.floor(rnd() * (cfg.pitW[1] - cfg.pitW[0] + 1));
       var ok = true;
       for (i = -3; i < w + 4; i++) { if (resBlock[x + i]) { ok = false; break; } }
@@ -1442,13 +1445,13 @@
         }
         x += w;
       }
-      x += 10 + Math.floor(rnd() * 10);
+      x += 12 + Math.floor(rnd() * 10);
     }
 
-    // --- 石块阶梯（金字塔，可助人登高分；V2：小型化 + 密集重试，先放阶梯再放砖阵） ---
+    // --- 石块阶梯（金字塔，先放阶梯再放砖阵） ---
     var sx = 26, placed = 0;
     while (sx < END_ZONE - 12 && placed < cfg.stairs) {
-      var h = 2 + Math.floor(rnd() * 2);            // V2：2 ~ 3 阶（小型化，给砖阵留空间）
+      var h = 2 + Math.floor(rnd() * 2);
       var totalW = h * 2;
       var okStair = true;
       for (i = -3; i < totalW + 3; i++) {
@@ -1471,11 +1474,11 @@
         placed++;
         sx += totalW + 8 + Math.floor(rnd() * 10);
       } else {
-        sx += 4;   // V2：放不下时小幅前移继续找空位
+        sx += 4;
       }
     }
 
-    // --- 砖块 / 问号块集群（只在第 8、9 行，保证下方净空高于马里奥） ---
+    // --- 砖块 / 问号块集群（保证下方净空高于马里奥） ---
     var bx = 18;
     while (bx < END_ZONE - 8) {
       var len = cfg.clusterLen[0] + Math.floor(rnd() * (cfg.clusterLen[1] - cfg.clusterLen[0] + 1));
@@ -1486,10 +1489,8 @@
       }
       if (okB) {
         for (i = 0; i < len; i++) grid[row][bx + i] = (rnd() < 0.45) ? T_QUESTION : T_BRICK;
-        grid[row][bx + Math.floor(len / 2)] = T_QUESTION;   // V2：每个砖阵保底一个问号（居中）
+        grid[row][bx + Math.floor(len / 2)] = T_QUESTION;
         if (cfg.double && rnd() < 0.45 && len >= 4) {
-          // V2 修复“双层问号顶不到”：上层改到 row-2（与下层隔一整行），
-          // 且两端各留 1 格缺口方便跳上下层——站上下层即可正常起跳顶到上层
           var upperRow = row - 2;
           for (i = 1; i < len - 1; i++) {
             if (grid[upperRow][bx + i] === 0) grid[upperRow][bx + i] = (rnd() < 0.3) ? T_QUESTION : T_BRICK;
@@ -1498,21 +1499,21 @@
         for (i = -2; i < len + 2; i++) if (bx + i >= 0 && bx + i < cols) resBlock[bx + i] = true;
         bx += len + 4 + Math.floor(rnd() * 7);
       } else {
-        bx += 3;   // V2：放不下时小幅前移继续找空位，而不是整段跳过
+        bx += 3;
       }
     }
 
     // --- 终点前的登高分阶梯（5 阶，借它可以摸到旗杆顶部） ---
-    var stairStart = poleCol - 8;   // 顶点在 poleCol-4，距旗杆 3 格
+    var stairStart = poleCol - 8;
     for (i = 0; i < 5; i++) {
       var cs = stairStart + i;
       for (r = GROUND_ROW - 1; r > GROUND_ROW - 1 - (i + 1); r--) grid[r][cs] = T_STONE;
     }
 
-    // --- 板栗仔（V2：每个悬崖的落点必配一只守卫，保证敌人数 ≥ 悬崖数，再随机补充巡逻） ---
+    // --- 板栗仔敌人放置 ---
     var enemyCols = [];
-    var need = Math.max(cfg.enemies, pitRanges.length + 2);
-    for (var pr = 0; pr < pitRanges.length; pr++) {
+    var need = cfg.enemies;
+    for (var pr = 0; pr < pitRanges.length && enemyCols.length < need; pr++) {
       var land = pitRanges[pr].s + pitRanges[pr].w;   // 对岸第一格
       if (land >= END_ZONE) continue;
       if (grid[GROUND_ROW][land] === T_GROUND && grid[GROUND_ROW - 1][land] === 0) enemyCols.push(land);
@@ -1535,7 +1536,7 @@
     for (var gi = 0; gi < gaps.length && enemyCols.length < need; gi++) tryPlace(gaps[gi], 3000);
     enemyCols.sort(function (a, b) { return a - b; });
 
-    // --- 地面金币小队列（随机散布，跳一跳就能吃到） ---
+    // --- 地面金币小队列 ---
     var gc = START_ZONE + 10;
     while (gc < END_ZONE - 8) {
       var clearGround = grid[GROUND_ROW][gc] === T_GROUND && grid[GROUND_ROW][gc + 2] === T_GROUND &&
@@ -1555,7 +1556,7 @@
     return {
       cfg: cfg, cols: cols, tpl: grid, grid: grid.map(function (r2) { return r2.slice(); }),
       enemyCols: enemyCols, poleCol: poleCol, pixelW: cols * TILE, castleCol: cols - 9,
-      coinList: coinList, pitCount: pitRanges.length
+      coinList: coinList, pitRanges: pitRanges, pitCount: pitRanges.length
     };
   }
 
@@ -1582,9 +1583,19 @@
 
   var mario = { x: 0, y: 0, w: MARIO_W, h: MARIO_H, vx: 0, vy: 0, onGround: false, face: 1, animT: 0, frame: 0, coyote: 0, dyingT: 0, prevY: 0 };
   var level = null, enemies = [], bumps = {}, coins = [], popups = [], particles = [];
-  var worldCoins = [];   // V2：关卡里散落的可收集金币（区别于问号块弹出的金币）
+  var worldCoins = [];
   var camX = 0, frameCount = 0;
   var flag = { y: POLE_TOP + 8, sliding: false, walkT: 0, carry: false };
+
+  // 关卡专属危险系统
+  var hazards = {
+    type: 'none',
+    sandParticles: [],
+    stalactites: [],
+    fireballs: [],
+    icicles: [],
+    ghosts: []
+  };
 
   function makeGoomba(col) {
     return {
@@ -1596,8 +1607,6 @@
   /* =========================================================================
    *  6. 关卡启动 / 流程
    * ========================================================================= */
-  // resetScore：积分清零（从第一关开始时为 true）
-  // resetLives：生命恢复为 3（新关卡 / 手动重玩时为 true；死亡重生为 false）
   function startLevel(index, resetScore, resetLives) {
     G.levelIndex = index;
     level = LEVEL_DATA[index];
@@ -1615,6 +1624,72 @@
     G.timeAcc = 0;
     G.flagBonus = 0; G.timeBonus = 0; G.luckyBonus = 0;
     worldCoins = level.coinList.map(function (c) { return { x: c.x, y: c.y, taken: false }; });
+
+    // 初始化关卡专属危险
+    hazards = {
+      type: 'none',
+      sandParticles: [],
+      stalactites: [],
+      fireballs: [],
+      icicles: [],
+      ghosts: []
+    };
+
+    if (index === 1) { // 第2关：黄昏沙尘风暴
+      hazards.type = 'desert';
+      for (var s = 0; s < 40; s++) {
+        hazards.sandParticles.push({
+          x: Math.random() * VIEW_W,
+          y: Math.random() * (GROUND_Y - 20),
+          vx: -3.5 - Math.random() * 3.5,
+          vy: 0.5 + Math.random() * 0.8,
+          size: 2 + Math.random() * 3,
+          alpha: 0.3 + Math.random() * 0.5
+        });
+      }
+    } else if (index === 2) { // 第3关：星夜洞窟钟乳石
+      hazards.type = 'cavern';
+      for (var col = 20; col < level.cols - 20; col += 20) {
+        hazards.stalactites.push({
+          x: col * TILE, y: 70, w: 18, h: 38,
+          state: 'idle', shakeTimer: 0, vy: 0, active: true
+        });
+      }
+    } else if (index === 3) { // 第4关：熔岩火山喷发火球
+      hazards.type = 'lava';
+      for (var p = 0; p < level.pitRanges.length; p++) {
+        var pr = level.pitRanges[p];
+        hazards.fireballs.push({
+          x: (pr.s + pr.w / 2) * TILE,
+          baseY: GROUND_Y + 12,
+          y: GROUND_Y + 12,
+          vy: 0,
+          state: 'submerged',
+          timer: (p * 45) % 150,
+          interval: 160 + (p % 3) * 30
+        });
+      }
+    } else if (index === 4) { // 第5关：冰雪世界冰锥
+      hazards.type = 'ice';
+      for (var c5 = 20; c5 < level.cols - 20; c5 += 20) {
+        hazards.icicles.push({
+          x: c5 * TILE, y: 260, w: 16, h: 32,
+          state: 'hanging', shakeTimer: 0, vy: 0, active: true
+        });
+      }
+    } else if (index === 5) { // 第6关：幽暗鬼域浮游幽灵
+      hazards.type = 'ghost';
+      for (var g6 = 24; g6 < level.cols - 24; g6 += 28) {
+        var gx = g6 * TILE;
+        hazards.ghosts.push({
+          x: gx, baseY: 280 + (g6 % 3) * 40, y: 280,
+          vx: (g6 % 2 === 0 ? -1.3 : 1.3),
+          w: 34, h: 34,
+          minX: gx - 160, maxX: gx + 160,
+          t: g6 * 1.2
+        });
+      }
+    }
 
     mario.x = 3 * TILE; mario.y = GROUND_Y - mario.h;
     mario.vx = 0; mario.vy = 0; mario.onGround = true; mario.face = 1;
@@ -1900,13 +1975,15 @@
    * ========================================================================= */
   function updateMario() {
     mario.prevY = mario.y;
+    var onIce = (hazards.type === 'ice' && mario.onGround);
     var maxS = keys.shift ? RUN_MAX : WALK_MAX;
-    var acc = mario.onGround ? ACC : AIR_ACC;
+    var acc = onIce ? 0.22 : (mario.onGround ? ACC : AIR_ACC);
+    var fric = onIce ? 0.03 : FRIC;
 
     if (keys.left && !keys.right) { mario.vx -= acc; mario.face = -1; }
     else if (keys.right && !keys.left) { mario.vx += acc; mario.face = 1; }
     else {
-      mario.vx *= (1 - FRIC);
+      mario.vx *= (1 - fric);
       if (Math.abs(mario.vx) < 0.12) mario.vx = 0;
     }
     // 松开 Shift 后超速时平滑回落，而不是硬切
@@ -1964,6 +2041,153 @@
       mario.animT += Math.abs(mario.vx) * 0.055;
       mario.frame = (Math.floor(mario.animT) % 2) ? 1 : 2;
     } else { mario.animT = 0; mario.frame = 0; }
+  }
+
+  function updateHazards() {
+    var htype = hazards.type;
+    var i;
+    if (htype === 'desert') {
+      for (i = 0; i < hazards.sandParticles.length; i++) {
+        var sp = hazards.sandParticles[i];
+        sp.x += sp.vx; sp.y += sp.vy;
+        if (sp.x < 0) { sp.x = VIEW_W + Math.random() * 20; sp.y = Math.random() * (GROUND_Y - 20); }
+        if (sp.y > GROUND_Y) sp.y = 0;
+      }
+      if (!mario.onGround || mario.vx > 0) mario.vx -= 0.12;
+      if (mario.onGround && Math.abs(mario.vx) > 1.5 && frameCount % 4 === 0) {
+        particles.push({
+          x: mario.x + 16, y: GROUND_Y - 4,
+          vx: -mario.face * 1.5 + (Math.random() - 0.5), vy: -Math.random() * 2,
+          t: 0, life: 18, size: 3, color: '#e5b868'
+        });
+      }
+    } else if (htype === 'cavern') {
+      for (i = 0; i < hazards.stalactites.length; i++) {
+        var st = hazards.stalactites[i];
+        if (!st.active) continue;
+        if (st.state === 'idle') {
+          if (Math.abs(mario.x + mario.w / 2 - (st.x + st.w / 2)) < 160 && mario.y > st.y) {
+            st.state = 'shaking';
+            st.shakeTimer = 30;
+          }
+        } else if (st.state === 'shaking') {
+          st.shakeTimer--;
+          if (st.shakeTimer <= 0) { st.state = 'falling'; st.vy = 2.2; }
+        } else if (st.state === 'falling') {
+          st.vy += 0.42; st.y += st.vy;
+          if (mario.x < st.x + st.w && mario.x + mario.w > st.x && mario.y < st.y + st.h && mario.y + mario.h > st.y) {
+            st.active = false;
+            Sound.shatter();
+            marioDie();
+            return;
+          }
+          if (st.y + st.h >= GROUND_Y) {
+            st.active = false;
+            Sound.shatter();
+            for (var k = 0; k < 6; k++) {
+              particles.push({
+                x: st.x + 9, y: GROUND_Y - 4,
+                vx: (Math.random() - 0.5) * 4, vy: -Math.random() * 4,
+                t: 0, life: 25, size: 3, color: '#8ab4f8'
+              });
+            }
+          }
+        }
+      }
+    } else if (htype === 'lava') {
+      for (i = 0; i < hazards.fireballs.length; i++) {
+        var fb = hazards.fireballs[i];
+        if (fb.state === 'submerged') {
+          fb.timer--;
+          if (fb.timer <= 0) {
+            fb.state = 'airborne';
+            fb.y = fb.baseY;
+            fb.vy = -14.2;
+            fb.timer = fb.interval;
+            Sound.flame();
+          }
+        } else if (fb.state === 'airborne') {
+          fb.vy += 0.38; fb.y += fb.vy;
+          if (frameCount % 2 === 0) {
+            particles.push({
+              x: fb.x + (Math.random() - 0.5) * 8, y: fb.y + 10,
+              vx: (Math.random() - 0.5) * 1.5, vy: Math.random() * 2,
+              t: 0, life: 16, size: 4,
+              color: Math.random() < 0.6 ? '#ff4500' : '#ffd700'
+            });
+          }
+          if (mario.x < fb.x + 12 && mario.x + mario.w > fb.x - 12 && mario.y < fb.y + 12 && mario.y + mario.h > fb.y - 12) {
+            marioDie();
+            return;
+          }
+          if (fb.y >= fb.baseY && fb.vy > 0) {
+            fb.state = 'submerged';
+            fb.y = fb.baseY;
+          }
+        }
+      }
+    } else if (htype === 'ice') {
+      for (i = 0; i < hazards.icicles.length; i++) {
+        var ic = hazards.icicles[i];
+        if (!ic.active) continue;
+        if (ic.state === 'hanging') {
+          if (Math.abs(mario.x + mario.w / 2 - (ic.x + ic.w / 2)) < 130 && mario.y > ic.y) {
+            ic.state = 'shaking';
+            ic.shakeTimer = 24;
+          }
+        } else if (ic.state === 'shaking') {
+          ic.shakeTimer--;
+          if (ic.shakeTimer <= 0) { ic.state = 'falling'; ic.vy = 2.6; }
+        } else if (ic.state === 'falling') {
+          ic.vy += 0.48; ic.y += ic.vy;
+          if (mario.x < ic.x + ic.w && mario.x + mario.w > ic.x && mario.y < ic.y + ic.h && mario.y + mario.h > ic.y) {
+            ic.active = false;
+            Sound.shatter();
+            marioDie();
+            return;
+          }
+          if (ic.y + ic.h >= GROUND_Y) {
+            ic.active = false;
+            Sound.shatter();
+            for (var k2 = 0; k2 < 6; k2++) {
+              particles.push({
+                x: ic.x + 8, y: GROUND_Y - 4,
+                vx: (Math.random() - 0.5) * 4, vy: -Math.random() * 4,
+                t: 0, life: 25, size: 3, color: '#cceeff'
+              });
+            }
+          }
+        }
+      }
+      if (mario.onGround && Math.abs(mario.vx) > 1.2 && frameCount % 3 === 0) {
+        particles.push({
+          x: mario.x + 16, y: GROUND_Y - 2,
+          vx: -mario.face * 1.8 + (Math.random() - 0.5), vy: -Math.random() * 2,
+          t: 0, life: 14, size: 3, color: '#e0f7fa'
+        });
+      }
+    } else if (htype === 'ghost') {
+      for (i = 0; i < hazards.ghosts.length; i++) {
+        var gh = hazards.ghosts[i];
+        gh.t += 0.038;
+        gh.y = gh.baseY + Math.sin(gh.t) * 36;
+        gh.x += gh.vx;
+        if (gh.x < gh.minX) { gh.x = gh.minX; gh.vx = Math.abs(gh.vx); }
+        else if (gh.x > gh.maxX) { gh.x = gh.maxX; gh.vx = -Math.abs(gh.vx); }
+        if (frameCount % 4 === 0) {
+          particles.push({
+            x: gh.x + 17 + (Math.random() - 0.5) * 12,
+            y: gh.y + 17 + (Math.random() - 0.5) * 12,
+            vx: (Math.random() - 0.5) * 1, vy: -0.6 - Math.random() * 0.8,
+            t: 0, life: 22, size: 3, color: '#d1c4e9'
+          });
+        }
+        if (mario.x < gh.x + gh.w && mario.x + mario.w > gh.x && mario.y < gh.y + gh.h && mario.y + mario.h > gh.y) {
+          marioDie();
+          return;
+        }
+      }
+    }
   }
 
   function updateFlagPhase() {
@@ -2024,12 +2248,15 @@
     if (G.state === 'playing') {
       updateMario();
       if (G.state === 'playing') {
-        updateEnemies();
-        marioVsEnemies();
-        // 计时
-        G.timeAcc += 1000 / 60;
-        if (G.timeAcc >= 1000) { G.timeAcc -= 1000; G.time--; if (G.time <= 0) { G.time = 0; marioDie(); syncHUD(); } }
-        syncHUDTime();
+        updateHazards();
+        if (G.state === 'playing') {
+          updateEnemies();
+          marioVsEnemies();
+          // 计时
+          G.timeAcc += 1000 / 60;
+          if (G.timeAcc >= 1000) { G.timeAcc -= 1000; G.time--; if (G.time <= 0) { G.time = 0; marioDie(); syncHUD(); } }
+          syncHUDTime();
+        }
       }
     } else if (G.state === 'dying') {
       mario.dyingT++;
@@ -2410,6 +2637,97 @@
     ctx.drawImage(spr, Math.round(px), Math.round(py), SPR, SPR);
   }
 
+  function drawHazards() {
+    var htype = hazards.type;
+    var i;
+    if (htype === 'desert') {
+      ctx.save();
+      for (i = 0; i < hazards.sandParticles.length; i++) {
+        var sp = hazards.sandParticles[i];
+        ctx.fillStyle = 'rgba(235, 180, 80, ' + sp.alpha + ')';
+        ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.strokeStyle = 'rgba(245, 200, 100, 0.18)';
+      ctx.lineWidth = 1.5;
+      for (i = 0; i < 6; i++) {
+        var lx = ((i * 190 + frameCount * 7) % (VIEW_W + 200)) - 100;
+        var ly = 120 + (i * 70) % (GROUND_Y - 200);
+        ctx.beginPath(); ctx.moveTo(VIEW_W - lx, ly); ctx.lineTo(VIEW_W - lx - 45, ly + 4); ctx.stroke();
+      }
+      ctx.restore();
+    } else if (htype === 'cavern') {
+      for (i = 0; i < hazards.stalactites.length; i++) {
+        var st = hazards.stalactites[i];
+        if (!st.active) continue;
+        var sx = st.x - camX + (st.state === 'shaking' ? (Math.random() - 0.5) * 5 : 0);
+        if (sx < -40 || sx > VIEW_W + 40) continue;
+        ctx.save();
+        var g = ctx.createLinearGradient(sx, st.y, sx + st.w, st.y + st.h);
+        g.addColorStop(0, '#5a7bb5'); g.addColorStop(0.5, '#8ab4f8'); g.addColorStop(1, '#e3f2fd');
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.moveTo(sx, st.y); ctx.lineTo(sx + st.w, st.y); ctx.lineTo(sx + st.w / 2, st.y + st.h);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#2d4b80'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(sx + st.w / 2 - 1, st.y + 4, 3, 3);
+        ctx.restore();
+      }
+    } else if (htype === 'lava') {
+      for (i = 0; i < hazards.fireballs.length; i++) {
+        var fb = hazards.fireballs[i];
+        if (fb.state !== 'airborne') continue;
+        var fx = fb.x - camX;
+        if (fx < -50 || fx > VIEW_W + 50) continue;
+        ctx.save();
+        var rad = 16;
+        var g2 = ctx.createRadialGradient(fx, fb.y, 2, fx, fb.y, rad);
+        g2.addColorStop(0, '#ffff80'); g2.addColorStop(0.4, '#ff6600'); g2.addColorStop(0.8, '#cc1100'); g2.addColorStop(1, 'rgba(200, 0, 0, 0)');
+        ctx.fillStyle = g2;
+        ctx.beginPath(); ctx.arc(fx, fb.y, rad, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(fx, fb.y, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+    } else if (htype === 'ice') {
+      for (i = 0; i < hazards.icicles.length; i++) {
+        var ic = hazards.icicles[i];
+        if (!ic.active) continue;
+        var ix = ic.x - camX + (ic.state === 'shaking' ? (Math.random() - 0.5) * 4 : 0);
+        if (ix < -40 || ix > VIEW_W + 40) continue;
+        ctx.save();
+        var g3 = ctx.createLinearGradient(ix, ic.y, ix + ic.w, ic.y + ic.h);
+        g3.addColorStop(0, '#cceeff'); g3.addColorStop(0.5, '#70d0ff'); g3.addColorStop(1, '#ffffff');
+        ctx.fillStyle = g3;
+        ctx.beginPath(); ctx.moveTo(ix, ic.y); ctx.lineTo(ix + ic.w, ic.y); ctx.lineTo(ix + ic.w / 2, ic.y + ic.h);
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#40b0f0'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.restore();
+      }
+    } else if (htype === 'ghost') {
+      for (i = 0; i < hazards.ghosts.length; i++) {
+        var gh = hazards.ghosts[i];
+        var gx = gh.x - camX;
+        if (gx < -60 || gx > VIEW_W + 60) continue;
+        ctx.save();
+        ctx.translate(gx + 17, gh.y + 17);
+        if (gh.vx > 0) ctx.scale(-1, 1);
+        var g4 = ctx.createRadialGradient(0, 0, 8, 0, 0, 24);
+        g4.addColorStop(0, 'rgba(240, 220, 255, 0.9)'); g4.addColorStop(0.6, 'rgba(180, 130, 240, 0.45)'); g4.addColorStop(1, 'rgba(120, 50, 200, 0)');
+        ctx.fillStyle = g4;
+        ctx.beginPath(); ctx.arc(0, 0, 24, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+        ctx.beginPath(); ctx.arc(0, -2, 16, Math.PI, 0, false);
+        ctx.quadraticCurveTo(14, 16, 8, 14); ctx.quadraticCurveTo(0, 18, -8, 14); ctx.quadraticCurveTo(-14, 16, -16, -2);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#2d1052';
+        ctx.beginPath(); ctx.arc(-6, -4, 2.5, 0, Math.PI * 2); ctx.arc(3, -4, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ff2255';
+        ctx.fillRect(-7, -5, 2, 2); ctx.fillRect(2, -5, 2, 2);
+        ctx.strokeStyle = '#2d1052'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.arc(-2, 4, 4, 0, Math.PI); ctx.stroke();
+        ctx.restore();
+      }
+    }
+  }
+
   function drawEffects() {
     var i;
     for (i = 0; i < particles.length; i++) {
@@ -2463,6 +2781,7 @@
     drawTiles();
     drawFlagAndCastle();
     drawEnemies();
+    drawHazards();
     drawWorldCoins();
     if (G.state !== 'menu') drawMario();
     else drawMario();
