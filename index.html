@@ -3,7 +3,7 @@
 ================================================================================
  🎮 玩五分钟 (Play 5 Mins) · 网页游戏项目
  版权所有 (C) 2026 120442759@qq.com. 保留所有权利。
- 
+
  【法律与版权声明】
  本项目代码与界面设计版权归属 120442759@qq.com。
  未经版权所有者明确书面授权，任何组织或个人不得以任何形式（包括但不限于复制、
@@ -15,31 +15,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>玩五分钟 · 超级马里奥</title>
+<title>玩五分钟</title>
 <link rel="icon" href="static/favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 <style>
 
 :root {
-  --font: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
-  --sky-top: #6ec6ff;
-  --sky-bottom: #b3e0ff;
-  --brick: #c8551f;
-  --ground: #8b5a2b;
-  --gold: #f5b301;
-  --red: #e5392b;
-  --ink: #232a3d;
-  --ink-2: #5b6580;
+  --font: "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", "Hiragino Sans GB", -apple-system, BlinkMacSystemFont, sans-serif;
+  --bg-base: #161c28;
+  --card-bg: rgba(28, 37, 52, 0.86);
+  --card-border: rgba(255, 255, 255, 0.13);
+  --card-hover-border: rgba(99, 102, 241, 0.45);
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --text-desc: #e2e8f0;
+  --primary-red: #ef4444;
+  --gold: #f59e0b;
 }
 
-html, body { height: 100%; }
+html, body { height: 100%; margin: 0; padding: 0; }
 
 body {
   font-family: var(--font);
-  color: var(--ink);
+  color: var(--text-main);
   background:
-    radial-gradient(900px 300px at 80% -10%, rgba(255,255,255,.55), transparent 60%),
-    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 62%, #ffd9a3 100%);
+    radial-gradient(1100px 550px at 50% -8%, rgba(99, 102, 241, 0.22), transparent 70%),
+    radial-gradient(900px 500px at 85% 60%, rgba(244, 114, 182, 0.12), transparent 65%),
+    radial-gradient(850px 480px at 15% 70%, rgba(56, 189, 248, 0.14), transparent 65%),
+    var(--bg-base);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -47,433 +50,308 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ============ 飘动的云 ============ */
-.cloud {
-  position: fixed;
-  width: 120px; height: 36px;
-  background: #fff;
-  border-radius: 40px;
-  opacity: .85;
-  animation: drift linear infinite;
-  z-index: 0;
-}
-.cloud::before, .cloud::after {
-  content: "";
-  position: absolute;
-  background: #fff;
-  border-radius: 50%;
-}
-.cloud::before { width: 46px; height: 46px; top: -20px; left: 22px; }
-.cloud::after  { width: 34px; height: 34px; top: -12px; right: 24px; }
-.cloud.c1 { top: 12%; animation-duration: 48s; }
-.cloud.c2 { top: 26%; transform: scale(.7); animation-duration: 64s; animation-delay: -20s; }
-.cloud.c3 { top: 7%;  transform: scale(.55); animation-duration: 38s; animation-delay: -30s; }
-@keyframes drift {
-  from { left: -160px; }
-  to   { left: 100vw; }
-}
-
-/* ============ 页头 ============ */
+/* ============ 页头（紧凑导航条） ============ */
 header {
   position: relative;
   z-index: 2;
-  text-align: center;
-  padding: 30px 0 8px;
+  padding: 18px 0 8px;
 }
 .header-container {
   position: relative;
   width: min(1080px, 94vw);
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.top-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.top-logo:hover {
+  transform: scale(1.04);
+  opacity: .95;
+}
+.top-logo img {
+  width: 32px;
+  height: 32px;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.45));
+}
+.top-logo .logo-text {
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 2px;
+  text-shadow: 0 0 16px rgba(255,255,255,.35), 0 2px 4px rgba(0,0,0,.6);
+  white-space: nowrap;
+  user-select: none;
 }
 .mario-logo {
-  font-size: 12px;
-  letter-spacing: 4px;
-  font-weight: 700;
-  color: #fff;
-  background: var(--red);
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  font-weight: 800;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.16);
+  border: 1px solid rgba(239, 68, 68, 0.4);
   display: inline-block;
-  padding: 7px 16px;
-  border-radius: 6px;
-  box-shadow: 0 3px 0 #a81d12;
-  margin-bottom: 18px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,.35);
+  padding: 5px 14px;
+  border-radius: 999px;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.15);
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
 }
-h1 {
-  font-size: clamp(30px, 5.4vw, 52px);
-  font-weight: 900;
-  letter-spacing: 3px;
-  color: #fff;
-  text-shadow:
-    3px 3px 0 #b3190f,
-    6px 6px 0 rgba(0,0,0,.18);
-}
-header .sub {
-  margin-top: 14px;
-  font-size: 16px;
-  color: #2c3e5d;
-  letter-spacing: 1px;
-}
-header .sub b { color: #b3190f; }
 
-/* ============ 版本卡片 ============ */
+/* ============ 版本卡片主区（屏幕中央垂直+水平居中） ============ */
 main {
   position: relative;
   z-index: 2;
   flex: 1;
   width: min(1080px, 94vw);
-  margin: 34px auto 26px;
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-  gap: 26px;
-  align-content: start;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px 26px;
+  align-content: center;   /* 4个方块整体垂直居中 */
+  justify-content: center; /* 4个方块整体水平居中 */
+  padding: 16px 0;
 }
 
 .card {
   position: relative;
-  background: #fff;
-  border: 1px solid #e2e8f5;
+  background: var(--card-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--card-border);
   border-radius: 20px;
-  box-shadow: 0 18px 44px rgba(30, 45, 90, .16);
+  box-shadow: 0 16px 36px rgba(10, 15, 25, 0.35);
   overflow: hidden;
-  transition: transform .16s ease, box-shadow .16s ease;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
   display: flex;
   flex-direction: column;
+  min-height: 290px;
 }
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 26px 56px rgba(30, 45, 90, .24);
+  transform: translateY(-5px);
+  border-color: var(--card-hover-border);
+  box-shadow: 0 22px 46px rgba(10, 15, 25, 0.45), 0 0 22px rgba(99, 102, 241, 0.18);
 }
 
 .card .banner {
   position: relative;
-  height: 92px;
+  height: 80px;
   display: flex;
-  align-items: flex-end;
-  padding: 14px 20px;
+  align-items: center;   /* 标题上下垂直居中 */
+  padding: 0 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.banner.grok { background: linear-gradient(160deg, #24244e 0%, #3b1f5e 55%, #5e1f4a 100%); }
-.banner.hy4  { background: linear-gradient(160deg, #ffe3c2 0%, #ffc6a0 50%, #ff9e7d 100%); }
+.banner.saltline    { background: linear-gradient(135deg, #1e3a68 0%, #254b85 55%, #1d4ed8 100%); }
+.banner.saltline-cn { background: linear-gradient(135deg, #451a1a 0%, #632626 55%, #991b1b 100%); }
+.banner.grok        { background: linear-gradient(135deg, #2c1e47 0%, #43296c 55%, #6d28d9 100%); }
+.banner.hy4         { background: linear-gradient(135deg, #3f2214 0%, #5d331d 55%, #9a3412 100%); }
+
+.banner-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
 /* 问号方块装饰 */
 .banner .qbox {
   position: absolute;
-  top: 14px; right: 18px;
+  top: calc(50% - 17px);
+  right: 22px;
   width: 34px; height: 34px;
   background: linear-gradient(180deg, #ffd85e, var(--gold));
-  border: 3px solid #a86e00;
-  border-radius: 6px;
+  border: 2px solid #b45309;
+  border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  color: #7a5200;
+  color: #78350f;
   font-weight: 900;
   font-size: 18px;
   font-family: var(--font);
-  box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 4px 8px rgba(0,0,0,.25);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35), inset 0 2px 0 rgba(255,255,255,.6);
   animation: bob 2.2s ease-in-out infinite;
 }
-@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* FPS 徽标装饰 */
+.banner .fps-badge {
+  position: absolute;
+  top: calc(50% - 13px);
+  right: 22px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
 
 .banner h2 {
   color: #fff;
-  font-size: 26px;
+  font-size: 21px;
   font-weight: 900;
-  letter-spacing: 2px;
-  text-shadow: 2px 2px 0 rgba(0,0,0,.35);
+  letter-spacing: 1.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+  line-height: 1.2;
+  margin: 0;
 }
-.banner.hy4 h2 { color: #7a2e12; text-shadow: 2px 2px 0 rgba(255,255,255,.45); }
 .banner .author {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: rgba(255,255,255,.82);
-  margin-left: 10px;
-  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.8px;
+  white-space: nowrap;
 }
-.banner.hy4 .author { color: rgba(122,46,18,.75); }
 
-.card .body { padding: 20px 22px 6px; flex: 1; }
+/* 卡片内容区（保持自然左对齐原样） */
+.card .body {
+  padding: 16px 24px 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
 
-.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
 .tag {
-  font-size: 12px;
-  padding: 4px 11px;
+  font-size: 11.5px;
+  padding: 3.5px 10px;
   border-radius: 999px;
   font-weight: 700;
-  background: #f2f6ff;
-  border: 1px solid #dfe5f2;
-  color: var(--ink-2);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e2e8f0;
 }
-.tag.ok   { background: #e8f8ef; border-color: #bfe8d0; color: #1f9d55; }
-.tag.hot  { background: #fdeeee; border-color: #f6c9c5; color: #c23125; }
+.tag.ok   { background: rgba(34, 197, 94, 0.16); border-color: rgba(34, 197, 94, 0.4); color: #4ade80; }
 
-.feat { list-style: none; margin: 0 0 8px; padding: 0; }
-.feat li {
-  position: relative;
-  padding: 5px 0 5px 24px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #39425c;
-}
-.feat li::before {
-  content: "🍄";
-  position: absolute;
-  left: 0;
-  top: 5px;
-  font-size: 13px;
+.desc {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-desc);
+  margin: 0 0 10px 0;
 }
 
-/* ============ 按钮区 ============ */
+.source-link {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 8px 0;
+}
+.source-link a {
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color .15s ease;
+}
+.source-link a:hover { color: #7dd3fc; text-decoration: underline; }
+
+/* ============ 按钮区（左侧主按钮+右侧新窗口按钮） ============ */
 .card .actions {
   display: flex;
   gap: 12px;
-  padding: 14px 20px 20px;
+  padding: 12px 24px 20px;
 }
 .btn {
   flex: 1;
   font-family: var(--font);
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 800;
   letter-spacing: 1.5px;
-  padding: 12px 10px;
+  padding: 11px 12px;
   border: 0;
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
   text-align: center;
-  transition: transform .07s ease, box-shadow .07s ease, filter .15s ease;
+  transition: transform .07s ease, box-shadow .15s ease, filter .15s ease;
 }
 .btn.play {
   color: #fff;
-  background: linear-gradient(180deg, #ff7a45, var(--red));
-  box-shadow: 0 5px 0 #a81d12, 0 10px 18px rgba(229,57,43,.3);
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
 }
-.btn.play:hover { filter: brightness(1.07); }
-.btn.play:active { transform: translateY(4px); box-shadow: 0 1px 0 #a81d12; }
+.btn.play:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+}
+.btn.play:active { transform: translateY(3px); box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
+
 .btn.newtab {
   flex: 0 0 auto;
-  color: #39425c;
-  background: linear-gradient(180deg, #ffffff, #eaeef8);
-  box-shadow: 0 5px 0 #c3cbdc;
-  padding: 12px 18px;
-  font-size: 13.5px;
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 11px 18px;
+  font-size: 13px;
+  backdrop-filter: blur(8px);
 }
-.btn.newtab:hover { filter: brightness(1.03); }
-.btn.newtab:active { transform: translateY(4px); box-shadow: 0 1px 0 #c3cbdc; }
+.btn.newtab:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.btn.newtab:active { transform: translateY(3px); }
 
-/* ============ 通用操作提示 ============ */
-.tips {
-  position: relative;
-  z-index: 2;
-  width: min(1080px, 94vw);
-  margin: 0 auto 24px;
-  background: rgba(255,255,255,.78);
-  border: 1px solid rgba(255,255,255,.9);
-  border-radius: 16px;
-  padding: 14px 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 24px;
-  justify-content: center;
-  font-size: 13.5px;
-  color: #39425c;
-  backdrop-filter: blur(6px);
-  align-items: center;
-}
-.tips kbd {
-  display: inline-block;
-  min-width: 24px;
-  text-align: center;
-  padding: 2px 7px;
-  margin: 0 2px;
-  background: #fff;
-  border: 1px solid #c9d3e6;
-  border-bottom-width: 3px;
-  border-radius: 6px;
-  font-family: var(--font);
-  font-weight: 700;
-  font-size: 12.5px;
-  color: #2c3e5d;
-}
-
-/* ============ 地面与页脚 ============ */
+/* ============ 优雅中深色页脚 ============ */
 footer {
   position: relative;
   z-index: 10;
-  min-height: 56px;
-  background:
-    repeating-linear-gradient(90deg,
-      var(--ground) 0 44px,
-      #7a4c23 44px 48px),
-    var(--ground);
-  border-top: 5px solid #5d3a1a;
-  box-shadow: 0 -4px 12px rgba(0,0,0,.15);
+  min-height: 44px;
+  background: rgba(18, 24, 34, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 10px 16px;
-  font-size: 13px;
-  color: rgba(255,255,255,.9);
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #94a3b8;
   letter-spacing: .5px;
-  line-height: 1.6;
+  line-height: 1.5;
   flex-wrap: wrap;
-  gap: 8px 14px;
+  gap: 6px 12px;
 }
-footer a { color: #ffd85e; text-decoration: none; font-weight: 700; }
-footer a:hover { text-decoration: underline; }
-footer .footer-dot { opacity: .7; }
+footer a { color: #f59e0b; text-decoration: none; font-weight: 600; }
+footer a:hover { text-decoration: underline; color: #fbbf24; }
 .footer-email-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  vertical-align: -2.5px;
-  margin-left: 6px;
-  color: #ffd85e;
-  opacity: .88;
+  vertical-align: -2px;
+  margin-left: 4px;
+  color: #f59e0b;
+  opacity: .85;
   transition: opacity .18s ease, transform .18s ease, color .18s ease;
   text-decoration: none;
 }
 .footer-email-link:hover {
   opacity: 1;
-  transform: scale(1.18);
-  color: #fff;
+  transform: scale(1.15);
+  color: #fbbf24;
   text-decoration: none;
 }
 .footer-email-link svg { display: block; }
 
-/* ============ 美观自定义语言选择器 (DIV 层) ============ */
-.lang-selector-wrap {
-  position: relative;
-  display: inline-block;
-  z-index: 100;
-}
-.lang-trigger-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 14px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  border-radius: 999px;
-  color: #fff;
-  font-family: var(--font);
-  font-size: 12.5px;
-  font-weight: 700;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.25);
-  transition: all .18s ease;
-  user-select: none;
-}
-.lang-trigger-btn:hover {
-  background: rgba(255, 255, 255, 0.32);
-  border-color: #ffd85e;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.25), 0 0 10px rgba(255,216,94,0.4);
-}
-.lang-trigger-btn .flag-icon { font-size: 15px; line-height: 1; }
-.lang-trigger-btn .arrow-icon { font-size: 10px; margin-left: 2px; transition: transform .2s ease; }
-.lang-selector-wrap.active .arrow-icon { transform: rotate(180deg); }
-
-.lang-dropdown-menu {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: #ffffff;
-  border: 1px solid #d0d9ea;
-  border-radius: 14px;
-  box-shadow: 0 14px 35px rgba(15, 25, 55, 0.28), 0 2px 6px rgba(0,0,0,0.06);
-  padding: 6px;
-  min-width: 146px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
-  z-index: 1000;
-}
-.lang-selector-wrap.active .lang-dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
-}
-.lang-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #2b364b;
-  cursor: pointer;
-  transition: background .12s ease, color .12s ease;
-  user-select: none;
-  white-space: nowrap;
-}
-.lang-dropdown-item:hover {
-  background: #edf3ff;
-  color: #1a4cd2;
-}
-.lang-dropdown-item.selected {
-  background: #e6f0ff;
-  color: #e5392b;
-  font-weight: 800;
-}
-.lang-dropdown-item .opt-flag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-.flag-svg {
-  display: inline-block;
-  vertical-align: -1.5px;
-  border-radius: 2px;
-  box-shadow: 0 0 1px rgba(0,0,0,0.5);
-  flex-shrink: 0;
-  width: 18px;
-  height: 12px;
-}
-
-/* ============ 左上角 LOGO（与下方主内容区垂直左对齐） ============ */
-.top-logo {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  transition: transform .18s ease, opacity .18s ease;
-}
-.top-logo:hover {
-  transform: scale(1.06);
-  opacity: .95;
-}
-.top-logo img {
-  width: 30px;
-  height: 30px;
-  display: block;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,.25));
-}
-.top-logo .logo-text {
-  font-size: 22px;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: 1.5px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,.25), 0 2px 6px rgba(0,0,0,.2);
-  white-space: nowrap;
-  user-select: none;
-}
-
-@media (max-width: 480px) {
-  .top-logo img { width: 24px; height: 24px; }
-  .top-logo .logo-text { font-size: 18px; }
-  header { padding-top: 14px; }
-  .banner h2 { font-size: 19px; }
+@media (max-width: 768px) {
+  main { grid-template-columns: 1fr; gap: 16px; margin: 10px auto; }
+  .header-container { width: 92vw; }
+  .top-logo img { width: 26px; height: 26px; }
+  .top-logo .logo-text { font-size: 20px; }
+  .banner h2 { font-size: 17px; }
   .card .actions { flex-direction: column; }
   .btn.newtab { width: 100%; }
 }
@@ -481,471 +359,119 @@ footer .footer-dot { opacity: .7; }
 </head>
 <body>
 
-<div class="cloud c1"></div>
-<div class="cloud c2"></div>
-<div class="cloud c3"></div>
-
 <header>
   <div class="header-container">
     <a href="index.html" class="top-logo" aria-label="Logo">
       <img src="static/manghe-white.png" alt="Logo">
-      <span class="logo-text" data-i18n="brandText">玩五分钟</span>
+      <span class="logo-text">玩五分钟</span>
     </a>
-    <div class="mario-logo" data-i18n="logo">AI GENERATED · HTML5 GAME</div>
-    <h1 data-i18n="h1Title">玩五分钟 · 超级马里奥</h1>
-    <p class="sub" data-i18n-html="subTitle">打开就玩，不用下载，找回小时候的快乐，无广告，<b>不会上瘾的简单小游戏</b></p>
+    <div class="mario-logo">AI GENERATED · HTML5 GAME</div>
   </div>
 </header>
 
 <main>
-  <!-- ================= Grok Fast 版本 ================= -->
+  <!-- ================= 上排 1: SALTLINE-3A游戏 ================= -->
   <section class="card">
-    <div class="banner grok">
-      <div class="qbox">?</div>
-      <h2 data-i18n="grokTitle">超级玛丽</h2>
-      <span class="author" data-i18n="grokAuthor">Grok Fast 生成 v6</span>
+    <div class="banner saltline">
+      <div class="fps-badge">FPS</div>
+      <div class="banner-title">
+        <h2>SALTLINE-3A游戏</h2>
+        <span class="author">Claude Fable 5.2 · AI生成</span>
+      </div>
     </div>
     <div class="body">
       <div class="tags">
-        <span class="tag ok" data-i18n="grokTagOk">✅ 关卡多变 挑战递进</span>
-        <span class="tag">1100 × 650</span>
-        <span class="tag" data-i18n="tagLevels">六大主题关卡</span>
-        <span class="tag" data-i18n="tagLangs">七种语言</span>
+        <span class="tag" style="background:rgba(14,165,233,0.16);border-color:rgba(14,165,233,0.4);color:#38bdf8;">FPS</span>
+        <span class="tag" style="background:rgba(99,102,241,0.16);border-color:rgba(99,102,241,0.4);color:#818cf8;">AI生成</span>
+        <span class="tag">WebGL</span>
+        <span class="tag">英文</span>
       </div>
-      <ul class="feat">
-        <li data-i18n="grokFeat1">六大主题独立地貌：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，关关不同</li>
-        <li data-i18n="grokFeat2">阶梯式难度进阶：落点守卫、高空移速平台、复杂砖阵机关，挑战不断升级</li>
-        <li data-i18n="grokFeat3">空中金币弧线、高空浮动平台、精巧立体砖阵、15% 概率触发高额幸运方块</li>
-        <li data-i18n="grokFeat4">终点夺旗漫天烟花盛典、过关彩带飞舞与 100~500 惊喜过关结算奖励</li>
-        <li data-i18n="grokFeat5">一键游戏全景截图（带文字说明与HUD合成保存）、高帧率FPS监控与七国语言</li>
-      </ul>
+      <p class="desc">Anthropic工程师 Felix Rieseberg 用 Claude Fable 5.2 一个提示词、8小时无干预生成的FPS大作，建模、音效、贴图全由AI完成，画质媲美3A。</p>
+      <p class="source-link">来源：<a href="https://x.com/felixrieseberg/status/2119925633564463609" target="_blank" rel="noopener">X平台 @felixrieseberg ↗</a></p>
     </div>
     <div class="actions">
-      <a class="btn play" data-i18n="btnPlay" href="mario-grok.html">▶ 开始游戏</a>
-      <a class="btn newtab" data-i18n="btnNewtab" href="mario-grok.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+      <a class="btn play" href="saltline.html">▶ 开始游戏</a>
+      <a class="btn newtab" href="saltline.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
     </div>
   </section>
 
-  <!-- ================= Hy4 Preview 版本 ================= -->
+  <!-- ================= 上排 2: SALTLINE · 汉化版 ================= -->
   <section class="card">
-    <div class="banner hy4">
-      <div class="qbox">?</div>
-      <h2 data-i18n="hy4Title">超级马里奥 · 六关历险</h2>
-      <span class="author" data-i18n="hy4Author">Hy4 Preview 生成 v3</span>
+    <div class="banner saltline-cn">
+      <div class="fps-badge">FPS</div>
+      <div class="banner-title">
+        <h2>SALTLINE · 汉化版</h2>
+        <span class="author">Claude Fable 5.2 · 中文版</span>
+      </div>
     </div>
     <div class="body">
       <div class="tags">
-        <span class="tag ok" data-i18n="hy4TagOk">✅ 经典硬核 冒险升级</span>
-        <span class="tag">1000 × 560</span>
-        <span class="tag" data-i18n="tagLevels">六大主题关卡</span>
-        <span class="tag" data-i18n="tagLangs">七种语言</span>
+        <span class="tag" style="background:rgba(239,68,68,0.16);border-color:rgba(239,68,68,0.4);color:#f87171;">FPS</span>
+        <span class="tag" style="background:rgba(99,102,241,0.16);border-color:rgba(99,102,241,0.4);color:#818cf8;">AI生成</span>
+        <span class="tag">WebGL</span>
+        <span class="tag">中文</span>
       </div>
-      <ul class="feat">
-        <li data-i18n="hy4Feat1">六大沉浸主题关卡：草原 → 黄昏 → 星夜 → 熔岩 → 冰雪 → 幽暗城堡</li>
-        <li data-i18n="hy4Feat2">智能巡逻板栗仔：悬崖边界自动掉头警戒、每个落点均有敌人守卫</li>
-        <li data-i18n="hy4Feat3">立体金币系统：悬崖腾空金币弧线 + 地面金币长廊，每次拾取即时计入高分</li>
-        <li data-i18n="hy4Feat4">层次化探索关卡：立体阶梯与错层高低砖阵，所有问号均可通过精妙操作顶取</li>
-        <li data-i18n="hy4Feat5">一键游戏全景截图（带文字说明与HUD合成保存）、全方位结算大奖与七国语言</li>
-      </ul>
+      <p class="desc">Saltline 的中文汉化版，FPS体验完全相同，界面和音频提示完全中文化。</p>
+      <p class="source-link">来源：<a href="https://github.com/Megasu/jimao-3a-game" target="_blank" rel="noopener">GitHub · Megasu/jimao-3a-game ↗</a></p>
     </div>
     <div class="actions">
-      <a class="btn play" data-i18n="btnPlay" href="mario-hy4.html">▶ 开始游戏</a>
-      <a class="btn newtab" data-i18n="btnNewtab" href="mario-hy4.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+      <a class="btn play" href="saltline-cn.html">▶ 开始游戏</a>
+      <a class="btn newtab" href="saltline-cn.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+    </div>
+  </section>
+
+  <!-- ================= 下排 1: 超级玛丽 · Grok Fast ================= -->
+  <section class="card">
+    <div class="banner grok">
+      <div class="qbox">?</div>
+      <div class="banner-title">
+        <h2>超级玛丽</h2>
+        <span class="author">Grok Fast · 六关历险</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="tags">
+        <span class="tag ok">✅ Grok Fast 生成</span>
+        <span class="tag">六大主题</span>
+        <span class="tag">七种语言</span>
+      </div>
+      <p class="desc">Grok Fast 生成的六关马里奥，六大主题关卡（草原→沙漠→星夜→熔岩→冰雪→鬼域），支持多语言和一键截图。</p>
+    </div>
+    <div class="actions">
+      <a class="btn play" href="mario-grok.html">▶ 开始游戏</a>
+      <a class="btn newtab" href="mario-grok.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
+    </div>
+  </section>
+
+  <!-- ================= 下排 2: 超级马里奥 · Hy4 Preview ================= -->
+  <section class="card">
+    <div class="banner hy4">
+      <div class="qbox">?</div>
+      <div class="banner-title">
+        <h2>超级马里奥</h2>
+        <span class="author">Hy4 Preview · 六关历险</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="tags">
+        <span class="tag ok">✅ Hy4 Preview 生成</span>
+        <span class="tag">六大主题</span>
+        <span class="tag">七种语言</span>
+      </div>
+      <p class="desc">Hy4 Preview 生成的六关马里奥，经典硬核冒险，智能敌人AI，立体金币系统。</p>
+    </div>
+    <div class="actions">
+      <a class="btn play" href="mario-hy4.html">▶ 开始游戏</a>
+      <a class="btn newtab" href="mario-hy4.html" target="_blank" rel="noopener">新窗口打开 ↗</a>
     </div>
   </section>
 </main>
 
-<div class="tips">
-  <span><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> <span data-i18n="tipMove">左右移动</span></span>
-  <span><kbd id="keySpace" data-i18n="keySpace">空格</kbd> / <kbd>↑</kbd> / <kbd>W</kbd> <span data-i18n="tipJump">跳跃</span></span>
-  <span><kbd>Shift</kbd> <span data-i18n="tipRun">加速奔跑</span></span>
-  <span><kbd>Enter</kbd> <span data-i18n="tipRestart">重开本关</span></span>
-</div>
-
 <footer>
-  <span data-i18n="footerDisclaimer">⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · </span>
-  <span><a href="mailto:120442759@qq.com" class="footer-email-link" title="联系邮箱：120442759@qq.com" aria-label="Email: 120442759@qq.com"><svg class="email-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a></span>
-  <div class="lang-selector-wrap" id="langWrap">
-    <button class="lang-trigger-btn" id="langTrigger" type="button" aria-haspopup="true" aria-expanded="false">
-      <span class="flag-icon" id="currentFlag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5,5 L5.7,7.2 L8,7.2 L6.1,8.6 L6.8,10.8 L5,9.4 L3.2,10.8 L3.9,8.6 L2,7.2 L4.3,7.2 Z" fill="#ffde00"/><path d="M10,2 L10.3,3.1 L11.4,3.1 L10.5,3.8 L10.8,4.9 L10,4.2 L9.2,4.9 L9.5,3.8 L8.6,3.1 L9.7,3.1 Z" fill="#ffde00"/><path d="M12,4 L12.3,5.1 L13.4,5.1 L12.5,5.8 L12.8,6.9 L12,6.2 L11.2,6.9 L11.5,5.8 L10.6,5.1 L11.7,5.1 Z" fill="#ffde00"/><path d="M12,8 L12.3,9.1 L13.4,9.1 L12.5,9.8 L12.8,10.9 L12,10.2 L11.2,10.9 L11.5,9.8 L10.6,9.1 L11.7,9.1 Z" fill="#ffde00"/><path d="M10,10 L10.3,11.1 L11.4,11.1 L10.5,11.8 L10.8,12.9 L10,12.2 L9.2,12.9 L9.5,11.8 L8.6,11.1 L9.7,11.1 Z" fill="#ffde00"/></svg></span>
-      <span id="currentLangLabel">简体中文</span>
-      <span class="arrow-icon">▲</span>
-    </button>
-    <div class="lang-dropdown-menu" id="langMenu" role="listbox">
-      <div class="lang-dropdown-item selected" data-val="zh-CN" role="option"><span class="opt-flag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5,5 L5.7,7.2 L8,7.2 L6.1,8.6 L6.8,10.8 L5,9.4 L3.2,10.8 L3.9,8.6 L2,7.2 L4.3,7.2 Z" fill="#ffde00"/><path d="M10,2 L10.3,3.1 L11.4,3.1 L10.5,3.8 L10.8,4.9 L10,4.2 L9.2,4.9 L9.5,3.8 L8.6,3.1 L9.7,3.1 Z" fill="#ffde00"/><path d="M12,4 L12.3,5.1 L13.4,5.1 L12.5,5.8 L12.8,6.9 L12,6.2 L11.2,6.9 L11.5,5.8 L10.6,5.1 L11.7,5.1 Z" fill="#ffde00"/><path d="M12,8 L12.3,9.1 L13.4,9.1 L12.5,9.8 L12.8,10.9 L12,10.2 L11.2,10.9 L11.5,9.8 L10.6,9.1 L11.7,9.1 Z" fill="#ffde00"/><path d="M10,10 L10.3,11.1 L11.4,11.1 L10.5,11.8 L10.8,12.9 L10,12.2 L9.2,12.9 L9.5,11.8 L8.6,11.1 L9.7,11.1 Z" fill="#ffde00"/></svg></span><span>简体中文</span></div>
-      <div class="lang-dropdown-item" data-val="zh-TW" role="option"><span class="opt-flag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><circle cx="15" cy="10" r="5.5" fill="#fff"/><circle cx="15" cy="10" r="4" fill="#de2910"/><g fill="#fff"><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(72 15 10)"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(144 15 10)"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(216 15 10)"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(288 15 10)"/></g></svg></span><span>繁體中文</span></div>
-      <div class="lang-dropdown-item" data-val="en" role="option"><span class="opt-flag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#b22234"/><path d="M0,3.08 H30 M0,6.15 H30 M0,9.23 H30 M0,12.31 H30 M0,15.38 H30 M0,18.46 H30" stroke="#fff" stroke-width="1.54"/><rect width="12" height="10.77" fill="#3c3b6e"/><circle cx="3" cy="2.7" r="0.7" fill="#fff"/><circle cx="6" cy="2.7" r="0.7" fill="#fff"/><circle cx="9" cy="2.7" r="0.7" fill="#fff"/><circle cx="4.5" cy="5.4" r="0.7" fill="#fff"/><circle cx="7.5" cy="5.4" r="0.7" fill="#fff"/><circle cx="3" cy="8.1" r="0.7" fill="#fff"/><circle cx="6" cy="8.1" r="0.7" fill="#fff"/><circle cx="9" cy="8.1" r="0.7" fill="#fff"/></svg></span><span>English</span></div>
-      <div class="lang-dropdown-item" data-val="ja" role="option"><span class="opt-flag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#ffffff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg></span><span>日本語</span></div>
-      <div class="lang-dropdown-item" data-val="pt-BR" role="option"><span class="opt-flag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#009c3b"/><polygon points="15,2 27,10 15,18 3,10" fill="#ffdf00"/><circle cx="15" cy="10" r="4.2" fill="#002776"/><path d="M11,10.5 C12.5,8.8 17.5,8.8 19,10.5" stroke="#ffffff" stroke-width="0.8" fill="none"/></svg></span><span>Português</span></div>
-      <div class="lang-dropdown-item" data-val="es" role="option"><span class="opt-flag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#aa151b"/><rect y="5" width="30" height="10" fill="#f1bf00"/><circle cx="7" cy="10" r="2.2" fill="#aa151b"/></svg></span><span>Español</span></div>
-      <div class="lang-dropdown-item" data-val="fr" role="option"><span class="opt-flag"><svg class="flag-svg" viewBox="0 0 30 20"><rect width="10" height="20" fill="#002654"/><rect x="10" width="10" height="20" fill="#ffffff"/><rect x="20" width="10" height="20" fill="#ce1126"/></svg></span><span>Français</span></div>
-    </div>
-  </div>
+  <span>⚖️ 仅用于 AI 编程能力研究与技术学习 · 请勿商用 · </span>
+  <span><a href="mailto:120442759@qq.com" class="footer-email-link" title="联系邮箱：120442759@qq.com" aria-label="Email: 120442759@qq.com"><svg class="email-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></a></span>
 </footer>
 
-<script>
-const FLAGS = {
-  'zh-CN': '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><path d="M5,5 L5.7,7.2 L8,7.2 L6.1,8.6 L6.8,10.8 L5,9.4 L3.2,10.8 L3.9,8.6 L2,7.2 L4.3,7.2 Z" fill="#ffde00"/><path d="M10,2 L10.3,3.1 L11.4,3.1 L10.5,3.8 L10.8,4.9 L10,4.2 L9.2,4.9 L9.5,3.8 L8.6,3.1 L9.7,3.1 Z" fill="#ffde00"/><path d="M12,4 L12.3,5.1 L13.4,5.1 L12.5,5.8 L12.8,6.9 L12,6.2 L11.2,6.9 L11.5,5.8 L10.6,5.1 L11.7,5.1 Z" fill="#ffde00"/><path d="M12,8 L12.3,9.1 L13.4,9.1 L12.5,9.8 L12.8,10.9 L12,10.2 L11.2,10.9 L11.5,9.8 L10.6,9.1 L11.7,9.1 Z" fill="#ffde00"/><path d="M10,10 L10.3,11.1 L11.4,11.1 L10.5,11.8 L10.8,12.9 L10,12.2 L9.2,12.9 L9.5,11.8 L8.6,11.1 L9.7,11.1 Z" fill="#ffde00"/></svg>',
-  'zh-TW': '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#de2910"/><circle cx="15" cy="10" r="5.5" fill="#fff"/><circle cx="15" cy="10" r="4" fill="#de2910"/><g fill="#fff"><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(72 15 10)"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(144 15 10)"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(216 15 10)"/><path d="M15,5 C17,6.5 16,8.5 15,10 C14,8.5 13,6.5 15,5 Z" transform="rotate(288 15 10)"/></g></svg>',
-  'en':    '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#b22234"/><path d="M0,3.08 H30 M0,6.15 H30 M0,9.23 H30 M0,12.31 H30 M0,15.38 H30 M0,18.46 H30" stroke="#fff" stroke-width="1.54"/><rect width="12" height="10.77" fill="#3c3b6e"/><circle cx="3" cy="2.7" r="0.7" fill="#fff"/><circle cx="6" cy="2.7" r="0.7" fill="#fff"/><circle cx="9" cy="2.7" r="0.7" fill="#fff"/><circle cx="4.5" cy="5.4" r="0.7" fill="#fff"/><circle cx="7.5" cy="5.4" r="0.7" fill="#fff"/><circle cx="3" cy="8.1" r="0.7" fill="#fff"/><circle cx="6" cy="8.1" r="0.7" fill="#fff"/><circle cx="9" cy="8.1" r="0.7" fill="#fff"/></svg>',
-  'ja':    '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#ffffff"/><circle cx="15" cy="10" r="6" fill="#bc002d"/></svg>',
-  'pt-BR': '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#009c3b"/><polygon points="15,2 27,10 15,18 3,10" fill="#ffdf00"/><circle cx="15" cy="10" r="4.2" fill="#002776"/><path d="M11,10.5 C12.5,8.8 17.5,8.8 19,10.5" stroke="#ffffff" stroke-width="0.8" fill="none"/></svg>',
-  'es':    '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="30" height="20" fill="#aa151b"/><rect y="5" width="30" height="10" fill="#f1bf00"/><circle cx="7" cy="10" r="2.2" fill="#aa151b"/></svg>',
-  'fr':    '<svg class="flag-svg" viewBox="0 0 30 20"><rect width="10" height="20" fill="#002654"/><rect x="10" width="10" height="20" fill="#ffffff"/><rect x="20" width="10" height="20" fill="#ce1126"/></svg>'
-};
-
-const LANG_MAP = {
-  'zh-CN': { label: '简体中文', flag: FLAGS['zh-CN'] },
-  'zh-TW': { label: '繁體中文', flag: FLAGS['zh-TW'] },
-  'en':    { label: 'English', flag: FLAGS['en'] },
-  'ja':    { label: '日本語', flag: FLAGS['ja'] },
-  'pt-BR': { label: 'Português', flag: FLAGS['pt-BR'] },
-  'es':    { label: 'Español', flag: FLAGS['es'] },
-  'fr':    { label: 'Français', flag: FLAGS['fr'] }
-};
-
-const I18N = {
-  'zh-CN': {
-    brandText: '玩五分钟',
-    docTitle: '玩五分钟 · 超级马里奥',
-    logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '玩五分钟 · 超级马里奥',
-    subTitle: '打开就玩，不用下载，找回小时候的快乐，无广告，<b>不会上瘾的简单小游戏</b>',
-    grokTitle: '超级玛丽',
-    grokAuthor: 'Grok Fast 生成 v6',
-    grokTagOk: '✅ 关卡多变 截图分享',
-    tagLevels: '六大主题关卡',
-    tagLangs: '七种语言',
-    grokFeat1: '六大主题独立地貌：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，关关不同',
-    grokFeat2: '阶梯式难度进阶：落点守卫、高空移速平台、复杂砖阵机关，挑战不断升级',
-    grokFeat3: '空中金币弧线、高空浮动平台、精巧立体砖阵、15% 概率触发高额幸运方块',
-    grokFeat4: '终点夺旗漫天烟花盛典、过关彩带飞舞与 100~500 惊喜过关结算奖励',
-    grokFeat5: '一键游戏全景截图（带文字说明与HUD合成保存）、高帧率FPS监控与七国语言',
-    hy4Title: '超级马里奥 · 六关历险',
-    hy4Author: 'Hy4 Preview 生成 v3',
-    hy4TagOk: '✅ 经典硬核 截图分享',
-    hy4Feat1: '六大沉浸主题关卡：草原 → 黄昏 → 星夜 → 熔岩 → 冰雪 → 幽暗城堡',
-    hy4Feat2: '智能巡逻板栗仔：悬崖边界自动掉头警戒、每个落点均有敌人守卫',
-    hy4Feat3: '立体金币系统：悬崖腾空金币弧线 + 地面金币长廊，每次拾取即时计入高分',
-    hy4Feat4: '层次化探索关卡：立体阶梯与错层高低砖阵，所有问号均可通过精妙操作顶取',
-    hy4Feat5: '一键游戏全景截图（带文字说明与HUD合成保存）、全方位结算大奖与七国语言',
-    btnPlay: '▶ 开始游戏',
-    btnNewtab: '新窗口打开 ↗',
-    keySpace: '空格',
-    tipMove: '左右移动',
-    tipJump: '跳跃',
-    tipRun: '加速奔跑',
-    tipRestart: '重开本关',
-    footerDisclaimer: '⚖️ 仅用于 AI 编程能力研究与技术学习 · 素材均为原创替代品 · 请勿商用 · '
-  },
-  'zh-TW': {
-    brandText: '玩五分鐘',
-    docTitle: '玩五分鐘 · 超級瑪利歐',
-    logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '玩五分鐘 · 超級瑪利歐',
-    subTitle: '打開就玩，不用下載，找回小時候的快樂，無廣告，<b>不會上癮的簡單小遊戲</b>',
-    grokTitle: '超級瑪利歐',
-    grokAuthor: 'Grok Fast 生成 v6',
-    grokTagOk: '✅ 關卡多變 截圖分享',
-    tagLevels: '六大主題關卡',
-    tagLangs: '七種語言',
-    grokFeat1: '六大主題獨立地貌：草原 → 沙漠 → 星夜 → 熔岩 → 冰雪 → 鬼域，關關不同',
-    grokFeat2: '階梯式難度進階：落點守衛、高空移速平臺、複雜磚陣機關，挑戰不斷升級',
-    grokFeat3: '空中金幣弧線、高空浮動平臺、精巧立體磚陣、15% 機率觸發高額幸運方塊',
-    grokFeat4: '終點奪旗漫天煙花盛典、過關彩帶飛舞與 100~500 驚喜過關結算獎勵',
-    grokFeat5: '一鍵遊戲全景截圖（帶文字說明與HUD合成保存）、高幀率FPS監控與七國語言',
-    hy4Title: '超級瑪利歐 · 六關歷險',
-    hy4Author: 'Hy4 Preview 生成 v3',
-    hy4TagOk: '✅ 經典硬核 截圖分享',
-    hy4Feat1: '六大沉浸主題關卡：草原 → 黃昏 → 星夜 → 熔岩 → 冰雪 → 幽暗城堡',
-    hy4Feat2: '智慧巡邏慄寶寶：懸崖邊界自動掉頭警戒、每個落點均有敵人守衛',
-    hy4Feat3: '立體金幣系統：懸崖騰空金幣弧線 + 地面金幣長廊，每次拾取即時計入高分',
-    hy4Feat4: '層次化探索關卡：立體階梯與錯層高低磚陣，所有問號均可透過精妙操作頂取',
-    hy4Feat5: '一鍵遊戲全景截圖（帶文字說明與HUD合成保存）、全方位結算大獎與七國語言',
-    btnPlay: '▶ 開始遊戲',
-    btnNewtab: '新視窗打開 ↗',
-    keySpace: '空白鍵',
-    tipMove: '左右移動',
-    tipJump: '跳躍',
-    tipRun: '加速奔跑',
-    tipRestart: '重開本關',
-    footerDisclaimer: '⚖️ 僅用於 AI 編程能力研究與技術學習 · 素材均為原創替代品 · 請勿商用 · '
-  },
-  'en': {
-    brandText: 'Play 5 Mins',
-    docTitle: '5-Minute Fun · Super Mario',
-    logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '5-Minute Fun · Super Mario',
-    subTitle: 'Instant play, no downloads, ad-free — Relive childhood joy with a <b>casual, stress-free mini game</b>',
-    grokTitle: 'Super Mario',
-    grokAuthor: 'Grok Fast Build v6',
-    grokTagOk: '✅ Dynamic Levels & Scaling Challenge',
-    tagLevels: '6 Themed Worlds',
-    tagLangs: '7 Languages',
-    grokFeat1: '6 Diverse Worlds: Grassland → Desert → Starry Night → Lava → Snow → Ghost House with distinct layouts',
-    grokFeat2: 'Steep difficulty scaling: pit guards, moving platforms, tiered obstacle mazes for thrilling platforming',
-    grokFeat3: 'Aerial coin arcs, floating platforms, multi-level brick pyramids, 15% lucky block rewards',
-    grokFeat4: 'Flagpole fireworks celebration, victory confetti storms & 100~500 surprise bonus scores',
-    grokFeat5: 'One-click full game screenshot (composites HUD & text descriptions to PNG), FPS monitor & 7 languages',
-    hy4Title: 'Super Mario · 6 Level Quest',
-    hy4Author: 'Hy4 Preview Build v3',
-    hy4TagOk: '✅ Classic Hardcore Adventure',
-    hy4Feat1: '6 Immersive Themed Worlds: Grassland → Dusk → Starry Night → Lava → Snow → Haunted Castle',
-    hy4Feat2: 'Smart patrol Goombas: edge-sensing AI patrols with Goombas guarding every cliff landing',
-    hy4Feat3: 'Dynamic coin system: mid-air coin arcs + ground coin corridors for instant score boosts',
-    hy4Feat4: 'Multi-tiered level exploration: climb pyramids and jump across stepped blocks to hit every ? block',
-    hy4Feat5: 'One-click full game screenshot (composites HUD & text descriptions to PNG), comprehensive score tally & 7 languages',
-    btnPlay: '▶ Play Now',
-    btnNewtab: 'Open in New Tab ↗',
-    keySpace: 'Space',
-    tipMove: 'Move Left / Right',
-    tipJump: 'Jump',
-    tipRun: 'Dash / Run Faster',
-    tipRestart: 'Restart Level',
-    footerDisclaimer: '⚖️ For AI programming research & educational learning only · Original placeholder assets · Non-commercial · '
-  },
-  'ja': {
-    brandText: '5分で遊ぶ',
-    docTitle: '5分で楽しむ · スーパーマリオ',
-    logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '5分で楽しむ · スーパーマリオ',
-    subTitle: 'ダウンロード不要ですぐ遊べる！広告なしで子供の頃の楽しさを思い出す、<b>手軽で夢中になりすぎないミニゲーム</b>',
-    grokTitle: 'スーパーマリオ',
-    grokAuthor: 'Grok Fast 生成 v6',
-    grokTagOk: '✅ 多彩なコースと難度上昇',
-    tagLevels: '6大テーマコース',
-    tagLangs: '7言語対応',
-    grokFeat1: '6大テーマコース：草原 → 砂漠 → 星夜 → 溶岩 → 氷雪 → 幽霊屋敷、全ステージ固有レイアウト',
-    grokFeat2: '段階的な難易度上昇：穴の着地クリボー、空中移動足場、複雑なレンガ構造による爽快アクション',
-    grokFeat3: '空中コインアーク、動く浮島、立体ピラミッドブロック、15%の確率でラッキーブロック発動',
-    grokFeat4: 'ゴール旗の花火ショー、クリア紙吹雪と100~500のサプライズボーナス得点',
-    grokFeat5: 'ワンクリック全画面スクショ（HUDや説明テキストをPNG合成保存）、FPS表示と7言語対応',
-    hy4Title: 'スーパーマリオ · 6コースの冒険',
-    hy4Author: 'Hy4 Preview 生成 v3',
-    hy4TagOk: '✅ クラシック骨太アドベンチャー',
-    hy4Feat1: '6大没入テーマコース：草原 → 黄昏 → 星夜 → 溶岩 → 氷雪 → 幽霊城',
-    hy4Feat2: '崖際Uターン敵AI：穴の縁で自動反転し、すべての着地点にクリボーが待ち受ける',
-    hy4Feat3: '立体コイン配置：ジャンプ軌道のコインアーク＋地上コイン街道で即時スコアアップ',
-    hy4Feat4: '立体探索コース：多層ステップ配置により、すべての？ブロックを快適に叩ける設計',
-    hy4Feat5: 'ワンクリック全画面スクショ（HUDや説明テキストをPNG合成保存）、多彩なクリア集計と7言語対応',
-    btnPlay: '▶ プレイ開始',
-    btnNewtab: '新しいタブで開く ↗',
-    keySpace: 'スペース',
-    tipMove: '左右移動',
-    tipJump: 'ジャンプ',
-    tipRun: 'ダッシュ加速',
-    tipRestart: 'リスタート',
-    footerDisclaimer: '⚖️ AIプログラミング研究・学習用 · オリジナル素材使用 · 商用利用禁止 · '
-  },
-  'pt-BR': {
-    brandText: 'Jogar 5 Min',
-    docTitle: '5 Minutos de Diversão · Super Mario',
-    logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '5 Minutos de Diversão · Super Mario',
-    subTitle: 'Jogue direto no navegador, sem download e sem anúncios — Reviva a alegria da infância com um <b>jogo simples e descontraído</b>',
-    grokTitle: 'Super Mario',
-    grokAuthor: 'Grok Fast Versão v6',
-    grokTagOk: '✅ Fases Dinâmicas e Desafio Escalonado',
-    tagLevels: '6 Fases Temáticas',
-    tagLangs: '7 Idiomas',
-    grokFeat1: '6 Fases Temáticas: Planície → Deserto → Noite Estrelada → Lava → Neve → Fantasma, com layouts distintos',
-    grokFeat2: 'Dificuldade progressiva: guardas nos buracos, plataformas móveis e armadilhas desafiadoras',
-    grokFeat3: 'Arcos de moedas aéreas, blocos suspensos, pirâmides de tijolos e 15% de blocos da sorte',
-    grokFeat4: 'Fogos de artifício na bandeira, confetes vibrantes e bônus surpresa de 100~500 pontos',
-    grokFeat5: 'Captura de tela com 1 clique (salva HUD e textos explicativos em PNG), monitor FPS e 7 idiomas',
-    hy4Title: 'Super Mario · Aventura de 6 Fases',
-    hy4Author: 'Hy4 Preview Versão v3',
-    hy4TagOk: '✅ Aventura Clássica Hardcore',
-    hy4Feat1: '6 Mundos Imersivos: Planície → Crepúsculo → Noite Estrelada → Lava → Neve → Castelo Assombrado',
-    hy4Feat2: 'Inimigos inteligentes: patrulhas que evitam quedas em penhascos e protegem cada pouso',
-    hy4Feat3: 'Sistema de moedas no ar e no chão com pontuação em tempo real',
-    hy4Feat4: 'Exploração em múltiplos níveis: pirâmides e blocos acessíveis para coletar todos os ?',
-    hy4Feat5: 'Captura de tela com 1 clique (salva HUD e textos explicativos em PNG), bônus completos e 7 idiomas',
-    btnPlay: '▶ Jogar Agora',
-    btnNewtab: 'Abrir em Nova Aba ↗',
-    keySpace: 'Espaço',
-    tipMove: 'Mover para os lados',
-    tipJump: 'Pular',
-    tipRun: 'Correr / Acelerar',
-    tipRestart: 'Reiniciar Fase',
-    footerDisclaimer: '⚖️ Apenas para pesquisa de programação com IA e aprendizado · Ativos originais · Não comercial · '
-  },
-  'es': {
-    brandText: 'Jugar 5 Min',
-    docTitle: '5 Minutos de Diversión · Super Mario',
-    logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '5 Minutos de Diversión · Super Mario',
-    subTitle: 'Juega al instante sin descargas y sin anuncios — Revive la alegría de la infancia con un <b>minijuego simple y relajante</b>',
-    grokTitle: 'Súper Mario',
-    grokAuthor: 'Grok Fast Versión v6',
-    grokTagOk: '✅ Niveles Variados y Dificultad Progresiva',
-    tagLevels: '6 Fases Temáticas',
-    tagLangs: '7 Idiomas',
-    grokFeat1: '6 Mundos Temáticos: Pradera → Desierto → Noche Estrellada → Lava → Nieve → Castillo Fantasma con layouts únicos',
-    grokFeat2: 'Dificultad escalonada: guardias en precipicios, plataformas móviles veloces y laberintos de ladrillos',
-    grokFeat3: 'Arcos de monedas aéreas, plataformas flotantes, pirámides de bloques y 15% de bloques de la suerte',
-    grokFeat4: 'Fuegos artificiales al alcanzar la bandera, confeti festivo y bonos sorpresa de 100~500 puntos',
-    grokFeat5: 'Captura de pantalla en 1 clic (guarda HUD y textos en PNG), contador FPS y 7 idiomas',
-    hy4Title: 'Super Mario · Aventura de 6 Fases',
-    hy4Author: 'Hy4 Preview Versão v3',
-    hy4TagOk: '✅ Aventura Clássica Desafiante',
-    hy4Feat1: '6 Mundos Inmersivos: Pradera → Ocaso → Noche Estrellada → Lava → Nieve → Fortaleza Encantada',
-    hy4Feat2: 'Goombas con IA inteligente: giran al borde de los fosos y custodian cada zona de aterrizaje',
-    hy4Feat3: 'Sistema de monedas en arco y pasillos de tierra con recuento de puntuación inmediata',
-    hy4Feat4: 'Exploración por alturas: escaleras y bloques organizados para golpear todos los bloques ? con destreza',
-    hy4Feat5: 'Captura de pantalla en 1 clic (guarda HUD y textos en PNG), recompensas completas y 7 idiomas',
-    btnPlay: '▶ Jugar Ahora',
-    btnNewtab: 'Abrir en Nueva Pestaña ↗',
-    keySpace: 'Espacio',
-    tipMove: 'Mover izquierda / derecha',
-    tipJump: 'Saltar',
-    tipRun: 'Correr / Acelerar',
-    tipRestart: 'Reiniciar Nivel',
-    footerDisclaimer: '⚖️ Solo para investigación y aprendizaje de programación con IA · Recursos originales · No comercial · '
-  },
-  'fr': {
-    brandText: 'Jouer 5 Min',
-    docTitle: '5 Minutes de Plaisir · Super Mario',
-    logo: 'AI GENERATED · HTML5 GAME',
-    h1Title: '5 Minutes de Plaisir · Super Mario',
-    subTitle: "Jouez instantanément sans téléchargement et sans pub — Retrouvez la joie de l'enfance avec un <b>mini-jeu simple et sans stress</b>",
-    grokTitle: 'Super Mario',
-    grokAuthor: 'Grok Fast Version v6',
-    grokTagOk: '✅ Niveaux Variés & Défi Progressif',
-    tagLevels: '6 Mondes Thématiques',
-    tagLangs: '7 Langues',
-    grokFeat1: '6 Mondes Thématiques : Prairie → Désert → Nuit Étoilée → Lave → Neige → Manoir Hanté aux tracés uniques',
-    grokFeat2: 'Difficulté progressive : gardes de fosses, plates-formes mouvantes et dédales de briques palpitants',
-    grokFeat3: 'Arcs de pièces aériennes, plates-formes flottantes, pyramides de blocs et 15% de blocs chance',
-    grokFeat4: 'Feux d’artifice au drapeau, pluie de confettis et bonus surprises de 100~500 points',
-    grokFeat5: 'Capture d\'écran en 1 clic (fusionne le HUD et les textes explicatifs en PNG), compteur FPS et 7 langues',
-    hy4Title: 'Super Mario · L\'Aventure des 6 Niveaux',
-    hy4Author: 'Hy4 Preview Version v3',
-    hy4TagOk: '✅ Aventure Classique Captivante',
-    hy4Feat1: '6 Mondes Immersifs : Prairie → Crépuscule → Nuit Étoilée → Lave → Neige → Manoir Mystérieux',
-    hy4Feat2: 'Goombas intelligents : font demi-tour au bord du gouffre et montent la garde à chaque réception',
-    hy4Feat3: 'Collecte dynamique : arcs de pièces au-dessus des gouffres et pistes de pièces au sol',
-    hy4Feat4: 'Exploration en hauteur : marches et blocks disposés pour atteindre chaque bloc ? avec adresse',
-    hy4Feat5: 'Capture d\'écran en 1 clic (fusionne le HUD et les textes explicatifs en PNG), récompenses complètes et 7 langues',
-    btnPlay: '▶ Jouer',
-    btnNewtab: 'Ouvrir dans un nouvel onglet ↗',
-    keySpace: 'Espace',
-    tipMove: 'Déplacement gauche / droite',
-    tipJump: 'Sauter',
-    tipRun: 'Courir plus vite',
-    tipRestart: 'Recommencer le niveau',
-    footerDisclaimer: '⚖️ Uniquement pour la recherche et l\'apprentissage de l\'IA · Ressources originales · Non commercial · '
-  }
-};
-
-function detectLang() {
-  const list = [].concat(navigator.languages || [], [navigator.language || 'en']);
-  for (let i = 0; i < list.length; i++) {
-    const raw = (list[i] || '').toLowerCase();
-    if (!raw) continue;
-    if (raw.startsWith('zh')) {
-      return (raw.includes('tw') || raw.includes('hk') || raw.includes('mo') || raw.includes('hant')) ? 'zh-TW' : 'zh-CN';
-    }
-    if (raw.startsWith('ja')) return 'ja';
-    if (raw.startsWith('pt')) return 'pt-BR';
-    if (raw.startsWith('es')) return 'es';
-    if (raw.startsWith('fr')) return 'fr';
-    if (raw.startsWith('en')) return 'en';
-  }
-  return 'zh-CN';
-}
-
-let currentLang = 'zh-CN';
-try {
-  const saved = localStorage.getItem('mario_lang');
-  if (saved && I18N[saved]) {
-    currentLang = saved;
-  } else {
-    currentLang = detectLang();
-  }
-} catch (e) {
-  currentLang = detectLang();
-}
-
-function applyLanguage() {
-  const t = I18N[currentLang] || I18N['zh-CN'];
-  document.title = t.docTitle;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if (t[k] != null) el.textContent = t[k];
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const k = el.getAttribute('data-i18n-html');
-    if (t[k] != null) el.innerHTML = t[k];
-  });
-  
-  // 更新自定义语言下拉框显示
-  const meta = LANG_MAP[currentLang] || LANG_MAP['zh-CN'];
-  const flagEl = document.getElementById('currentFlag');
-  const labelEl = document.getElementById('currentLangLabel');
-  if (flagEl) flagEl.innerHTML = meta.flag;
-  if (labelEl) labelEl.textContent = meta.label;
-  
-  document.querySelectorAll('.lang-dropdown-item').forEach(item => {
-    const val = item.getAttribute('data-val');
-    const optFlag = item.querySelector('.opt-flag');
-    if (optFlag && FLAGS[val]) {
-      optFlag.innerHTML = FLAGS[val];
-    }
-    if (val === currentLang) {
-      item.classList.add('selected');
-    } else {
-      item.classList.remove('selected');
-    }
-  });
-  document.documentElement.lang = currentLang;
-}
-
-// 绑定自定义语言下拉框事件
-const langWrap = document.getElementById('langWrap');
-const langTrigger = document.getElementById('langTrigger');
-const langMenu = document.getElementById('langMenu');
-
-if (langTrigger && langWrap) {
-  langTrigger.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isActive = langWrap.classList.toggle('active');
-    langTrigger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
-  });
-
-  document.querySelectorAll('.lang-dropdown-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const val = item.getAttribute('data-val');
-      if (val && I18N[val]) {
-        currentLang = val;
-        try { localStorage.setItem('mario_lang', currentLang); } catch (err) {}
-        applyLanguage();
-      }
-      langWrap.classList.remove('active');
-      langTrigger.setAttribute('aria-expanded', 'false');
-    });
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!langWrap.contains(e.target)) {
-      langWrap.classList.remove('active');
-      langTrigger.setAttribute('aria-expanded', 'false');
-    }
-  });
-}
-
-applyLanguage();
-
-// 版权数字签名与控制台暗水印保护
-(function () {
-  try {
-    var _0xsign = "8J+OriDnjqnkupTliIbpkp8gwrcgUGxheSA1IE1pbnMgfCDniYjmnYPmiYDmnIkgKEMpIDIwMjYgMTIwNDQyNzU5QHFxLmNvbS4gQWxsIFJpZ2h0cyBSZXNlcnZlZC4g5pyq57uP5o6I5p2D5Lil56aB5ou36LSd44CB5L+u5pS55LiO5ZWG55So44CC";
-    var _0xstr = decodeURIComponent(escape(atob(_0xsign)));
-    console.log("%c " + _0xstr + " ", "background:#e5392b;color:#fff;padding:6px 12px;font-size:12px;font-weight:bold;border-radius:4px;");
-  } catch (e) {}
-})();
-</script>
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "53a666c8130641eba76813d383a02702"}'></script><!-- End Cloudflare Web Analytics -->
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "53a666c8130641eba76813d383a02702"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

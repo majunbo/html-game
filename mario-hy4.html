@@ -3248,5 +3248,110 @@
 })();
 </script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "53a666c8130641eba76813d383a02702"}'></script><!-- End Cloudflare Web Analytics -->
+<!-- 触屏虚拟控制器 -->
+<div id="touch-controls" style="display:none;position:fixed;bottom:0;left:0;right:0;height:160px;z-index:9999;pointer-events:none;">
+  <!-- 左摇杆区域 -->
+  <div id="joystick-zone" style="position:absolute;left:20px;bottom:20px;width:120px;height:120px;pointer-events:all;">
+    <div id="joystick-base" style="position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.3);"></div>
+    <div id="joystick-knob" style="position:absolute;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.4);border:2px solid rgba(255,255,255,0.6);top:35px;left:35px;transition:none;"></div>
+  </div>
+  <!-- 右按钮区域 -->
+  <div style="position:absolute;right:20px;bottom:20px;display:flex;flex-direction:column;gap:12px;align-items:center;pointer-events:all;">
+    <button id="btn-jump" style="width:70px;height:70px;border-radius:50%;background:rgba(229,57,43,0.75);border:3px solid rgba(255,255,255,0.5);color:#fff;font-size:28px;cursor:pointer;pointer-events:all;user-select:none;-webkit-user-select:none;touch-action:manipulation;">↑</button>
+    <div style="display:flex;gap:12px;">
+      <button id="btn-left-extra" style="width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);color:#fff;font-size:20px;cursor:pointer;pointer-events:all;user-select:none;touch-action:manipulation;">←</button>
+      <button id="btn-right-extra" style="width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);color:#fff;font-size:20px;cursor:pointer;pointer-events:all;user-select:none;touch-action:manipulation;">→</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // 检测触屏设备
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  if (!isTouchDevice) return;
+  
+  const controls = document.getElementById('touch-controls');
+  controls.style.display = 'block';
+  
+  // 模拟按键状态
+  const keys = {};
+  function fireKey(code, down) {
+    if (keys[code] === down) return;
+    keys[code] = down;
+    const type = down ? 'keydown' : 'keyup';
+    const event = new KeyboardEvent(type, { code, key: code === 'ArrowLeft' ? 'ArrowLeft' : code === 'ArrowRight' ? 'ArrowRight' : ' ', bubbles: true, cancelable: true });
+    document.dispatchEvent(event);
+    // 也发送到window
+    window.dispatchEvent(new KeyboardEvent(type, { code, key: code === 'ArrowLeft' ? 'ArrowLeft' : code === 'ArrowRight' ? 'ArrowRight' : ' ', bubbles: true }));
+  }
+  
+  // 摇杆逻辑
+  const zone = document.getElementById('joystick-zone');
+  const knob = document.getElementById('joystick-knob');
+  let joystickActive = false;
+  let joystickId = null;
+  let zoneRect;
+  const DEAD = 20;
+  
+  function updateJoystick(cx, cy) {
+    if (!zoneRect) zoneRect = zone.getBoundingClientRect();
+    const centerX = zoneRect.left + zoneRect.width / 2;
+    const centerY = zoneRect.top + zoneRect.height / 2;
+    const dx = cx - centerX;
+    const dy = cy - centerY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const maxR = 35;
+    const r = Math.min(dist, maxR);
+    const angle = Math.atan2(dy, dx);
+    knob.style.transform = `translate(${Math.cos(angle)*r}px, ${Math.sin(angle)*r}px)`;
+    
+    if (dx < -DEAD) { fireKey('ArrowLeft', true); fireKey('ArrowRight', false); }
+    else if (dx > DEAD) { fireKey('ArrowRight', true); fireKey('ArrowLeft', false); }
+    else { fireKey('ArrowLeft', false); fireKey('ArrowRight', false); }
+  }
+  
+  zone.addEventListener('touchstart', e => {
+    e.preventDefault();
+    joystickActive = true;
+    joystickId = e.changedTouches[0].identifier;
+    zoneRect = zone.getBoundingClientRect();
+    updateJoystick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  }, { passive: false });
+  
+  zone.addEventListener('touchmove', e => {
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      if (t.identifier === joystickId) updateJoystick(t.clientX, t.clientY);
+    }
+  }, { passive: false });
+  
+  zone.addEventListener('touchend', e => {
+    e.preventDefault();
+    for (const t of e.changedTouches) {
+      if (t.identifier === joystickId) {
+        joystickActive = false;
+        joystickId = null;
+        knob.style.transform = '';
+        fireKey('ArrowLeft', false);
+        fireKey('ArrowRight', false);
+      }
+    }
+  }, { passive: false });
+  
+  // 跳跃按钮
+  const btnJump = document.getElementById('btn-jump');
+  btnJump.addEventListener('touchstart', e => { e.preventDefault(); fireKey('Space', true); }, { passive: false });
+  btnJump.addEventListener('touchend', e => { e.preventDefault(); fireKey('Space', false); }, { passive: false });
+  
+  // 左右额外按钮
+  const btnLeft = document.getElementById('btn-left-extra');
+  const btnRight = document.getElementById('btn-right-extra');
+  btnLeft.addEventListener('touchstart', e => { e.preventDefault(); fireKey('ArrowLeft', true); }, { passive: false });
+  btnLeft.addEventListener('touchend', e => { e.preventDefault(); fireKey('ArrowLeft', false); }, { passive: false });
+  btnRight.addEventListener('touchstart', e => { e.preventDefault(); fireKey('ArrowRight', true); }, { passive: false });
+  btnRight.addEventListener('touchend', e => { e.preventDefault(); fireKey('ArrowRight', false); }, { passive: false });
+})();
+</script>
 </body>
 </html>
